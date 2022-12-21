@@ -17,9 +17,14 @@ release：编译好的dll。
 2.通过http协议与dll通信，方便客户端操作。
 3.接口的url为http://127.0.0.1:19088，注入成功后，直接进行调用即可。
 4.特别注意数据库查询接口需要先调用获取到句柄之后，才能进行查询。
+5.相关功能只在win11环境下进行简单测试，其他环境无法保证。
 
+#### 编译环境
 
-
+Visual Studio 2022(x86)
+Visual Studio code 
+cmake
+vcpkg
 
 ### 接口文档：
 
@@ -677,3 +682,7 @@ release：编译好的dll。
 ```
 
 
+#### 感谢
+https://github.com/ljc545w/ComWeChatRobot
+https://github.com/NationalSecurityAgency/ghidra
+https://github.com/x64dbg/x64dbg
