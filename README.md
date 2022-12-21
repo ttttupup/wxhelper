@@ -1,0 +1,2 @@
+# wxhelper
+wechat hook .
