@@ -10,8 +10,8 @@
 using namespace nlohmann;
 
 using namespace std;
-#define WX_RECV_MSG_HOOK_OFFSET 0xb94796
-#define WX_RECV_MSG_HOOK_NEXT_OFFSET 0x6fe2c0
+#define WX_RECV_MSG_HOOK_OFFSET 0xb97126
+#define WX_RECV_MSG_HOOK_NEXT_OFFSET 0x6fc850
 
 // SyncMgr::addMsgListToDB
 // #define WX_RECV_MSG_HOOK_OFFSET 0xB9C919

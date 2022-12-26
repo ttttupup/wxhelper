@@ -3,10 +3,10 @@
 #include "common.h"
 #include "wechat_data.h"
 
-#define WX_SEND_IMAGE_OFFSET  0xb68b90
-#define WX_SEND_MESSAGE_MGR_OFFSET 0x663320
-#define WX_INIT_CHAT_MSG_OFFSET  0xdbcc40
-#define WX_FREE_CHAT_MSG_OFFSET 0x651c40
+#define WX_SEND_IMAGE_OFFSET  0xb6a3f0
+#define WX_SEND_MESSAGE_MGR_OFFSET 0x65b2a0
+#define WX_INIT_CHAT_MSG_OFFSET  0xdbf380
+#define WX_FREE_CHAT_MSG_OFFSET 0x649ac0
 
 int SendImage(wchar_t *wxid, wchar_t *image_path){
 

@@ -5,11 +5,11 @@
 #include "common.h"
 #include "wechat_data.h"
 
-#define WX_SEND_TEXT_OFFSET 0xb690a0
+#define WX_SEND_TEXT_OFFSET 0xb6a930
 
-#define WX_SEND_MESSAGE_MGR_OFFSET 0x663320
+#define WX_SEND_MESSAGE_MGR_OFFSET 0x65b2a0
 
-#define WX_FREE_CHAT_MSG_OFFSET 0x651c40
+#define WX_FREE_CHAT_MSG_OFFSET 0x649ac0
 /// @brief 发生文本消息
 /// @param wxid wxid
 /// @param msg  文本消息

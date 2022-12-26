@@ -4,15 +4,11 @@
 #include "common.h"
 #include "wechat_data.h"
 
-#define WX_CONTACT_MGR_INSTANCE_OFFSET 0x655d60
-#define WX_CONTACT_GET_LIST_OFFSET 0xa97da0
-#define WX_CONTACT_DEL_OFFSET 0xa9bd10
-#define WX_INIT_CHAT_MSG_OFFSET 0xdbcc40
-#define WX_DB_QUERY_OFFSET 0xa9ba20
-#define WX_SYNC_MGR_OFFSET 0x993fa0
-#define WX_SYNC_MGR_OFFSET 0x993fa0
-#define WX_DO_DEL_CONTACT_OFFSET 0xb9a750
-#define WX_DEL_CONTACT_VTABLE_OFFSET  0x2886990
+#define WX_CONTACT_MGR_INSTANCE_OFFSET 0x64dc30
+#define WX_CONTACT_GET_LIST_OFFSET 0xa9b000
+#define WX_CONTACT_DEL_OFFSET 0xa9ef40
+#define WX_INIT_CHAT_MSG_OFFSET 0xdbf380
+#define WX_DB_QUERY_OFFSET 0xa9ec40
 int GetAllContact(vector<Contact> &vec) {
   DWORD base = GetWeChatWinBase();
   DWORD get_instance = base + WX_CONTACT_MGR_INSTANCE_OFFSET;
@@ -66,7 +62,7 @@ int GetAllContact(vector<Contact> &vec) {
    temp.type = *(DWORD *)(start + 0x50);
    temp.verify_flag = *(DWORD *)(start + 0x54);
    vec.push_back(temp);
-   start += 0x3E8;
+   start += 0x438;
     }
     return success;
 }

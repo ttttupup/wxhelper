@@ -4,17 +4,17 @@
 #include "common.h"
 
 #include "wechat_data.h"
-#define WX_CHAT_ROOM_MGR_OFFSET 0x686e40
-#define WX_GET_CHAT_ROOM_DETAIL_INFO_OFFSET 0xa70920
-#define WX_NEW_CHAT_ROOM_INFO_OFFSET 0xd03ec0
-#define WX_FREE_CHAT_ROOM_INFO_OFFSET 0x7226e0
-#define WX_DEL_CHAT_ROOM_MEMBER_OFFSET 0xa668f0
-#define WX_INIT_CHAT_MSG_OFFSET 0xdbcc40
-#define WX_FREE_CHAT_MSG_OFFSET 0x651c40
-#define WX_ADD_MEMBER_TO_CHAT_ROOM_OFFSET 0xa66400
-#define WX_GET_MEMBER_FROM_CHAT_ROOM_OFFSET 0xa71650
-#define WX_INIT_CHAT_ROOM_OFFSET 0xd01c30
-#define WX_FREE_CHAT_ROOM_OFFSET 0xa79310
+#define WX_CHAT_ROOM_MGR_OFFSET 0x67ee70
+#define WX_GET_CHAT_ROOM_DETAIL_INFO_OFFSET 0xa73a80
+#define WX_NEW_CHAT_ROOM_INFO_OFFSET 0xd07010
+#define WX_FREE_CHAT_ROOM_INFO_OFFSET 0xd072f0
+#define WX_DEL_CHAT_ROOM_MEMBER_OFFSET 0xa69a50
+#define WX_INIT_CHAT_MSG_OFFSET 0xdbf380
+#define WX_FREE_CHAT_MSG_OFFSET 0x649ac0
+#define WX_ADD_MEMBER_TO_CHAT_ROOM_OFFSET 0xa69560
+#define WX_GET_MEMBER_FROM_CHAT_ROOM_OFFSET 0xa749b0
+#define WX_INIT_CHAT_ROOM_OFFSET 0xd04d80
+#define WX_FREE_CHAT_ROOM_OFFSET 0xa7c620
 
 int GetChatRoomDetailInfo(wchar_t* chat_room_id, ChatRoomInfoInner& room_info) {
   int success = 0;
@@ -24,7 +24,7 @@ int GetChatRoomDetailInfo(wchar_t* chat_room_id, ChatRoomInfoInner& room_info) {
   DWORD get_chat_room_detail_addr = base + WX_GET_CHAT_ROOM_DETAIL_INFO_OFFSET;
   DWORD create_chat_room_info_addr = base + WX_NEW_CHAT_ROOM_INFO_OFFSET;
   DWORD free_chat_room_info_addr = base + WX_FREE_CHAT_ROOM_INFO_OFFSET;
-  char chat_room_info[0xA4] = {0};
+  char chat_room_info[0xDC] = {0};
   __asm {
          PUSHAD
          LEA        ECX,chat_room_info
@@ -144,7 +144,7 @@ int GetMemberFromChatRoom(wchar_t* chat_room_id,ChatRoomInner & out){
   int success = 0;
    WeChatString chat_room(chat_room_id);
    DWORD chat_room_ptr = (DWORD) &chat_room;
-  char buffer[0x1A0] = {0};
+  char buffer[0x1D4] = {0};
   DWORD base = GetWeChatWinBase();
   DWORD get_member_addr =  base + WX_GET_MEMBER_FROM_CHAT_ROOM_OFFSET;
   DWORD get_chat_room_mgr_addr = base + WX_CHAT_ROOM_MGR_OFFSET;

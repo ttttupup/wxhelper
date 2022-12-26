@@ -4,8 +4,8 @@
 #include "common.h"
 #include "get_db_handle.h"
 #include "wechat_data.h"
-#define WX_FORWARD_MSG_OFFSET 0xb68c80
-#define WX_INIT_CHAT_MSG_OFFSET 0xdbcc40
+#define WX_FORWARD_MSG_OFFSET 0xb6a4e0
+#define WX_INIT_CHAT_MSG_OFFSET 0xdbf380
 
 int ForwardMsg(wchar_t *wxid, unsigned long long msgid) {
   int success = 0;
@@ -27,11 +27,11 @@ int ForwardMsg(wchar_t *wxid, unsigned long long msgid) {
     PUSH       EAX
     SUB        ESP,0x14
     MOV        ECX,ESP
-    LEA        ESI, to_user;
+    LEA        ESI,to_user
     PUSH       ESI
     CALL       init_chat_msg_addr                                
     CALL       forward_msg_addr
-    MOVZX      EAX,AL;
+    MOVZX      EAX,AL
     MOV        success,EAX
     ADD        ESP,0x1c
     POPFD
