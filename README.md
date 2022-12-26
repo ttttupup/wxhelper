@@ -1,18 +1,19 @@
 # wxhelper
-wechat hook .
+wechat hook 。PC端微信逆向学习。支持3.8.0.41，3.8.1.26版本。
 #### 免责声明:
 本仓库发布的内容，仅用于学习研究，请勿用于非法用途和商业用途！如因此产生任何法律纠纷，均与作者无关！
 
 #### 项目说明：
-本项目是个人学习学习逆向的项目，主要参考https://github.com/ttttupup/ComWeChatRobot，在此基础上实现了wechat 3.8.0.41的版本的部分内容。
+本项目是个人学习学习逆向的项目，主要参考https://github.com/ttttupup/ComWeChatRobot，在此基础上实现了微信的的其它版本的部分内容。
 
 #### 使用说明：
-支持的版本3.8.0.41，目前是最新版本。
+支持的版本3.8.0.41，3.8.1.26。
 src:主要的dll代码
 tool：简单的注入工具，一个是控制台，一个是图形界面。
 python: 简单的服务器，用以接收消息内容。
 release：编译好的dll。
 
+0.首先安装对应的微信版本，主分支是3.8.0.41版本，3.8.1.26分支对应3.8.1.26版本。
 1.通过cmake构建成功后，将wxhelper.dll注入到微信，本地启动tcp server，监听19088端口。
 2.通过http协议与dll通信，方便客户端操作。
 3.接口的url为http://127.0.0.1:19088，注入成功后，直接进行调用即可。
@@ -21,10 +22,18 @@ release：编译好的dll。
 
 #### 编译环境
 
-Visual Studio 2022(x86)
-Visual Studio code 
-cmake
+Visual Studio 2022(x86)  
+
+Visual Studio code   
+
+cmake  
+
 vcpkg
+
+
+#### 更新说明
+2022-12-26 ： 增加3.8.1.26版本支持。
+
 
 ### 接口文档：
 
@@ -683,6 +692,8 @@ vcpkg
 
 
 #### 感谢
-https://github.com/ljc545w/ComWeChatRobot
-https://github.com/NationalSecurityAgency/ghidra
-https://github.com/x64dbg/x64dbg
+https://github.com/ljc545w/ComWeChatRobot  
+
+https://github.com/NationalSecurityAgency/ghidra  
+
+https://github.com/x64dbg/x64dbg  
