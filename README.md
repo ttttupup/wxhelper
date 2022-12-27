@@ -97,7 +97,6 @@ vcpkg
 |data|string|响应内容|
 
 ###### 接口示例
-地址：https://www.bincoding.cn/test
 入参：
 ``` javascript
 ```
@@ -144,7 +143,6 @@ vcpkg
 |wxid|string|wxid|
 
 ###### 接口示例
-地址：https://www.bincoding.cn/test
 入参：
 ``` javascript
 ```
@@ -180,7 +178,7 @@ vcpkg
 
 
 ###### 接口示例
-地址：https://www.bincoding.cn/test
+
 入参：
 ``` javascript
 {
