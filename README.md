@@ -29,7 +29,44 @@ Visual Studio code
 cmake  
 
 vcpkg
+#### 构建步骤
+以下是在vscode中操作，vs中的操作类似。  
+1.安装vcpkg，cmake，vscode  
 
+2.安装相应的库，如果安装的版本不同，则根据vcpkg安装成功后提示的find_package修改CMakeLists.txt内容即可。或者自己编译。
+```
+    vcpkg  install mongoose  
+    vcpkg  install nlohmann-json
+```
+3.vscode 配置CMakePresets.json,主要设置CMAKE_C_COMPILER 和CMAKE_CXX_COMPILER 为cl.exe.参考如下
+```
+ {
+            "name": "x86-release",
+            "displayName": "x86-release",
+            "description": "Sets Ninja generator, build and install directory",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "architecture":{
+                "value": "x86",
+                "strategy": "external"
+            },
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "cl.exe",
+                "CMAKE_CXX_COMPILER": "cl.exe",
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+                "CMAKE_TOOLCHAIN_FILE": {
+                    "value": "C:/soft/vcpkg/scripts/buildsystems/vcpkg.cmake",
+                     "type": "FILEPATH"
+                  }
+            },
+            "environment": {
+
+            }
+          
+        }
+```
+4.vscode中右键configure all  projects,在Terminal中点击Run Task，如没有先配置build任务，然后运行即可
 
 #### 更新说明
 2022-12-26 ： 增加3.8.1.26版本支持。
