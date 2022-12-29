@@ -18,6 +18,7 @@
 #include "chat_room.h"
 #include "self_info.h"
 #include "hook_img.h"
+#include "ocr.h"
 
 #pragma comment(lib, "ws2_32.lib")
 using namespace std;
@@ -535,6 +536,15 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       int success = GetImgByName(WS2LW(image_path),WS2LW(save_path));
       json ret_data = {{"code", success}, {"result", "OK"}};
       ret = ret_data.dump();
+      break;
+    }
+    case  WECHAT_DO_OCR:{
+      wstring image_path = get_http_req_param(hm, j_param, "imagePath", is_post);
+      string text("");
+      int success = DoOCRTask(WS2LW(image_path),text);
+      json ret_data = {{"code", success}, {"result", "OK"},{"text",text}};
+      ret = ret_data.dump();
+      break;
     }
     default:
       break;

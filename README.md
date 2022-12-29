@@ -29,11 +29,48 @@ Visual Studio code
 cmake  
 
 vcpkg
+#### 构建步骤
+以下是在vscode中操作，vs中的操作类似。  
+1.安装vcpkg，cmake，vscode  
 
+2.安装相应的库，如果安装的版本不同，则根据vcpkg安装成功后提示的find_package修改CMakeLists.txt内容即可。或者自己编译。
+```
+    vcpkg  install mongoose  
+    vcpkg  install nlohmann-json
+```
+3.vscode 配置CMakePresets.json,主要设置CMAKE_C_COMPILER 和CMAKE_CXX_COMPILER 为cl.exe.参考如下
+```
+ {
+            "name": "x86-release",
+            "displayName": "x86-release",
+            "description": "Sets Ninja generator, build and install directory",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "architecture":{
+                "value": "x86",
+                "strategy": "external"
+            },
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "cl.exe",
+                "CMAKE_CXX_COMPILER": "cl.exe",
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+                "CMAKE_TOOLCHAIN_FILE": {
+                    "value": "C:/soft/vcpkg/scripts/buildsystems/vcpkg.cmake",
+                     "type": "FILEPATH"
+                  }
+            },
+            "environment": {
+
+            }
+          
+        }
+```
+4.vscode中右键configure all  projects,在Terminal中点击Run Task，如没有先配置build任务，然后运行即可
 
 #### 更新说明
 2022-12-26 ： 增加3.8.1.26版本支持。
-
+2022-12-29 ： 新增提取文字功能。
 
 ### 接口文档：
 
@@ -60,7 +97,6 @@ vcpkg
 |data|string|响应内容|
 
 ###### 接口示例
-地址：https://www.bincoding.cn/test
 入参：
 ``` javascript
 ```
@@ -107,7 +143,6 @@ vcpkg
 |wxid|string|wxid|
 
 ###### 接口示例
-地址：https://www.bincoding.cn/test
 入参：
 ``` javascript
 ```
@@ -143,7 +178,7 @@ vcpkg
 
 
 ###### 接口示例
-地址：https://www.bincoding.cn/test
+
 入参：
 ``` javascript
 {
@@ -688,6 +723,44 @@ vcpkg
 响应：
 ``` javascript
 {"code":1,"result":"OK"}
+```
+
+
+
+#### 49.提取文字**
+###### 接口功能
+> 提取图片中的文字
+
+###### 接口地址
+> [/api/?type=49](/api/?type=49)
+
+###### HTTP请求方式
+> POST  JSON
+
+###### 请求参数
+|参数|必选|类型|说明|
+|---|---|---|---|
+|imagePath |ture |string| 图片路径 |
+
+###### 返回字段
+|返回字段|字段类型|说明                              |
+|---|---|---|
+|code|int|返回状态,0成功, -1失败，1 2 则是缓存或者正在进行中需再调用一次|
+|result|string|成功提示|
+|text|string|提取的相应文字|
+
+
+###### 接口示例
+入参：
+``` javascript
+{
+    "imagePath":"C:\\3a610d7bc1cf5a15d12225a64b8962.dat"
+}
+
+```
+响应：
+``` javascript
+{"code":0,"result":"OK","text":"搜索商品新闻简报小程序上线啦!!!我的收藏地址管理促销单品多买多省热门榜单热门榜单首发新品精品推荐精品推荐首发新品FRONTI警微安奈儿 童装冬季款男￥39900￥59.90帕拉丁品牌 时尚双背包409 00￥49.90我是有底线的首页分类购物车我的"}
 ```
 
 
