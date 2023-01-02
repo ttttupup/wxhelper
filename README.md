@@ -69,9 +69,11 @@ vcpkg
 4.vscode中右键configure all  projects,在Terminal中点击Run Task，如没有先配置build任务，然后运行即可
 
 #### 更新说明
-2022-12-26 ： 增加3.8.1.26版本支持。
-2022-12-29 ： 新增提取文字功能。
+2022-12-26 ： 增加3.8.1.26版本支持。  
 
+2022-12-29 ： 新增提取文字功能。  
+
+2022-01-02 ： 退出微信登录。
 ### 接口文档：
 
 #### 0.检查微信登录**
@@ -596,6 +598,43 @@ vcpkg
 响应：
 ``` javascript
 {"code":1,"data":[["localId","TalkerId","MsgSvrID","Type","SubType","IsSender","CreateTime","Sequence","StatusEx","FlagEx","Status","MsgServerSeq","MsgSequence","StrTalker","StrContent","DisplayContent","Reserved0","Reserved1","Reserved2","Reserved3","Reserved4","Reserved5","Reserved6","CompressContent","BytesExtra","BytesTrans"],["6346","24","8985035417589024392","1","0","0","1670897832","1670897832000","0","0","2","1","778715089","wxid_1222","112","","0","2","","","","","","","CgQIEBAAGkEIBxI9PG1zZ3NvdXJjZT4KCTxzaWduYXR1cmU+djFfSFFyeVAwZTE8L3NpZ25hdHVyZT4KPC9tc2dzb3VyY2U+ChokCAISIDU5NjI1NjUxNWE0YzU2ZDQxZDJlOWMyYmIxMjFhNmZl",""]],"result":"OK"}
+```
+
+
+
+#### 44.退出登录**
+###### 接口功能
+> 退出登录微信，相当于直接退出微信，跟手动退出比，少了重新打开登录的一步，dll注入后也会随微信关闭而关闭。调用后不能再继续操作dll。
+
+###### 接口地址
+> [/api/?type=44](/api/?type=44)
+
+###### HTTP请求方式
+> POST  JSON
+
+###### 请求参数
+|参数|必选|类型|说明|
+|---|---|---|---|
+
+
+
+###### 返回字段
+|返回字段|字段类型|说明                              |
+|---|---|---|
+|code|int|返回状态,非0成功|
+|result|string|成功提示|
+
+
+
+
+###### 接口示例
+入参：
+``` javascript
+
+```
+响应：
+``` javascript
+{"code":4344,"result":"OK"}
 ```
 
 
