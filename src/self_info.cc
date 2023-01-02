@@ -19,7 +19,8 @@
 #define WX_APP_DATA_SAVE_PATH_OFFSET 0x2c65728
 #define WX_CURRENT_DATA_PATH_OFFSET 0x2c636fc
 
-
+#define WX_LOGOUT_OFFSET  0xccc320
+#define WX_ACCOUT_SERVICE_OFFSET 0x65bcc0
 
 int GetSelfInfo(SelfInfoInner &out) {
   DWORD base = GetWeChatWinBase();
@@ -136,4 +137,25 @@ int GetSelfInfo(SelfInfoInner &out) {
 int CheckLogin(){
   DWORD base = GetWeChatWinBase();
   return *(DWORD*) (base + WX_LOGIN_STATUS_OFFSET);
+}
+
+
+int Logout(){
+  int success = 0;
+  if(!CheckLogin()){
+    return success;
+  }
+  DWORD base = GetWeChatWinBase();
+  DWORD account_service_addr = base + WX_ACCOUT_SERVICE_OFFSET;
+  DWORD logout_addr = base + WX_LOGOUT_OFFSET;
+  __asm{
+    PUSHAD
+    CALL       account_service_addr                              
+    PUSH       0x0
+    MOV        ECX,EAX
+    CALL       logout_addr 
+    MOV        success,EAX                         
+    POPAD
+  }
+  return success;
 }

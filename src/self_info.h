@@ -4,4 +4,6 @@
 int GetSelfInfo(SelfInfoInner& out);
 
 int CheckLogin();
+
+int Logout();
 #endif

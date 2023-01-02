@@ -461,6 +461,9 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       break;
     }
     case WECHAT_LOGOUT: {
+      int success = Logout();
+      json ret_data = {{"code", success}, {"result", "OK"}};
+      ret = ret_data.dump();
       break;
     }
     case WECHAT_GET_TRANSFER: {
