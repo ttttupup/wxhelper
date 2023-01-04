@@ -10,8 +10,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D '0_UNICODE' /D 'UNICODE'")
 file(GLOB CPP_FILES  ${PROJECT_SOURCE_DIR}/src/*.cc  ${PROJECT_SOURCE_DIR}/src/*.cpp)
 
 
-
-include_directories(${VCPKG_INSTALLED_DIR}/installed/x86-windows/include)
+include_directories(${VCPKG_INSTALLED_DIR}/x86-windows/include)
 
 # add_subdirectory(3rd)
 
