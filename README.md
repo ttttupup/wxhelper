@@ -79,6 +79,9 @@ vcpkg
 ```
 4.vscode中右键configure all  projects,在Terminal中点击Run Task，如没有先配置build任务，然后运行即可
 
+#### 参与项目
+本项目还有许多不足，欢迎提出 issues 或 pr。
+
 #### 更新说明
 2022-12-26 ： 增加3.8.1.26版本支持。  
 
