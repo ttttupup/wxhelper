@@ -15,6 +15,7 @@
 #define WX_GET_MEMBER_FROM_CHAT_ROOM_OFFSET 0xa749b0
 #define WX_INIT_CHAT_ROOM_OFFSET 0xd04d80
 #define WX_FREE_CHAT_ROOM_OFFSET 0xa7c620
+#define WX_MOD_CHAT_ROOM_MEMBER_NICK_NAME_OFFSET 0xa6f8f0
 
 int GetChatRoomDetailInfo(wchar_t* chat_room_id, ChatRoomInfoInner& room_info) {
   int success = 0;
@@ -180,5 +181,40 @@ int GetMemberFromChatRoom(wchar_t* chat_room_id,ChatRoomInner & out){
     LEA       ECX,buffer
     CALL      free_chat_room_addr
   }  
+  return success;
+}
+
+int ModChatRoomMemberNickName(wchar_t* chat_room_id,wchar_t* wxid,wchar_t * nick){
+  int success = 0;
+  WeChatString chat_room(chat_room_id);
+  WeChatString self_wxid(wxid);
+  WeChatString new_nick(nick);
+  DWORD base = GetWeChatWinBase();
+  DWORD get_chat_room_mgr_addr = base + WX_CHAT_ROOM_MGR_OFFSET;
+  DWORD mod_member_nick_name_addr = base + WX_MOD_CHAT_ROOM_MEMBER_NICK_NAME_OFFSET;
+  DWORD init_chat_msg_addr = base + WX_INIT_CHAT_MSG_OFFSET;
+  __asm{
+    PUSHAD
+    CALL       get_chat_room_mgr_addr                               
+    SUB        ESP,0x14
+    MOV        ECX,ESP
+    LEA        EDI,new_nick
+    PUSH       EDI
+    CALL       init_chat_msg_addr                                      
+    SUB        ESP,0x14
+    LEA        EAX,self_wxid
+    MOV        ECX,ESP
+    PUSH       EAX
+    CALL       init_chat_msg_addr                                      
+    SUB        ESP,0x14
+    LEA        EAX,chat_room
+    MOV        ECX,ESP
+    PUSH       EAX
+    CALL       init_chat_msg_addr                                      
+    CALL       mod_member_nick_name_addr   
+    MOVZX     EAX,AL
+    MOV       success,EAX      
+    POPAD
+  }
   return success;
 }

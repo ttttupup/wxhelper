@@ -381,6 +381,12 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       break;
     }
     case WECHAT_CHATROOM_SET_SELF_NICKNAME: {
+      wstring room_id = get_http_req_param(hm, j_param, "chatRoomId", is_post);
+      wstring wxid = get_http_req_param(hm, j_param, "wxid", is_post);
+      wstring nick = get_http_req_param(hm, j_param, "nickName", is_post);
+      int success = ModChatRoomMemberNickName(WS2LW(room_id),WS2LW(wxid),WS2LW(nick));
+      json ret_data = {{"code", success}, {"result", "OK"}};
+      ret = ret_data.dump();
       break;
     }
     case WECHAT_DATABASE_GET_HANDLES: {

@@ -7,4 +7,5 @@ int DelMemberFromChatRoom(wchar_t* chat_room_id,wchar_t** wxids,int len);
 int AddMemberToChatRoom(wchar_t* chat_room_id, wchar_t** wxids,int len);
 
 int GetMemberFromChatRoom(wchar_t* chat_room_id,ChatRoomInner & out);
+int ModChatRoomMemberNickName(wchar_t* chat_room_id,wchar_t* wxid,wchar_t * nick);
 #endif
