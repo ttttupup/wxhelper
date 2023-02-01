@@ -20,6 +20,7 @@ using namespace std;
 #define CLIENT_IP "127.0.0.1"
 static int kServerPort = 0;
 static int kMessageHooked = FALSE;
+static char kServerIp[16]= "127.0.0.1";
 static DWORD kWeChatWinBase = GetWeChatWinBase();
 
 static char kOriginReceMsgAsmCode[5] = {0};
@@ -59,10 +60,12 @@ BOOL SendBySocket(const char *buffer, size_t len) {
   memset(&client_addr, 0, sizeof(client_addr));
   client_addr.sin_family = AF_INET;
   client_addr.sin_port = htons((u_short)kServerPort);
-  InetPtonA(AF_INET, CLIENT_IP, &client_addr.sin_addr.s_addr);
+  InetPtonA(AF_INET, kServerIp, &client_addr.sin_addr.s_addr);
   if (connect(client_socket, reinterpret_cast<sockaddr *>(&client_addr),
               sizeof(sockaddr)) < 0) {
 #ifdef _DEBUG
+    cout << "kServerIp:" << kServerIp <<endl;
+    cout << "port:" << kServerPort <<endl;
     cout << "connect error,"
          << " errno:" << errno << endl;
 #endif
@@ -190,8 +193,9 @@ _declspec(naked) void handle_sync_msg() {
 /// @brief hook any address   address+0x5
 /// @param port 端口
 /// @return 成功返回1,已经hook返回2,失败返回-1
-int HookRecvMsg(int port) {
+int HookRecvMsg(char* client_ip,int port) {
   kServerPort = port;
+  strcpy_s(kServerIp,client_ip);
   kWeChatWinBase = GetWeChatWinBase();
   if (!kWeChatWinBase) {
     return -1;

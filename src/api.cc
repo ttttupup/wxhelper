@@ -267,7 +267,11 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
     }
     case WECHAT_MSG_START_HOOK: {
       int port = get_http_req_param_int(hm, j_param, "port", is_post);
-      int success = HookRecvMsg(port);
+      wstring ip = get_http_req_param(hm, j_param, "ip", is_post);
+      string client_ip = Wstring2String(ip);
+      char ip_cstr[16];
+      strcpy_s(ip_cstr,client_ip.c_str());
+      int success = HookRecvMsg(ip_cstr,port);
       json ret_data = {{"code", success}, {"result", "OK"}};
       ret = ret_data.dump();
       break;
