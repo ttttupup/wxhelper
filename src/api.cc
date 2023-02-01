@@ -19,6 +19,7 @@
 #include "self_info.h"
 #include "hook_img.h"
 #include "ocr.h"
+#include "pat.h"
 
 #pragma comment(lib, "ws2_32.lib")
 using namespace std;
@@ -552,6 +553,14 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       string text("");
       int success = DoOCRTask(WS2LW(image_path),text);
       json ret_data = {{"code", success}, {"result", "OK"},{"text",text}};
+      ret = ret_data.dump();
+      break;
+    }
+    case  WECHAT_SEND_PAT_MSG:{
+      wstring room_id = get_http_req_param(hm, j_param, "chatRoomId", is_post);
+      wstring wxid = get_http_req_param(hm, j_param, "wxid", is_post);
+      int success = SendPatMsg(WS2LW(room_id),WS2LW(wxid));
+      json ret_data = {{"code", success}, {"result", "OK"}};
       ret = ret_data.dump();
       break;
     }
