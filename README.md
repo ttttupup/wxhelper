@@ -851,7 +851,7 @@ vcpkg
 |---|---|---|
 |code|int|返回状态,1成功, -1失败|
 |result|string|成功提示|
-|text|string|提取的相应文字|
+
 
 
 ###### 接口示例
