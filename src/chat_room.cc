@@ -231,6 +231,7 @@ int SetTopMsg(wchar_t* wxid,ULONG64 msg_id){
   DWORD new_chat_msg_addr = base + WX_NEW_CHAT_MSG_OFFSET;
   DWORD get_chat_room_mgr_addr = base + WX_CHAT_ROOM_MGR_OFFSET;
   DWORD handle_top_msg_addr = base + WX_TOP_MSG_OFFSET;
+  DWORD free_addr = base +  WX_FREE_CHAT_ROOM_OFFSET;
   vector<string> local_msg = GetChatMsgByMsgId(msg_id);
   if(local_msg.empty()){
     return -2;
@@ -276,6 +277,8 @@ int SetTopMsg(wchar_t* wxid,ULONG64 msg_id){
     PUSH       EAX
     CALL       handle_top_msg_addr
     MOV        success,EAX
+    LEA        ECX,chat_msg
+    CALL       free_addr
     POPAD
   }
   return success;
@@ -285,8 +288,6 @@ int SetTopMsg(wchar_t* wxid,ULONG64 msg_id){
 int RemoveTopMsg(wchar_t* chat_room_id,ULONG64 msg_id){
 
   int success = -1;
-  DWORD left =  (DWORD)(&msg_id);
-  DWORD right = (DWORD)(&msg_id+4);
   WeChatString chat_room(chat_room_id);
   DWORD base = GetWeChatWinBase();
   DWORD get_chat_room_mgr_addr = base + WX_CHAT_ROOM_MGR_OFFSET;
