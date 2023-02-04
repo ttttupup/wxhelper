@@ -2,8 +2,9 @@
 #include "chat_room.h"
 
 #include "common.h"
-
+#include "get_db_handle.h"
 #include "wechat_data.h"
+#include "base64.h"
 #define WX_CHAT_ROOM_MGR_OFFSET 0x67ee70
 #define WX_GET_CHAT_ROOM_DETAIL_INFO_OFFSET 0xa73a80
 #define WX_NEW_CHAT_ROOM_INFO_OFFSET 0xd07010
@@ -16,6 +17,9 @@
 #define WX_INIT_CHAT_ROOM_OFFSET 0xd04d80
 #define WX_FREE_CHAT_ROOM_OFFSET 0xa7c620
 #define WX_MOD_CHAT_ROOM_MEMBER_NICK_NAME_OFFSET 0xa6f8f0
+#define WX_NEW_CHAT_MSG_OFFSET 0x64adc0
+#define WX_TOP_MSG_OFFSET 0xa76e60
+#define WX_REMOVE_TOP_MSG_OFFSET 0xa76c50
 
 int GetChatRoomDetailInfo(wchar_t* chat_room_id, ChatRoomInfoInner& room_info) {
   int success = 0;
@@ -216,5 +220,96 @@ int ModChatRoomMemberNickName(wchar_t* chat_room_id,wchar_t* wxid,wchar_t * nick
     MOV       success,EAX      
     POPAD
   }
+  return success;
+}
+
+
+int SetTopMsg(wchar_t* wxid,ULONG64 msg_id){
+  int success = -1;
+  char chat_msg[0x2A8] ={0};
+  DWORD base = GetWeChatWinBase();
+  DWORD new_chat_msg_addr = base + WX_NEW_CHAT_MSG_OFFSET;
+  DWORD get_chat_room_mgr_addr = base + WX_CHAT_ROOM_MGR_OFFSET;
+  DWORD handle_top_msg_addr = base + WX_TOP_MSG_OFFSET;
+  vector<string> local_msg = GetChatMsgByMsgId(msg_id);
+  if(local_msg.empty()){
+    return -2;
+  }
+  string  type = local_msg[3];
+  string  status = local_msg[10];
+  string  talker = local_msg[13];
+  string  content = local_msg[14];
+  wstring w_talker = String2Wstring(talker);
+  wstring w_content = String2Wstring(content);
+  int msg_type =stoi(type);
+  int msg_status =stoi(status);
+
+  #ifdef _DEBUG
+  wcout << "w_talker:"  <<w_talker  <<endl;
+  wcout << "w_content:"  <<w_content  <<endl;
+  #endif
+  WeChatString  chat_room(w_talker);
+  WeChatString msg_content(w_content);
+
+  WeChatString user_id(wxid);
+  __asm{
+    PUSHAD
+    LEA        ECX,chat_msg
+    CALL       new_chat_msg_addr
+    POPAD
+  }
+
+  memcpy(&chat_msg[0x30],&msg_id,sizeof(msg_id));
+  memcpy(&chat_msg[0x38],&msg_type,sizeof(msg_type));
+  memcpy(&chat_msg[0x40],&msg_status,sizeof(msg_status));
+  memcpy(&chat_msg[0x48],&chat_room,sizeof(chat_room));
+ 
+  memcpy(&chat_msg[0x70],&msg_content,sizeof(msg_content));
+  memcpy(&chat_msg[0x174],&user_id,sizeof(user_id));
+ 
+
+  __asm{
+    PUSHAD
+    CALL       get_chat_room_mgr_addr                             
+    PUSH       0x1
+    LEA        EAX,chat_msg
+    PUSH       EAX
+    CALL       handle_top_msg_addr
+    MOV        success,EAX
+    POPAD
+  }
+  return success;
+}
+
+
+int RemoveTopMsg(wchar_t* chat_room_id,ULONG64 msg_id){
+
+  int success = -1;
+  DWORD left =  (DWORD)(&msg_id);
+  DWORD right = (DWORD)(&msg_id+4);
+  WeChatString chat_room(chat_room_id);
+  DWORD base = GetWeChatWinBase();
+  DWORD get_chat_room_mgr_addr = base + WX_CHAT_ROOM_MGR_OFFSET;
+  DWORD new_chat_msg_addr = base + WX_NEW_CHAT_MSG_OFFSET;
+  DWORD init_chat_msg_addr = base + WX_INIT_CHAT_MSG_OFFSET;
+  DWORD remove_top_msg_addr = base + WX_REMOVE_TOP_MSG_OFFSET;
+
+  __asm{
+    PUSHAD
+    CALL       get_chat_room_mgr_addr                                   
+    MOV        EDI,dword ptr [msg_id]
+    LEA        EAX,chat_room
+    MOV        ESI,dword ptr [msg_id + 0x4]
+    SUB        ESP,0x14
+    MOV        ECX,ESP
+    PUSH       EAX
+    CALL       init_chat_msg_addr                                      
+    PUSH       ESI
+    PUSH       EDI
+    CALL       remove_top_msg_addr     
+    MOV        success,EAX 
+    POPAD                               
+  }
+
   return success;
 }

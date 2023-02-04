@@ -297,3 +297,22 @@ unsigned int GetLocalIdByMsgId(ULONG64 msgid, int &dbIndex) {
   }
   return 0;
 }
+
+vector<string> GetChatMsgByMsgId(ULONG64 msgid){
+  char sql[260] = {0};
+  sprintf_s(sql, "select localId,TalkerId,MsgSvrID,Type,SubType,IsSender,CreateTime,Sequence,StatusEx,FlagEx,Status,MsgServerSeq,MsgSequence,StrTalker,StrContent,BytesExtra from MSG where MsgSvrID=%llu;", msgid);
+  wchar_t dbname[20] = {0};
+  for (int i = 0;; i++) {
+    swprintf_s(dbname, L"MSG%d.db", i);
+    DWORD handle = GetDbHandleByDbName(dbname);
+    if (handle == 0) return {};
+    vector<vector<string>> result;
+    int ret = Select(handle, (const char *)sql, result);
+    #ifdef _DEBUG
+    cout <<" size =" <<result.size()<<endl;
+    #endif
+    if (result.size() == 0) continue;
+    return result[1];
+  }
+  return {};
+}

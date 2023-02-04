@@ -568,6 +568,22 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       ret = ret_data.dump();
       break;
     }
+    case WECHAT_SET_TOP_MSG:{
+      wstring wxid = get_http_req_param(hm, j_param, "wxid", is_post);
+      ULONG64 msgid = get_http_param_ulong64(hm, j_param, "msgid", is_post);
+      int success = SetTopMsg(WS2LW(wxid),msgid);
+      json ret_data = {{"code", success}, {"result", "OK"}};
+      ret = ret_data.dump();
+      break;
+    }
+    case WECHAT_REMOVE_TOP_MSG:{
+      wstring room_id = get_http_req_param(hm, j_param, "chatRoomId", is_post);
+      ULONG64 msgid = get_http_param_ulong64(hm, j_param, "msgid", is_post);
+      int success = RemoveTopMsg(WS2LW(room_id),msgid);
+      json ret_data = {{"code", success}, {"result", "OK"}};
+      ret = ret_data.dump();
+      break;
+    }
     default:
       break;
   }
