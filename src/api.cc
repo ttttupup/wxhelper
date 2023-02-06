@@ -20,6 +20,7 @@
 #include "hook_img.h"
 #include "ocr.h"
 #include "pat.h"
+#include "confirm_receipt.h"
 
 #pragma comment(lib, "ws2_32.lib")
 using namespace std;
@@ -478,6 +479,12 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       break;
     }
     case WECHAT_GET_TRANSFER: {
+      wstring wxid = get_http_req_param(hm, j_param, "wxid", is_post);
+      wstring transcationid = get_http_req_param(hm, j_param, "transcationId", is_post);
+      wstring transferid = get_http_req_param(hm, j_param, "transferId", is_post);
+      BOOL response = DoConfirmReceipt(WS2LW(wxid), WS2LW(transcationid), WS2LW(transferid));
+      json ret_data = {{"msg", response}, {"result", "OK"}};
+      ret = ret_data.dump();
       break;
     }
     case WECHAT_GET_CONTACT_ALL: {
