@@ -7,7 +7,7 @@
 #define WX_INIT_OBJ_OFFSET 0x6cbab0
 #define WX_OCR_MANAGER_OFFSET 0x6cff00
 #define WX_DO_OCR_TASK_OFFSET 0x11e3210
-
+using namespace std;
 int DoOCRTask(wchar_t *img_path, std::string &result) {
   int success = -1;
   WeChatString path(img_path);

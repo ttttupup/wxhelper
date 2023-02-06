@@ -25,7 +25,7 @@ wstring utf8_to_unicode(const char *buffer) {
 /// @param wstr unicode
 /// @return string utf8
 string unicode_to_utf8(wchar_t *wstr) {
-   int c_size = WideCharToMultiByte(CP_UTF8, 0, wstr, -1, NULL, 0, NULL, FALSE);
+  int c_size = WideCharToMultiByte(CP_UTF8, 0, wstr, -1, NULL, 0, NULL, FALSE);
   if (c_size > 0) {
     char *buffer = new char[c_size + 1];
     WideCharToMultiByte(CP_UTF8, 0, wstr, -1, buffer, c_size, NULL, FALSE);

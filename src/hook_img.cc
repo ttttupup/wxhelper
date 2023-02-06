@@ -2,7 +2,7 @@
 #include "hook_img.h"
 
 #include "common.h"
-
+using namespace std;
 
 // #define WX_HOOK_IMG_OFFSET 0xd7eaa5
 // #define WX_HOOK_IMG_NEXT_OFFSET 0xda56e0

@@ -4,7 +4,6 @@
 // #include <windows.h>
 
 #include <vector>
-using namespace std;
 struct WeChatString {
   wchar_t *ptr;
   DWORD length;
@@ -13,7 +12,7 @@ struct WeChatString {
   DWORD c_len = 0;
   WeChatString() { WeChatString(NULL); }
 
-  WeChatString(wstring &s) {
+  WeChatString(std::wstring &s) {
     ptr = (wchar_t *)(s.c_str());
     length = s.length();
     max_length = s.length() * 2;
@@ -51,7 +50,7 @@ struct DatabaseInfo {
   DWORD handle = 0;
   wchar_t *db_name = NULL;
   DWORD db_name_len = 0;
-  vector<TableInfo> tables;
+  std::vector<TableInfo> tables;
   DWORD count = 0;
   DWORD extrainfo = 0;
 };
@@ -101,6 +100,25 @@ struct ChatRoomInfoInner {
   WeChatString notice;
   WeChatString admin;
   WeChatString xml;
+
+  ~ChatRoomInfoInner(){
+      if(chat_room_id.ptr){
+        delete []chat_room_id.ptr;
+        chat_room_id.ptr = nullptr;
+      }
+      if(notice.ptr){
+        delete []notice.ptr;
+        notice.ptr = nullptr;
+      }
+      if(admin.ptr){
+        delete []admin.ptr;
+        admin.ptr = nullptr;
+      }
+      if(xml.ptr){
+        delete []xml.ptr;
+        xml.ptr = nullptr;
+      }
+  }
 };
 
 struct VectorInner {
@@ -124,17 +142,17 @@ struct ChatRoomInner{
 };
 
 struct SelfInfoInner{
-  string name;
-  string city;
-  string province;
-  string country;
-  string account;
-  string wxid;
-  string mobile;
-  string  small_img;
-  string big_img;
-  string data_root_path;
-  string data_save_path;
-  string current_data_path;
+  std::string name;
+  std::string city;
+  std::string province;
+  std::string country;
+  std::string account;
+  std::string wxid;
+  std::string mobile;
+  std::string  small_img;
+  std::string big_img;
+  std::string data_root_path;
+  std::string data_save_path;
+  std::string current_data_path;
 };
 #endif

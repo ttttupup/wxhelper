@@ -4,7 +4,7 @@
 #include "base64.h"
 #include "common.h"
 #include "new_sqlite3.h"
-
+using namespace std;
 
 /// @brief free data
 void FreeResult(vector<vector<SqlResult>> &data) {
@@ -15,11 +15,11 @@ void FreeResult(vector<vector<SqlResult>> &data) {
     for (unsigned j = 0; j < data[i].size(); j++) {
       SqlResult *sr = (SqlResult *)&data[i][j];
       if (sr->column_name) {
-        delete sr->column_name;
+        delete[] sr->column_name;
         sr->column_name = NULL;
       }
       if (sr->content) {
-        delete sr->content;
+        delete[] sr->content;
         sr->content = NULL;
       }
     }

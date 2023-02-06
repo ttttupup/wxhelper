@@ -4,6 +4,7 @@
 #include "common.h"
 
 #include "wechat_data.h"
+using namespace std;
 
 #define WX_SELF_NAME_OFFSET 0x2C426E8
 #define WX_SELF_MOBILE_OFFSET 0x2C42658

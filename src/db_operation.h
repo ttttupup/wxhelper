@@ -2,7 +2,6 @@
 #define DB_OPERATION_H_
 #include <windows.h>
 #include <vector>
-using namespace std;
 struct SqlResult {
   char *column_name;
   DWORD column_name_len;
@@ -18,6 +17,6 @@ struct SqlResult {
 /// @return 
 int ExecuteSQL(DWORD db, const char *sql, DWORD callback, void *data);
 
-int Select(DWORD db_hanle, const char *sql,vector<vector<string>> &query_result);
+int Select(DWORD db_hanle, const char *sql,std::vector<std::vector<std::string>> &query_result);
 
 #endif

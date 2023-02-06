@@ -5,6 +5,8 @@
 #include "get_db_handle.h"
 #include "wechat_data.h"
 #include "base64.h"
+using namespace std;
+
 #define WX_CHAT_ROOM_MGR_OFFSET 0x67ee70
 #define WX_GET_CHAT_ROOM_DETAIL_INFO_OFFSET 0xa73a80
 #define WX_NEW_CHAT_ROOM_INFO_OFFSET 0xd07010
@@ -45,21 +47,54 @@ int GetChatRoomDetailInfo(wchar_t* chat_room_id, ChatRoomInfoInner& room_info) {
          MOV        success,EAX  
          POPAD
   }
-  room_info.chat_room_id.ptr = *(wchar_t**)(chat_room_info + 0x4);
-  room_info.chat_room_id.length = *(DWORD*)(chat_room_info + 0x8);
-  room_info.chat_room_id.max_length = *(DWORD*)(chat_room_info + 0xC);
+  DWORD room_id_len = *(DWORD*)(chat_room_info + 0x8);
+  DWORD room_id_max_len = *(DWORD*)(chat_room_info + 0xC);
+  wchar_t * room_id = new wchar_t[room_id_len + 1];
+  wmemcpy(room_id,*(wchar_t**)(chat_room_info + 0x4),room_id_len + 1);
+  room_info.chat_room_id.ptr = room_id;
+  room_info.chat_room_id.length = room_id_len;
+  room_info.chat_room_id.max_length = room_id_max_len;
+  
 
-  room_info.notice.ptr = *(wchar_t**)(chat_room_info + 0x18);
-  room_info.notice.length = *(DWORD*)(chat_room_info + 0x1C);
-  room_info.notice.max_length = *(DWORD*)(chat_room_info + 0x20);
+  DWORD notice_len = *(DWORD*)(chat_room_info + 0x1C);
+  DWORD notice_max_len = *(DWORD*)(chat_room_info + 0x20);
+  wchar_t* notice_ptr = *(wchar_t**)(chat_room_info + 0x18);
+  if(notice_len <= 0){
+    room_info.notice.ptr = nullptr;
+  }else{
+    wchar_t * notice = new wchar_t[notice_len + 1];
+    wmemcpy(notice,notice_ptr,notice_len+1);
+    room_info.notice.ptr = notice;
+  }
+  room_info.notice.length = notice_len;
+  room_info.notice.max_length = notice_max_len;
 
-  room_info.admin.ptr = *(wchar_t**)(chat_room_info + 0x2C);
-  room_info.admin.length = *(DWORD*)(chat_room_info + 0x30);
-  room_info.admin.max_length = *(DWORD*)(chat_room_info + 0x34);
+  DWORD admin_len = *(DWORD*)(chat_room_info + 0x30);
+  DWORD admin_max_len = *(DWORD*)(chat_room_info + 0x34);
+  wchar_t* admin_ptr = *(wchar_t**)(chat_room_info + 0x2C);
+  if(admin_len <= 0){
+    room_info.admin.ptr = nullptr;
+  }else{
+    wchar_t * admin = new wchar_t[admin_len + 1];
+    wmemcpy(admin,admin_ptr,admin_len+1);
+    room_info.admin.ptr = admin;
+  }
+  room_info.admin.length = admin_len;
+  room_info.admin.max_length = admin_max_len;
 
-  room_info.xml.ptr = *(wchar_t**)(chat_room_info + 0x50);
-  room_info.xml.length = *(DWORD*)(chat_room_info + 0x54);
-  room_info.xml.max_length = *(DWORD*)(chat_room_info + 0x58);
+  DWORD xml_len = *(DWORD*)(chat_room_info + 0x54);
+  DWORD xml_max_len = *(DWORD*)(chat_room_info + 0x58);
+  wchar_t* xml_ptr = *(wchar_t**)(chat_room_info + 0x50);
+  if (xml_len <= 0){
+    room_info.xml.ptr = nullptr;
+  }else{
+    wchar_t * xml = new wchar_t[xml_len + 1];
+    wmemcpy(xml,xml_ptr,xml_len+1);
+    room_info.xml.ptr = xml;
+  }
+  room_info.xml.length = xml_len;
+  room_info.xml.max_length = xml_max_len;
+
   __asm {
         PUSHAD
         LEA         ECX,chat_room_info

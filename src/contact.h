@@ -3,7 +3,7 @@
 #include <vector>
 #include "wechat_data.h"
 
-int GetAllContact(vector<Contact> &vec);
+int GetAllContact(std::vector<Contact> &vec);
 
 
 
