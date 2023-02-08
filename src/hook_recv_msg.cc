@@ -12,6 +12,8 @@ using namespace nlohmann;
 using namespace std;
 #define WX_RECV_MSG_HOOK_OFFSET 0xb97126
 #define WX_RECV_MSG_HOOK_NEXT_OFFSET 0x6fc850
+#define WX_SNS_HOOK_OFFSET  0x12fb9a5
+#define WX_SNS_HOOK_NEXT_OFFSET 0x12fbc30
 
 // SyncMgr::addMsgListToDB
 // #define WX_RECV_MSG_HOOK_OFFSET 0xB9C919
@@ -28,6 +30,13 @@ static DWORD kReceMsgJmpBackAddress =
     kWeChatWinBase + WX_RECV_MSG_HOOK_OFFSET + 0x5;
 static DWORD kReceMsgNextAddress =
     kWeChatWinBase + WX_RECV_MSG_HOOK_NEXT_OFFSET;
+
+
+static char kOriginSnsMsgAsmCode[5] = {0};
+static DWORD kSnsMsgJmpBackAddress =
+    kWeChatWinBase + WX_SNS_HOOK_OFFSET + 0x5;
+static DWORD kSnsMsgNextAddress =
+    kWeChatWinBase + WX_SNS_HOOK_NEXT_OFFSET;
 
 struct InnerMessageStruct {
   char *buffer;
@@ -112,7 +121,7 @@ void SendSocketMessage(InnerMessageStruct *msg) {
 }
 /// @brief msg handle
 /// @param msg_addr msg address in memory
-void OnRecvMsg(DWORD msg_addr) {
+void __cdecl OnRecvMsg(DWORD msg_addr) {
   json j_msg;
   unsigned long long msgid = *(unsigned long long *)(msg_addr + 0x30);
   j_msg["msgId"] = msgid;
@@ -175,6 +184,50 @@ void OnRecvMsg(DWORD msg_addr) {
     CloseHandle(thread);
   }
 }
+
+
+
+ void __cdecl OnSnsTimeLineMsg(DWORD msg_addr) {
+  json j_sns;
+  DWORD begin_addr = *(DWORD *)(msg_addr + 0x20);
+  DWORD end_addr = *(DWORD *)(msg_addr + 0x24);
+   #ifdef _DEBUG
+   cout << "begin" <<begin_addr<<endl;
+   cout << "end" <<end_addr<<endl;
+  #endif
+  if (begin_addr == 0) {
+    j_sns = {{"data", json::array()}};
+  } else {
+    while (begin_addr < end_addr) {
+      json j_item;
+      j_item["snsId"] = *(unsigned long long *)(begin_addr);
+      j_item["createTime"] = *(DWORD *)(begin_addr + 0x2C);
+
+      j_item["senderId"] =
+          unicode_to_utf8((wchar_t *)READ_WSTRING(begin_addr, 0x18).c_str());
+
+      j_item["content"] =
+          unicode_to_utf8((wchar_t *)READ_WSTRING(begin_addr, 0x3c).c_str());
+
+      j_item["xml"] =
+          unicode_to_utf8((wchar_t *)READ_WSTRING(begin_addr, 0x384).c_str());
+
+      j_sns["data"].push_back(j_item);
+      begin_addr += 0xB48;
+    }
+  }
+  string jstr = j_sns.dump() + '\n';
+  InnerMessageStruct *inner_msg = new InnerMessageStruct;
+  inner_msg->buffer = new char[jstr.size() + 1];
+  memcpy(inner_msg->buffer, jstr.c_str(), jstr.size() + 1);
+  inner_msg->length = jstr.size();
+  HANDLE thread = CreateThread(
+      NULL, 0, (LPTHREAD_START_ROUTINE)SendSocketMessage, inner_msg, NULL, 0);
+  if (thread) {
+    CloseHandle(thread);
+  }
+}
+
 /// @brief  hook implement
 _declspec(naked) void handle_sync_msg() {
   __asm {
@@ -189,6 +242,23 @@ _declspec(naked) void handle_sync_msg() {
 		JMP     kReceMsgJmpBackAddress
   }
 }
+
+
+/// @brief  hook sns msg implement
+_declspec(naked) void handle_sns_msg() {
+  __asm {
+    PUSHAD
+		PUSHFD
+    PUSH    [ESP + 0x24]
+		CALL    OnSnsTimeLineMsg
+		ADD     ESP, 0x4
+    POPFD
+		POPAD
+		CALL    kSnsMsgNextAddress
+		JMP     kSnsMsgJmpBackAddress
+  }
+}
+
 
 /// @brief hook any address   address+0x5
 /// @param port 端口
@@ -210,6 +280,14 @@ int HookRecvMsg(char* client_ip,int port) {
   kReceMsgJmpBackAddress = hook_recv_msg_addr + 0x5;
   HookAnyAddress(hook_recv_msg_addr, (LPVOID)handle_sync_msg,
                  kOriginReceMsgAsmCode);
+  
+  DWORD hook_sns_msg_addr = kWeChatWinBase + WX_SNS_HOOK_OFFSET;
+  kSnsMsgNextAddress = kWeChatWinBase + WX_SNS_HOOK_NEXT_OFFSET;
+  kSnsMsgJmpBackAddress = hook_sns_msg_addr + 0x5;
+  HookAnyAddress(hook_sns_msg_addr, (LPVOID)handle_sns_msg,
+                 kOriginSnsMsgAsmCode);
+  
+
   kMessageHooked = TRUE;
   return 1;
 }
@@ -218,7 +296,9 @@ int UnHookRecvMsg() {
   kServerPort = 0;
   if (!kMessageHooked) return 2;
   DWORD hook_recv_msg_addr = kWeChatWinBase + WX_RECV_MSG_HOOK_OFFSET;
+  DWORD hook_sns_addr = kWeChatWinBase + WX_SNS_HOOK_OFFSET;
   UnHookAnyAddress(hook_recv_msg_addr, kOriginReceMsgAsmCode);
+  UnHookAnyAddress(hook_sns_addr, kOriginSnsMsgAsmCode);
   kMessageHooked = FALSE;
   return 1;
 }

@@ -93,7 +93,9 @@ vcpkg
 
 2023-02-04 ： 新增群消息置顶和取消置顶。  
 
-2023-02-04 ： 新增确认收款。
+2023-02-06 ： 新增确认收款。  
+
+2023-02-08 ： 新增朋友圈消息。
 
 #### 功能预览：
 0.检查是否登录  
@@ -122,6 +124,8 @@ vcpkg
 50.拍一拍  
 51.群消息置顶消息  
 52.群消息取消置顶  
+53.朋友圈首页
+54.朋友圈下一页
 ### 接口文档：
 
 
@@ -1127,6 +1131,107 @@ vcpkg
 响应：
 ``` javascript
 {"code":0,"result":"OK"}
+```   
+
+
+
+#### 53.朋友圈首页消息**
+###### 接口功能
+> 获取朋友圈最新消息，调用之后，会在tcpserver服务中收到朋友圈的消息。格式如下：
+``` javascript
+{
+  'data': [
+    {
+      'content': '朋友圈[玫瑰][玫瑰]',
+      'createTime': 1675827480,
+      'senderId': 'wxid_12333',
+      'snsId': 14057859804711563695,
+      'xml': '<TimelineObject><id><![CDATA[1405712322563695]]></id><username><![CDATA[wxid_12333]]></username><createTime><![CDATA[1675827480]]></createTime><contentDescShowType>0</contentDescShowType><contentDescScene>0</contentDescScene><private><![CDATA[0]]></private><contentDesc><![CDATA[朋友圈[玫瑰][玫瑰]]]></contentDesc><contentattr><![CDATA[0]]></contentattr><sourceUserName></sourceUserName><sourceNickName></sourceNickName><statisticsData></statisticsData><weappInfo><appUserName></appUserName><pagePath></pagePath><version><![CDATA[0]]></version><debugMode><![CDATA[0]]></debugMode><shareActionId></shareActionId><isGame><![CDATA[0]]></isGame><messageExtraData></messageExtraData><subType><![CDATA[0]]></subType><preloadResources></preloadResources></weappInfo><canvasInfoXml></canvasInfoXml><ContentObject><contentStyle><![CDATA[2]]></contentStyle><contentSubStyle><![CDATA[0]]></contentSubStyle><title></title><description></description><contentUrl></contentUrl></ContentObject><actionInfo><appMsg><mediaTagName></mediaTagName><messageExt></messageExt><messageAction></messageAction></appMsg></actionInfo><appInfo><id></id></appInfo><location poiClassifyId="" poiName="" poiAddress="" poiClassifyType="0" city=""></location><publicUserName></publicUserName><streamvideo><streamvideourl></streamvideourl><streamvideothumburl></streamvideothumburl><streamvideoweburl></streamvideoweburl></streamvideo></TimelineObject>'
+    }]
+}
+
+```
+
+###### 接口地址
+> [/api/?type=53](/api/?type=53)
+
+###### HTTP请求方式
+> POST  JSON
+
+###### 请求参数
+|参数|必选|类型|说明|
+|---|---|---|---|
+
+
+   
+
+###### 返回字段
+|返回字段|字段类型|说明                              |
+|---|---|---|
+|code|int|返回状态,1成功, -1失败|
+|result|string|成功提示|
+
+
+
+###### 接口示例
+入参：
+``` javascript
+
+
+```
+响应：
+``` javascript
+{"code":1,"result":"OK"}
+```   
+
+
+#### 54.朋友圈下一页**
+###### 接口功能
+> 朋友圈下一页，会在tcpserver服务中收到朋友圈的消息。格式如下：
+``` javascript
+{
+  'data': [
+    {
+      'content': '朋友圈[玫瑰][玫瑰]',
+      'createTime': 1675827480,
+      'senderId': 'wxid_12333',
+      'snsId': 14057859804711563695,
+      'xml': '<TimelineObject><id><![CDATA[1405712322563695]]></id><username><![CDATA[wxid_12333]]></username><createTime><![CDATA[1675827480]]></createTime><contentDescShowType>0</contentDescShowType><contentDescScene>0</contentDescScene><private><![CDATA[0]]></private><contentDesc><![CDATA[朋友圈[玫瑰][玫瑰]]]></contentDesc><contentattr><![CDATA[0]]></contentattr><sourceUserName></sourceUserName><sourceNickName></sourceNickName><statisticsData></statisticsData><weappInfo><appUserName></appUserName><pagePath></pagePath><version><![CDATA[0]]></version><debugMode><![CDATA[0]]></debugMode><shareActionId></shareActionId><isGame><![CDATA[0]]></isGame><messageExtraData></messageExtraData><subType><![CDATA[0]]></subType><preloadResources></preloadResources></weappInfo><canvasInfoXml></canvasInfoXml><ContentObject><contentStyle><![CDATA[2]]></contentStyle><contentSubStyle><![CDATA[0]]></contentSubStyle><title></title><description></description><contentUrl></contentUrl></ContentObject><actionInfo><appMsg><mediaTagName></mediaTagName><messageExt></messageExt><messageAction></messageAction></appMsg></actionInfo><appInfo><id></id></appInfo><location poiClassifyId="" poiName="" poiAddress="" poiClassifyType="0" city=""></location><publicUserName></publicUserName><streamvideo><streamvideourl></streamvideourl><streamvideothumburl></streamvideothumburl><streamvideoweburl></streamvideoweburl></streamvideo></TimelineObject>'
+    }]
+}
+
+```
+
+###### 接口地址
+> [/api/?type=54](/api/?type=54)
+
+###### HTTP请求方式
+> POST  JSON
+
+###### 请求参数
+|参数|必选|类型|说明|
+|---|---|---|---|
+|snsId |ture |string| 朋友圈的snsId |
+
+   
+
+###### 返回字段
+|返回字段|字段类型|说明                              |
+|---|---|---|
+|code|int|返回状态,1成功, -1失败|
+|result|string|成功提示|
+
+
+
+###### 接口示例
+入参：
+``` javascript
+
+
+```
+响应：
+``` javascript
+{"code":1,"result":"OK"}
 ```
 
 #### 感谢
