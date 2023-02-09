@@ -3,16 +3,16 @@
 #include "common.h"
 #include "wechat_data.h"
 
-#define WX_APP_MSG_MGR_OFFSET   0x65df50
-#define WX_SEND_FILE_OFFSET     0xa10190
-#define WX_INIT_CHAT_MSG_OFFSET 0xdbf380
-#define WX_FREE_CHAT_MSG_OFFSET 0x649ac0
+#define WX_APP_MSG_MGR_OFFSET   0x709bb0
+#define WX_SEND_FILE_OFFSET     0xb06240
+#define WX_INIT_CHAT_MSG_OFFSET 0xed3be0
+#define WX_FREE_CHAT_MSG_OFFSET 0x6f4ea0
 
 int  SendFile(wchar_t *wxid, wchar_t *file_path){
   int success = 0;
   WeChatString to_user(wxid);
   WeChatString path(file_path);
-  char chat_msg[0x2A8] = {0};
+  char chat_msg[0x2C4] = {0};
   DWORD base = GetWeChatWinBase();
   DWORD app_msg_mgr_addr = base + WX_APP_MSG_MGR_OFFSET;
   DWORD init_chat_msg_addr = base + WX_INIT_CHAT_MSG_OFFSET;

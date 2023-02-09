@@ -4,9 +4,9 @@
 #include "common.h"
 #include "wechat_data.h"
 
-#define  WX_PAT_MGR_OFFSET  0x7e91c0
+#define  WX_PAT_MGR_OFFSET  0x8d0c00
 #define  WX_SEND_PAT_MSG_OFFSET  0x1228510
-#define  WX_RET_OFFSET   0x1AE4A45
+#define  WX_RET_OFFSET   0x1C94D34
 
 int SendPatMsg(wchar_t* chat_room_id, wchar_t* wxid) {
   int success = -1;

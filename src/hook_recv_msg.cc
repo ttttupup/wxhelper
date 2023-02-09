@@ -10,10 +10,10 @@
 using namespace nlohmann;
 
 using namespace std;
-#define WX_RECV_MSG_HOOK_OFFSET 0xb97126
-#define WX_RECV_MSG_HOOK_NEXT_OFFSET 0x6fc850
-#define WX_SNS_HOOK_OFFSET  0x12fb9a5
-#define WX_SNS_HOOK_NEXT_OFFSET 0x12fbc30
+#define WX_RECV_MSG_HOOK_OFFSET 0xca0284
+#define WX_RECV_MSG_HOOK_NEXT_OFFSET 0x7d5030
+#define WX_SNS_HOOK_OFFSET  0x143ef09
+#define WX_SNS_HOOK_NEXT_OFFSET 0x143f1b0
 
 // SyncMgr::addMsgListToDB
 // #define WX_RECV_MSG_HOOK_OFFSET 0xB9C919
@@ -147,9 +147,6 @@ void __cdecl OnRecvMsg(DWORD msg_addr) {
   if (content_len > 0) {
     j_msg["content"] =
         unicode_to_utf8((wchar_t *)READ_WSTRING(msg_addr, 0x70).c_str());
-#ifdef _DEBUG
-    printf("%s", j_msg["content"].get<std::string>().c_str());
-#endif
   }
   int sign_len = *(DWORD *)(msg_addr + 0x18C);
   if (sign_len > 0) {

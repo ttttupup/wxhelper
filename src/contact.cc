@@ -4,8 +4,8 @@
 #include "common.h"
 #include "wechat_data.h"
 using namespace std;
-#define WX_CONTACT_MGR_INSTANCE_OFFSET 0x64dc30
-#define WX_CONTACT_GET_LIST_OFFSET 0xa9b000
+#define WX_CONTACT_MGR_INSTANCE_OFFSET 0x6f8990
+#define WX_CONTACT_GET_LIST_OFFSET 0xb97550
 #define WX_CONTACT_DEL_OFFSET 0xa9ef40
 #define WX_INIT_CHAT_MSG_OFFSET 0xdbf380
 #define WX_DB_QUERY_OFFSET 0xa9ec40
