@@ -27,6 +27,11 @@ release：编译好的dll。
 个人精力和水平有限，项目还有许多不足，欢迎提出 issues 或 pr。期待你的贡献。
 
 
+
+#### 找call方法 
+个人常用的方法，请参考https://github.com/ttttupup/wxhelper/wiki  
+
+
 #### 编译环境
 
 Visual Studio 2022(x86)  
