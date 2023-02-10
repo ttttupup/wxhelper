@@ -7,21 +7,21 @@
 #include "base64.h"
 using namespace std;
 
-#define WX_CHAT_ROOM_MGR_OFFSET 0x67ee70
-#define WX_GET_CHAT_ROOM_DETAIL_INFO_OFFSET 0xa73a80
-#define WX_NEW_CHAT_ROOM_INFO_OFFSET 0xd07010
-#define WX_FREE_CHAT_ROOM_INFO_OFFSET 0xd072f0
-#define WX_DEL_CHAT_ROOM_MEMBER_OFFSET 0xa69a50
-#define WX_INIT_CHAT_MSG_OFFSET 0xdbf380
-#define WX_FREE_CHAT_MSG_OFFSET 0x649ac0
-#define WX_ADD_MEMBER_TO_CHAT_ROOM_OFFSET 0xa69560
-#define WX_GET_MEMBER_FROM_CHAT_ROOM_OFFSET 0xa749b0
-#define WX_INIT_CHAT_ROOM_OFFSET 0xd04d80
-#define WX_FREE_CHAT_ROOM_OFFSET 0xa7c620
-#define WX_MOD_CHAT_ROOM_MEMBER_NICK_NAME_OFFSET 0xa6f8f0
-#define WX_NEW_CHAT_MSG_OFFSET 0x64adc0
-#define WX_TOP_MSG_OFFSET 0xa76e60
-#define WX_REMOVE_TOP_MSG_OFFSET 0xa76c50
+#define WX_CHAT_ROOM_MGR_OFFSET 0x72cf60
+#define WX_GET_CHAT_ROOM_DETAIL_INFO_OFFSET 0xb6f260
+#define WX_NEW_CHAT_ROOM_INFO_OFFSET 0xe15de0
+#define WX_FREE_CHAT_ROOM_INFO_OFFSET 0xe160b0
+#define WX_DEL_CHAT_ROOM_MEMBER_OFFSET 0xb64180
+#define WX_INIT_CHAT_MSG_OFFSET 0xed3be0
+#define WX_ADD_MEMBER_TO_CHAT_ROOM_OFFSET 0xb63c50
+#define WX_GET_MEMBER_FROM_CHAT_ROOM_OFFSET 0xB70260
+#define WX_INIT_CHAT_ROOM_OFFSET 0xe13b30
+#define WX_FREE_CHAT_ROOM_OFFSET 0xe13d50
+#define WX_MOD_CHAT_ROOM_MEMBER_NICK_NAME_OFFSET 0xb6adf0
+#define WX_NEW_CHAT_MSG_OFFSET 0x70e2a0
+#define WX_FREE_CHAT_MSG_OFFSET 0x6f4ea0
+#define WX_TOP_MSG_OFFSET 0xb727e0
+#define WX_REMOVE_TOP_MSG_OFFSET 0xb725a0
 
 int GetChatRoomDetailInfo(wchar_t* chat_room_id, ChatRoomInfoInner& room_info) {
   int success = 0;
@@ -182,8 +182,8 @@ int AddMemberToChatRoom(wchar_t* chat_room_id, wchar_t** wxids,int len){
 
 int GetMemberFromChatRoom(wchar_t* chat_room_id,ChatRoomInner & out){
   int success = 0;
-   WeChatString chat_room(chat_room_id);
-   DWORD chat_room_ptr = (DWORD) &chat_room;
+  WeChatString chat_room(chat_room_id);
+  DWORD chat_room_ptr = (DWORD) &chat_room;
   char buffer[0x1D4] = {0};
   DWORD base = GetWeChatWinBase();
   DWORD get_member_addr =  base + WX_GET_MEMBER_FROM_CHAT_ROOM_OFFSET;
@@ -261,12 +261,12 @@ int ModChatRoomMemberNickName(wchar_t* chat_room_id,wchar_t* wxid,wchar_t * nick
 
 int SetTopMsg(wchar_t* wxid,ULONG64 msg_id){
   int success = -1;
-  char chat_msg[0x2A8] ={0};
+  char chat_msg[0x2C4] ={0};
   DWORD base = GetWeChatWinBase();
   DWORD new_chat_msg_addr = base + WX_NEW_CHAT_MSG_OFFSET;
   DWORD get_chat_room_mgr_addr = base + WX_CHAT_ROOM_MGR_OFFSET;
   DWORD handle_top_msg_addr = base + WX_TOP_MSG_OFFSET;
-  DWORD free_addr = base +  WX_FREE_CHAT_ROOM_OFFSET;
+  DWORD free_addr = base +  WX_FREE_CHAT_MSG_OFFSET;
   vector<string> local_msg = GetChatMsgByMsgId(msg_id);
   if(local_msg.empty()){
     return -2;

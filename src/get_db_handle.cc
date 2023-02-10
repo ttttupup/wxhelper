@@ -5,7 +5,7 @@
 #include "new_sqlite3.h"
 #include "pch.h"
 #include "wechat_data.h"
-#define CONTACT_G_PINSTANCE 0x2c42e78
+#define CONTACT_G_PINSTANCE_OFFSET 0x2e2d628
 #define DB_MICRO_MSG_OFFSET 0x68
 #define DB_CHAT_MSG_OFFSET 0x1C0
 #define DB_MISC_OFFSET 0x3D8
@@ -15,10 +15,10 @@
 #define DB_FUNCTION_MSG_OFFSET 0x11B0
 #define DB_NAME_OFFSET 0x14
 
-#define PUBLIC_MSG_MGR_OFFSET  0x2c7ec88
-#define MULTI_DB_MSG_MGR_OFFSET  0x2c807d0
-#define FAVORITE_STORAGE_MGR_OFFSET  0x2c801f8
-#define FTS_FAVORITE_MGR_OFFSET  0x2c439b8
+#define PUBLIC_MSG_MGR_OFFSET  0x2e6ce20
+#define MULTI_DB_MSG_MGR_OFFSET  0x2e6ec84
+#define FAVORITE_STORAGE_MGR_OFFSET  0x2e6e630
+#define FTS_FAVORITE_MGR_OFFSET  0x2e2e168
 
 using namespace std;
 map<wstring, DatabaseInfo> dbmap;
@@ -64,7 +64,7 @@ std::vector<void *> GetDbHandles() {
   dbs.clear();
   dbmap.clear();
   DWORD base = GetWeChatWinBase();
-  DWORD p_contact_addr = *(DWORD *)(base + CONTACT_G_PINSTANCE);
+  DWORD p_contact_addr = *(DWORD *)(base + CONTACT_G_PINSTANCE_OFFSET);
   DWORD micro_msg_db_addr = *(DWORD *)(p_contact_addr + DB_MICRO_MSG_OFFSET);
   DWORD chat_msg_db_addr = *(DWORD *)(p_contact_addr + DB_CHAT_MSG_OFFSET);
   DWORD misc_db_addr = *(DWORD *)(p_contact_addr + DB_MISC_OFFSET);

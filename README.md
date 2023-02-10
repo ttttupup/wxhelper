@@ -109,20 +109,20 @@ vcpkg
 6.发送文件  
 9.hook消息  
 10.取消hook消息  
-~~11.hook图片~~  
-~~12.取消hook图片~~  
+11.hook图片  
+12.取消hook图片  
 ~~17.删除好友~~  
-~~25.获取群成员~~  
-~~27.删除群成员~~   
-~~28.增加群成员~~    
-~~31.修改群昵称~~  
-~~32.获取数据库句柄~~   
-~~34.查询数据库~~  
-~~40.转发消息~~  
+25.获取群成员  
+27.删除群成员   
+28.增加群成员    
+31.修改群昵称  
+32.获取数据库句柄     
+34.查询数据库    
+40.转发消息     
 44.退出登录  
 ~~45.确认收款~~  
 46.联系人列表  
-~~47.获取群详情~~  
+47.获取群详情  
 48.获取解密图片  
 ~~49.图片提取文字ocr~~  
 ~~50.拍一拍~~  
@@ -226,7 +226,7 @@ vcpkg
 ###### 请求参数
 |参数|必选|类型|说明|
 |---|---|---|---|
-|wxid |ture |string| 接收人wxid |
+|wxid |true |string| 接收人wxid |
 |msg|true |string|消息文本内容|
 
 ###### 返回字段
@@ -265,7 +265,7 @@ vcpkg
 ###### 请求参数
 |参数|必选|类型|说明|
 |---|---|---|---|
-|wxid |ture |string| 接收人wxid |
+|wxid |true |string| 接收人wxid |
 |imagePath|true |string|图片路径|
 
 ###### 返回字段
@@ -303,7 +303,7 @@ vcpkg
 ###### 请求参数
 |参数|必选|类型|说明|
 |---|---|---|---|
-|wxid |ture |string| 接收人wxid |
+|wxid |true |string| 接收人wxid |
 |filePath|true |string|文件路径|
 
 ###### 返回字段
@@ -340,8 +340,8 @@ vcpkg
 ###### 请求参数
 |参数|必选|类型|说明|
 |---|---|---|---|
-|port |ture |string| 本地服务端端口，用来接收消息内容 |
-|ip |ture |string| 服务端ip地址，用来接收消息内容，可以是任意ip,即tcp客户端连接的服务端的ip (3.8.1.26版本)|
+|port |true |string| 本地服务端端口，用来接收消息内容 |
+|ip |true |string| 服务端ip地址，用来接收消息内容，可以是任意ip,即tcp客户端连接的服务端的ip (3.8.1.26版本)|
 
 ###### 返回字段
 |返回字段|字段类型|说明                              |
@@ -410,7 +410,7 @@ vcpkg
 ###### 请求参数
 |参数|必选|类型|说明|
 |---|---|---|---|
-|imgDir |ture |string| 图片保存的目录 |
+|imgDir |true |string| 图片保存的目录 |
 
 
 ###### 返回字段
@@ -479,7 +479,7 @@ vcpkg
 ###### 请求参数
 |参数|必选|类型|说明|
 |---|---|---|---|
-|wxid |ture |string| 好友wxid |
+|wxid |true |string| 好友wxid |
 
 
 ###### 返回字段
@@ -516,7 +516,7 @@ vcpkg
 ###### 请求参数
 |参数|必选|类型|说明|
 |---|---|---|---|
-|chatRoomId |ture |string| 群id |
+|chatRoomId |true |string| 群id |
 
 
 ###### 返回字段
@@ -557,8 +557,8 @@ vcpkg
 ###### 请求参数
 |参数|必选|类型|说明|
 |---|---|---|---|
-|chatRoomId |ture |string| 群id |
-|memberIds |ture |string| 成员id，以,分割 |
+|chatRoomId |true |string| 群id |
+|memberIds |true |string| 成员id，以,分割 |
 
 
 ###### 返回字段
@@ -596,8 +596,8 @@ vcpkg
 ###### 请求参数
 |参数|必选|类型|说明|
 |---|---|---|---|
-|chatRoomId |ture |string| 群id |
-|memberIds |ture |string| 成员id，以,分割 |
+|chatRoomId |true |string| 群id |
+|memberIds |true |string| 成员id，以,分割 |
 
 
 ###### 返回字段
@@ -634,9 +634,9 @@ vcpkg
 ###### 请求参数
 |参数|必选|类型|说明|
 |---|---|---|---|
-|chatRoomId |ture |string| 群id |
-|wxid |ture |string| 自己的id，只能修改自己的群名片 |
-|nickName |ture |string| 修改的昵称 |
+|chatRoomId |true |string| 群id |
+|wxid |true |string| 自己的id，只能修改自己的群名片 |
+|nickName |true |string| 修改的昵称 |
 
 ###### 返回字段
 |返回字段|字段类型|说明                              |
@@ -733,8 +733,8 @@ vcpkg
 ###### 请求参数
 |参数|必选|类型|说明|
 |---|---|---|---|
-|dbHandle |ture |int| 句柄 |
-|sql |ture |string| sql语句 |
+|dbHandle |true |int| 句柄 |
+|sql |true |string| sql语句 |
 
 
 ###### 返回字段
@@ -773,8 +773,8 @@ vcpkg
 ###### 请求参数
 |参数|必选|类型|说明|
 |---|---|---|---|
-|wxid |ture |string| 消息接收人wxid |
-|msgid |ture |number| 消息id，hook消息接口中返回的消息id |
+|wxid |true |string| 消息接收人wxid |
+|msgid |true |number| 消息id，hook消息接口中返回的消息id |
 
 
 ###### 返回字段
@@ -931,7 +931,7 @@ vcpkg
 ###### 请求参数
 |参数|必选|类型|说明|
 |---|---|---|---|
-|chatRoomId |ture |string| 群id |
+|chatRoomId |true |string| 群id |
 
 ###### 返回字段
 |返回字段|字段类型|说明                              |
@@ -974,8 +974,8 @@ vcpkg
 ###### 请求参数
 |参数|必选|类型|说明|
 |---|---|---|---|
-|imagePath |ture |string| 图片路径 |
-|savePath |ture |string| 保存路径 |
+|imagePath |true |string| 图片路径 |
+|savePath |true |string| 保存路径 |
 
 ###### 返回字段
 |返回字段|字段类型|说明                              |
@@ -1014,7 +1014,7 @@ vcpkg
 ###### 请求参数
 |参数|必选|类型|说明|
 |---|---|---|---|
-|imagePath |ture |string| 图片路径 |
+|imagePath |true |string| 图片路径 |
 
 ###### 返回字段
 |返回字段|字段类型|说明                              |
@@ -1037,8 +1037,8 @@ vcpkg
 ###### 请求参数
 |参数|必选|类型|说明|
 |---|---|---|---|
-|chatRoomId |ture |string| 微信群聊id |  
-|wxid |ture |string| 要拍的用户wxid，如果使用用户自定义的微信号，则不会显示群内昵称 |
+|chatRoomId |true |string| 微信群聊id |  
+|wxid |true |string| 要拍的用户wxid，如果使用用户自定义的微信号，则不会显示群内昵称 |
 ###### 返回字段
 |返回字段|字段类型|说明                              |
 |---|---|---|
@@ -1075,8 +1075,8 @@ vcpkg
 ###### 请求参数
 |参数|必选|类型|说明|
 |---|---|---|---|
-|wxid |ture |string| 置顶消息的发送人wxid |
-|msgid |ture |string| 消息id |
+|wxid |true |string| 置顶消息的发送人wxid |
+|msgid |true |string| 消息id |
 ###### 返回字段
 |返回字段|字段类型|说明                              |
 |---|---|---|
@@ -1113,8 +1113,8 @@ vcpkg
 ###### 请求参数
 |参数|必选|类型|说明|
 |---|---|---|---|
-|chatRoomId |ture |string| 微信群聊id |  
-|msgid |ture |string| 消息id |
+|chatRoomId |true |string| 微信群聊id |  
+|msgid |true |string| 消息id |
 ###### 返回字段
 |返回字段|字段类型|说明                              |
 |---|---|---|
@@ -1215,7 +1215,7 @@ vcpkg
 ###### 请求参数
 |参数|必选|类型|说明|
 |---|---|---|---|
-|snsId |ture |string| 朋友圈的snsId |
+|snsId |true |string| 朋友圈的snsId |
 
    
 

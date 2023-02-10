@@ -6,9 +6,9 @@ using namespace std;
 
 // #define WX_HOOK_IMG_OFFSET 0xd7eaa5
 // #define WX_HOOK_IMG_NEXT_OFFSET 0xda56e0
-#define WX_HOOK_IMG_OFFSET 0xc672cc
-#define WX_HOOK_IMG_NEXT_OFFSET 0xd82370
-#define WX_SELF_ID_OFFSET 0x2C42A38
+#define WX_HOOK_IMG_OFFSET 0xd723dc
+#define WX_HOOK_IMG_NEXT_OFFSET 0xe91d90
+#define WX_SELF_ID_OFFSET 0x2E2CD3C
 #define BUFSIZE 1024
 
 #define JPEG0 0xFF
