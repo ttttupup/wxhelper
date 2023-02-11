@@ -22,6 +22,7 @@ using namespace std;
 #define WX_FREE_CHAT_MSG_OFFSET 0x6f4ea0
 #define WX_TOP_MSG_OFFSET 0xb727e0
 #define WX_REMOVE_TOP_MSG_OFFSET 0xb725a0
+#define WX_FREE_CHAT_MSG_INSTANCE_COUNTER_OFFSET  0x6f5370
 
 int GetChatRoomDetailInfo(wchar_t* chat_room_id, ChatRoomInfoInner& room_info) {
   int success = 0;
@@ -266,7 +267,8 @@ int SetTopMsg(wchar_t* wxid,ULONG64 msg_id){
   DWORD new_chat_msg_addr = base + WX_NEW_CHAT_MSG_OFFSET;
   DWORD get_chat_room_mgr_addr = base + WX_CHAT_ROOM_MGR_OFFSET;
   DWORD handle_top_msg_addr = base + WX_TOP_MSG_OFFSET;
-  DWORD free_addr = base +  WX_FREE_CHAT_MSG_OFFSET;
+  // DWORD free_addr = base +  WX_FREE_CHAT_MSG_OFFSET;
+  DWORD free_addr = base +  WX_FREE_CHAT_MSG_INSTANCE_COUNTER_OFFSET;
   vector<string> local_msg = GetChatMsgByMsgId(msg_id);
   if(local_msg.empty()){
     return -2;
@@ -288,6 +290,7 @@ int SetTopMsg(wchar_t* wxid,ULONG64 msg_id){
   WeChatString msg_content(w_content);
 
   WeChatString user_id(wxid);
+
   __asm{
     PUSHAD
     LEA        ECX,chat_msg
@@ -307,12 +310,13 @@ int SetTopMsg(wchar_t* wxid,ULONG64 msg_id){
   __asm{
     PUSHAD
     CALL       get_chat_room_mgr_addr                             
-    PUSH       0x1
+    PUSH       0x0
     LEA        EAX,chat_msg
     PUSH       EAX
     CALL       handle_top_msg_addr
     MOV        success,EAX
     LEA        ECX,chat_msg
+    PUSH       0x0
     CALL       free_addr
     POPAD
   }

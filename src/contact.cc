@@ -6,9 +6,11 @@
 using namespace std;
 #define WX_CONTACT_MGR_INSTANCE_OFFSET 0x6f8990
 #define WX_CONTACT_GET_LIST_OFFSET 0xb97550
-#define WX_CONTACT_DEL_OFFSET 0xa9ef40
-#define WX_INIT_CHAT_MSG_OFFSET 0xdbf380
-#define WX_DB_QUERY_OFFSET 0xa9ec40
+#define WX_CONTACT_DEL_OFFSET 0xb9b3b0
+#define WX_INIT_CHAT_MSG_OFFSET 0xed3be0
+#define WX_SYNC_MGR_OFFSET 0xa87fd0
+#define WX_SET_VALUE_OFFSET 0x1f80900
+#define WX_DO_DEL_CONTACT_OFFSET 0xca6480
 int GetAllContact(vector<Contact> &vec) {
   DWORD base = GetWeChatWinBase();
   DWORD get_instance = base + WX_CONTACT_MGR_INSTANCE_OFFSET;
@@ -66,33 +68,32 @@ int GetAllContact(vector<Contact> &vec) {
     }
     return success;
 }
-// todo 
+// note maybe  not delete 
 int DelContact(wchar_t *wxid) {
-    int success = 0;
+    int success = -1;
     WeChatString user_id(wxid);
     DWORD id_ptr = (DWORD) &user_id;
     DWORD base = GetWeChatWinBase();
-    DWORD get_instance_addr = base + WX_CONTACT_MGR_INSTANCE_OFFSET;
-    DWORD init_chat_msg_addr = base + WX_INIT_CHAT_MSG_OFFSET;
-    DWORD del_addr = base + WX_CONTACT_DEL_OFFSET;
-    DWORD db_op_addr = base + WX_DB_QUERY_OFFSET;
+    DWORD sync_mgr_addr = base + WX_SYNC_MGR_OFFSET;
+    DWORD set_id_addr = base + WX_SET_VALUE_OFFSET;
+    DWORD del_contact_addr = base + WX_DO_DEL_CONTACT_OFFSET;
+    int len = user_id.length;
+    
+    string id_cstr = unicode_to_utf8(wxid);
+    char id_[0x20]={0};
+    memcpy(id_,id_cstr.c_str(),id_cstr.size()+1);
+    char buff[0x10]={0}; 
     __asm{
         PUSHAD
         PUSHFD
-        CALL       get_instance_addr   
-        MOV        ECX,dword ptr[id_ptr]
-        PUSH       ECX
+        CALL       sync_mgr_addr
         MOV        ECX,EAX
-        MOV        ESI,EAX
-        CALL       db_op_addr                                     
-        SUB        ESP,0x14
-        MOV        EAX,dword ptr[id_ptr]
-        MOV        ECX,ESP
-        PUSH       EAX
-        CALL       init_chat_msg_addr                                     
-        MOV        ECX,ESI
-        CALL       del_addr
-        MOV        success,EAX      
+        LEA        EAX,buff
+        MOV        [ECX + 4],EAX
+        LEA        EAX,id_
+        Mov        dword ptr[buff +0x4],EAX
+        CALL       del_contact_addr 
+        MOV        success,EAX            
         POPFD                 
         POPAD      
     }

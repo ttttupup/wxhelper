@@ -4,9 +4,9 @@
 #include "common.h"
 #include "wechat_data.h"
 
-#define WX_NEW_WCPAYINFO_OFFSET 0x69d2b0
-#define WX_FREE_WCPAYINFO_OFFSET 0x68d610
-#define WX_CONFIRM_RECEIPT_OFFSET 0x13d5e00
+#define WX_NEW_WCPAYINFO_OFFSET 0x756340
+#define WX_FREE_WCPAYINFO_OFFSET 0x73c170
+#define WX_CONFIRM_RECEIPT_OFFSET 0x15287a0
 
 int DoConfirmReceipt(wchar_t *wxid, wchar_t *transcationid,
                      wchar_t *transferid) {
