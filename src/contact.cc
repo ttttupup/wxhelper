@@ -11,6 +11,9 @@ using namespace std;
 #define WX_SYNC_MGR_OFFSET 0xa87fd0
 #define WX_SET_VALUE_OFFSET 0x1f80900
 #define WX_DO_DEL_CONTACT_OFFSET 0xca6480
+#define WX_FREE_CONTACT_OFFSET  0xe23690
+#define WX_GET_CONTACT_OFFSET  0xb93b20
+
 int GetAllContact(vector<Contact> &vec) {
   DWORD base = GetWeChatWinBase();
   DWORD get_instance = base + WX_CONTACT_MGR_INSTANCE_OFFSET;
@@ -100,4 +103,36 @@ int DelContact(wchar_t *wxid) {
     return success;
 }
 
-
+std::wstring GetContactOrChatRoomNickname(wchar_t *id) {
+    int success = -1;
+    char buff[0x440] = {0};
+    WeChatString pri(id);
+    DWORD base = GetWeChatWinBase();
+    DWORD contact_mgr_addr = base + WX_CONTACT_MGR_INSTANCE_OFFSET;
+    DWORD get_contact_addr = base + WX_GET_CONTACT_OFFSET;
+    DWORD free_contact_addr = base + WX_FREE_CONTACT_OFFSET;
+    wstring name = L"";
+    __asm {
+      PUSHAD
+      PUSHFD
+      CALL       contact_mgr_addr                                   
+      LEA        ECX,buff
+      PUSH       ECX
+      LEA        ECX,pri
+      PUSH       ECX
+      MOV        ECX,EAX
+      CALL       get_contact_addr                            
+      POPFD
+      POPAD
+    }
+    name += READ_WSTRING(buff, 0x6C);
+    __asm {
+      PUSHAD
+      PUSHFD
+      LEA        ECX,buff
+      CALL       free_contact_addr    
+      POPFD
+      POPAD
+    }
+    return name;
+}

@@ -11,4 +11,6 @@ int ModChatRoomMemberNickName(wchar_t* chat_room_id,wchar_t* wxid,wchar_t * nick
 
 int SetTopMsg(wchar_t* wxid,ULONG64 msg_id);
 int RemoveTopMsg(wchar_t* chat_room_id,ULONG64 msg_id);
+
+std::wstring GetChatRoomMemberNickname(wchar_t* chat_room_id,wchar_t* wxid);
 #endif

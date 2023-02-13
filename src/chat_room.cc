@@ -23,6 +23,10 @@ using namespace std;
 #define WX_TOP_MSG_OFFSET 0xb727e0
 #define WX_REMOVE_TOP_MSG_OFFSET 0xb725a0
 #define WX_FREE_CHAT_MSG_INSTANCE_COUNTER_OFFSET  0x6f5370
+#define WX_GET_MEMBER_NICKNAME_OFFSET  0xb703f0
+#define WX_CONTACT_MGR_INSTANCE_OFFSET 0x6f8990
+#define WX_GET_CONTACT_OFFSET  0xb93b20
+#define WX_FREE_CONTACT_OFFSET  0xe23690
 
 int GetChatRoomDetailInfo(wchar_t* chat_room_id, ChatRoomInfoInner& room_info) {
   int success = 0;
@@ -352,4 +356,63 @@ int RemoveTopMsg(wchar_t* chat_room_id,ULONG64 msg_id){
   }
 
   return success;
+}
+
+
+
+std::wstring GetChatRoomMemberNickname(wchar_t* chat_room_id,wchar_t* wxid){
+  WeChatString chat_room(chat_room_id);
+  WeChatString member_id(wxid);
+  WeChatString nickname(NULL);
+  DWORD base = GetWeChatWinBase();
+  DWORD get_chat_room_mgr_addr = base + WX_CHAT_ROOM_MGR_OFFSET;
+  DWORD get_nickname_addr = base + WX_GET_MEMBER_NICKNAME_OFFSET;
+  DWORD contact_mgr_addr = base + WX_CONTACT_MGR_INSTANCE_OFFSET;
+  DWORD get_contact_addr = base + WX_GET_CONTACT_OFFSET;
+  DWORD free_contact_addr = base + WX_FREE_CONTACT_OFFSET;
+  __asm{
+    PUSHAD
+    PUSHFD
+    CALL       get_chat_room_mgr_addr                                   
+    LEA        ECX,nickname
+    PUSH       ECX
+    LEA        ECX,member_id
+    PUSH       ECX
+    LEA        ECX,chat_room
+    PUSH       ECX
+    MOV        ECX,EAX
+    CALL       get_nickname_addr                            
+    POPFD
+    POPAD
+  }
+  wstring name = L"";
+  if (nickname.ptr) {
+    name += wstring(nickname.ptr);
+  }else {
+    char buff[0x440] = {0};
+    __asm {
+      PUSHAD
+      PUSHFD
+      CALL       contact_mgr_addr                                   
+      LEA        ECX,buff
+      PUSH       ECX
+      LEA        ECX,member_id
+      PUSH       ECX
+      MOV        ECX,EAX
+      CALL       get_contact_addr                            
+      POPFD
+      POPAD
+    }
+    name += READ_WSTRING(buff, 0x6C);
+
+    __asm{
+      PUSHAD
+      PUSHFD
+      LEA        ECX,buff
+      CALL       free_contact_addr    
+      POPFD
+      POPAD
+    }
+  }
+  return name;
 }

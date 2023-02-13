@@ -355,6 +355,12 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       break;
     }
     case WECHAT_CHATROOM_GET_MEMBER_NICKNAME: {
+      wstring room_id = get_http_req_param(hm, j_param, "chatRoomId", is_post);
+      wstring member_id = get_http_req_param(hm, j_param, "memberId", is_post);
+      
+      wstring nickname = GetChatRoomMemberNickname(WS2LW(room_id),WS2LW(member_id));
+      json ret_data = {{"code", 1}, {"result", "OK"},{"nickname",unicode_to_utf8(WS2LW(nickname))}};
+      ret = ret_data.dump();
       break;
     }
     case WECHAT_CHATROOM_DEL_MEMBER: {
@@ -598,10 +604,17 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       ret = ret_data.dump();
       break;
     }
-     case WECHAT_SNS_GET_NEXT_PAGE:{
+    case WECHAT_SNS_GET_NEXT_PAGE: {
       ULONG64 snsid = get_http_param_ulong64(hm, j_param, "snsId", is_post);
       int success = GetNextPage(snsid);
       json ret_data = {{"code", success}, {"result", "OK"}};
+      ret = ret_data.dump();
+      break;
+    }
+    case WECHAT_CONTACT_NAME:{
+      wstring pri_id = get_http_req_param(hm, j_param, "id", is_post);
+      wstring name =GetContactOrChatRoomNickname(WS2LW(pri_id));
+      json ret_data = {{"code", 1}, {"result", "OK"},{"name",unicode_to_utf8(WS2LW(name))}};
       ret = ret_data.dump();
       break;
     }
