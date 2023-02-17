@@ -116,6 +116,7 @@ vcpkg
 11.hook图片  
 12.取消hook图片  
 17.删除好友       
+19.通过手机或qq查找微信
 20.通过wxid添加好友   
 25.获取群成员  
 26.获取群成员昵称  
@@ -508,6 +509,65 @@ vcpkg
 {"code":0,"result":"OK"}
 ```
 
+#### 19.通过手机或qq查找微信**
+###### 接口功能
+> 通过手机或qq查找微信
+
+###### 接口地址
+> [/api/?type=19](/api/?type=19)
+
+###### HTTP请求方式
+> POST  JSON
+
+###### 请求参数
+|参数|必选|类型|说明|
+|---|---|---|---|
+|keyword |true |string| 手机或qq |
+
+
+###### 返回字段
+|返回字段|字段类型|说明                              |
+|---|---|---|
+|code|int|返回状态,1成功, -1失败|
+|result|string|成功提示|
+|userInfo|object|用户信息|
+|&#8194;&#8194;bigImage|string|大头像|
+|&#8194;&#8194;smallImage|string|小头像|
+|&#8194;&#8194;city|string|城市|
+|&#8194;&#8194;nation|string|民族|
+|&#8194;&#8194;nickname|string|昵称|
+|&#8194;&#8194;province|string|省|
+|&#8194;&#8194;sex|number|性别|
+|&#8194;&#8194;signature|string|签名|
+|&#8194;&#8194;v2|string|v2|
+|&#8194;&#8194;v3|string|v3|
+
+###### 接口示例
+入参：
+``` javascript
+{
+    "keyword":"131111111"
+}
+```
+响应：
+``` javascript
+{
+  "code": 1,
+  "result": "OK",
+  "userInfo": {
+    "bigImage": "http://wx.qlogo.cn/mmhead/ver_1/7NIHQAyXeaAPa7Vd7p122mKxgETJwoAiaERdk1sSyOyfnLLQOfElw4G9I32QkZzh7bGfZr2lg0OIQE1Az3cUwtWaLUM79Q/0",
+    "city": "",
+    "nation": "",
+    "nickname": "昵称",
+    "province": "",
+    "sex": 0,
+    "signature": "",
+    "smallImage": "http://wx.qlogo.cn/mmhead/ver_1/7NIHQAyXeaAPa7Vd7p4KR3vxiasmKxgETJwoAiaER23QE6G5mLBcdBQkZzh7bGfZr2lg0OIQE1Az3cUwtWaLUM79Q/132",
+    "v2": "wxid_12333",
+    "v3": "v3_020b3826fd0301000000000098ca23832239a3dba12f95f6b60a0536a1adb6b40fc4086288f46c0b89e6c4eb70c34f118c7b4b6a6845144843b088f0077e406507f821068571289b36c4158a8ac47ec41ae47bee65e9@stranger"
+  }
+}
+```
 
 
     

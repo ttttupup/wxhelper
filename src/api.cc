@@ -22,6 +22,7 @@
 #include "pat.h"
 #include "confirm_receipt.h"
 #include "sns.h"
+#include "search_contact.h"
 
 #pragma comment(lib, "ws2_32.lib")
 using namespace std;
@@ -321,6 +322,26 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       break;
     }
     case WECHAT_CONTACT_SEARCH_BY_NET: {
+      wstring keyword = get_http_req_param(hm, j_param, "keyword", is_post);
+      UserInfo *user = nullptr;
+      int success = SearchContactNetScene(WS2LW(keyword), &user);
+      json ret_data = {{"code", success}, {"result", "OK"}};
+      if (user) {
+        json info = {
+            {"bigImage", unicode_to_utf8(user->big_image)},
+            {"smallImage", unicode_to_utf8(user->small_image)},
+            {"city", unicode_to_utf8(user->city)},
+            {"nation", unicode_to_utf8(user->nation)},
+            {"nickname", unicode_to_utf8(user->nickname)},
+            {"province", unicode_to_utf8(user->province)},
+            {"sex", user->sex},
+            {"signature", unicode_to_utf8(user->signature)},
+            {"v2", unicode_to_utf8(user->v2)},
+            {"v3", unicode_to_utf8(user->v3)},
+        };
+        ret_data["userInfo"] = info;
+      }
+      ret = ret_data.dump();
       break;
     }
     case WECHAT_CONTACT_ADD_BY_WXID: {
@@ -681,5 +702,21 @@ int http_start(int port) {
   kHttpRuning = true;
   kHttpThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)http_server,
                              (LPVOID)port, NULL, 0);
+  return 0;
+}
+
+int http_close() {
+  if (!kHttpRuning) {
+    return 1;
+  }
+  kHttpRuning = false;
+  if (kHttpThread) {
+    WaitForSingleObject(kHttpThread, -1);
+    CloseHandle(kHttpThread);
+    kHttpThread = NULL;
+  }
+  UnHookRecvMsg();
+  UnHookImg();
+  UnHookSearchContact();
   return 0;
 }

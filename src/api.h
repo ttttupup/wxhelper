@@ -74,5 +74,6 @@ typedef enum WECHAT_HTTP_APISTag
     *PWECHAT_HTTP_APIS;
 
 
-int http_start(int port);
+extern "C" __declspec(dllexport) int http_start(int port);
+extern "C" __declspec(dllexport) int http_close();
 #endif

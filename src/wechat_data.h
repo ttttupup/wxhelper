@@ -155,4 +155,30 @@ struct SelfInfoInner{
   std::string data_save_path;
   std::string current_data_path;
 };
+
+struct UserInfo {
+  int error_code;
+  wchar_t *keyword;
+  int keyword_len;
+  wchar_t *v3;
+  int v3_len;
+  wchar_t *nickname;
+  int nickname_len;
+  wchar_t *signature;
+  int signature_len;
+  wchar_t *v2;
+  int v2_len;
+  wchar_t *nation;
+  int nation_len;
+  wchar_t *province;
+  int province_len;
+  wchar_t *city;
+  int city_len;
+  wchar_t *big_image;
+  int big_image_len;
+  wchar_t *small_image;
+  int small_image_len;
+  DWORD sex;
+  BOOL over;
+};
 #endif
