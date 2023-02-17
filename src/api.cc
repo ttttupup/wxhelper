@@ -324,6 +324,10 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       break;
     }
     case WECHAT_CONTACT_ADD_BY_WXID: {
+      wstring user_id = get_http_req_param(hm, j_param, "wxid", is_post);
+      int success = AddFriendByWxid(WS2LW(user_id));
+      json ret_data = {{"code", success}, {"result", "OK"}};
+      ret = ret_data.dump();
       break;
     }
     case WECHAT_CONTACT_ADD_BY_V3: {

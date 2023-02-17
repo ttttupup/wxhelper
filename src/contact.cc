@@ -13,6 +13,7 @@ using namespace std;
 #define WX_DO_DEL_CONTACT_OFFSET 0xca6480
 #define WX_FREE_CONTACT_OFFSET  0xe23690
 #define WX_GET_CONTACT_OFFSET  0xb93b20
+#define WX_DO_VERIFY_USER_OFFSET  0xB91160
 
 int GetAllContact(vector<Contact> &vec) {
   DWORD base = GetWeChatWinBase();
@@ -135,4 +136,57 @@ std::wstring GetContactOrChatRoomNickname(wchar_t *id) {
       POPAD
     }
     return name;
+}
+
+
+int AddFriendByWxid(wchar_t *wxid){
+  int success = -1;
+  DWORD base = GetWeChatWinBase();
+  DWORD contact_mgr_addr = base + WX_CONTACT_MGR_INSTANCE_OFFSET;
+  DWORD set_group_addr = base + 0x746E20;
+  DWORD fn2_addr = base + 0x285D968;
+  DWORD fn3_addr = base + 0x6F6050;
+  DWORD fn4_addr = base + 0xED3BE0;
+  DWORD do_verify_user_addr = base + WX_DO_VERIFY_USER_OFFSET;
+
+  DWORD instance =0;
+  WeChatString chat_room(NULL);
+  WeChatString user_id(wxid);
+  __asm{
+    PUSHAD
+    PUSHFD
+    CALL        contact_mgr_addr    
+    SUB         ESP,0x18                                     
+    MOV         dword ptr [instance],EAX                  
+    MOV         ECX,ESP                                    
+    PUSH        ECX                                       
+    LEA         ECX,chat_room                  
+    CALL        set_group_addr 
+    MOV         EAX,fn2_addr                     
+    SUB         ESP,0x18                                     
+    MOV         ECX,ESP                                    
+    PUSH        EAX                                       
+    CALL        fn3_addr                       
+    PUSH        0x0                                         
+    PUSH        0XE                    
+    SUB         ESP,0x14                                     
+    MOV         ESI,ESP                                    
+    MOV         dword ptr [ESI],0x0                       
+    MOV         dword ptr [ESI+0x4],0x0                     
+    MOV         dword ptr [ESI+0x8],0x0                     
+    MOV         dword ptr [ESI+0xC],0x0                     
+    MOV         dword ptr [ESI+0x10],0x0                                      
+    PUSH        0x1                                         
+    SUB         ESP,0x14                                     
+    MOV         ECX,ESP      
+    LEA         EAX,user_id                              
+    PUSH        EAX                   
+    CALL        fn4_addr                        
+    MOV         ECX,dword ptr [instance]                  
+    CALL        do_verify_user_addr            
+    MOV         success,EAX         
+    POPFD
+    POPAD
+  }
+  return success;
 }
