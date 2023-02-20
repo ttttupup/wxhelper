@@ -97,10 +97,15 @@ int Select(DWORD db_hanle, const char *sql,
   if (status == 0) {
     return 0;
   }
+  if(data.size() == 0){
+    return 1;
+  }
   vector<string> index;
-  for (size_t i = 0; i < data[0].size(); i++)
+  for (size_t i = 0; i < data[0].size(); i++){
     index.push_back(data[0][i].column_name);
+  }
   query_result.push_back(index);
+ 
   for (auto it : data) {
     vector<string> item;
     for (size_t i = 0; i < it.size(); i++) {
