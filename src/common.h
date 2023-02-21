@@ -53,6 +53,7 @@ std::string Wstring2String(std::wstring wstr);
 /// @return 
 BOOL FindOrCreateDirectoryW(const wchar_t *path);
 
+void CloseConsole();
 
 template <typename T1, typename T2>
 std::vector<T1> split(T1 str, T2 letter) {

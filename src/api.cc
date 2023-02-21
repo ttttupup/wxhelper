@@ -701,7 +701,7 @@ int http_start(int port) {
   #endif
   kHttpRuning = true;
   kHttpThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)http_server,
-                             (LPVOID)port, NULL, 0);
+                              (LPVOID)port, NULL, 0);
   return 0;
 }
 

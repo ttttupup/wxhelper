@@ -136,3 +136,10 @@ BOOL FindOrCreateDirectoryW(const wchar_t *path) {
   }
   return true;
 }
+
+void CloseConsole(){
+  fclose(stdin);
+  fclose(stdout);
+  fclose(stderr);
+  FreeConsole();
+}
