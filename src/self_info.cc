@@ -21,123 +21,140 @@ using namespace std;
 #define WX_CURRENT_DATA_PATH_OFFSET 0x2E4F290
 
 #define WX_LOGOUT_OFFSET  0xdd5c90
-#define WX_ACCOUT_SERVICE_OFFSET 0x707960
-
+#define WX_ACCOUNT_SERVICE_OFFSET 0x707960
+#define WX_GET_APP_DATA_SAVE_PATH_OFFSET 0xeb4b00
+#define WX_GET_CURRENT_DATA_PATH_OFFSET   0xc11140
 int GetSelfInfo(SelfInfoInner &out) {
   DWORD base = GetWeChatWinBase();
-#ifdef _DEBUG
-  cout << "mobile:" << (char *)(base + WX_SELF_MOBILE_OFFSET) << endl;
-  cout << "name:" << (char *)(base + WX_SELF_NAME_OFFSET) << endl;
-  cout << "city:" << (char *)(base + WX_SELF_CITY_OFFSET) << endl;
-  cout << "city:" << (char *)(base + WX_SELF_CITY_OFFSET) << endl;
-  cout << "province:" << (char *)(base + WX_SELF_PROVINCE_OFFSET) << endl;
-  cout << "country:" << (char *)(base + WX_SELF_COUNTRY_OFFSET) << endl;
-  cout << "account:" << (char *)(base + WX_SELF_ACCOUNT_OFFSET) << endl;
-  cout << "wxid:" << (char *)(base + WX_SELF_ID_OFFSET) << endl;
-  cout << "small_img:" << (char *)(base + WX_SELF_SMALL_IMG_OFFSET) << endl;
-  cout << "big_img:" << (char *)(base + WX_SELF_BIG_IMG_OFFSET) << endl;
-#endif
-  if (*(DWORD *)(base + WX_SELF_NAME_OFFSET) == 0 ||
-      *(DWORD *)(base + WX_SELF_NAME_OFFSET + 0x10) == 0) {
-    out.name = string();
-  } else {
-    out.name = string((char *)(base + WX_SELF_NAME_OFFSET),
-                      *(DWORD *)(base + WX_SELF_NAME_OFFSET + 0x10));
+  DWORD accout_service_addr = base + WX_ACCOUNT_SERVICE_OFFSET;
+  DWORD get_app_save_addr = base + WX_GET_APP_DATA_SAVE_PATH_OFFSET;
+  DWORD get_current_data_path_addr = base + WX_GET_CURRENT_DATA_PATH_OFFSET;
+  DWORD service_addr = NULL;
+  __asm {
+      PUSHAD 
+      CALL       accout_service_addr                          
+      MOV        service_addr,EAX
+      POPAD
   }
-  if (*(DWORD *)(base + WX_SELF_MOBILE_OFFSET) == 0 ||
-      *(DWORD *)(base + WX_SELF_MOBILE_OFFSET + 0x10) == 0) {
-    out.mobile = string();
-  } else {
-    out.mobile = string((char *)(base + WX_SELF_MOBILE_OFFSET),
-                       *(DWORD *)(base + WX_SELF_MOBILE_OFFSET + 0x10));
+  if (service_addr) {
+    if (*(DWORD *)(service_addr + 0x44) == 0 ||
+        *(DWORD *)(service_addr + 0x44 + 0x10) == 0) {
+      out.wxid = string();
+    } else {
+      out.wxid = string(*(char **)(service_addr + 0x44),
+                        *(DWORD *)(service_addr + 0x44 + 0x10));
+    }
+
+    if (*(DWORD *)(service_addr + 0xA8) == 0 ||
+        *(DWORD *)(service_addr + 0xA8 + 0x10) == 0) {
+      out.account = string();
+    } else {
+      out.account = string(*(char **)(service_addr + 0xA8),
+                           *(DWORD *)(service_addr + 0xA8 + 0x10));
+    }
+
+    if (*(DWORD *)(service_addr + 0xC0) == 0 ||
+        *(DWORD *)(service_addr + 0xC0 + 0x10) == 0) {
+      out.mobile = string();
+    } else {
+      out.mobile = string((char *)(service_addr + 0xC0),
+                          *(DWORD *)(service_addr + 0xC0 + 0x10));
+    }
+
+    if (*(DWORD *)(service_addr + 0xD8) == 0 ||
+        *(DWORD *)(service_addr + 0xD8 + 0x10) == 0) {
+      out.signature = string();
+    } else {
+      out.signature = string((char *)(service_addr + 0xD8),
+                             *(DWORD *)(service_addr + 0xD8 + 0x10));
+    }
+
+    if (*(DWORD *)(service_addr + 0xF0) == 0 ||
+        *(DWORD *)(service_addr + 0xF0 + 0x10) == 0) {
+      out.country = string();
+    } else {
+      out.country = string((char *)(service_addr + 0xF0),
+                           *(DWORD *)(service_addr + 0xF0 + 0x10));
+    }
+
+    if (*(DWORD *)(service_addr + 0x108) == 0 ||
+        *(DWORD *)(service_addr + 0x108 + 0x10) == 0) {
+      out.province = string();
+    } else {
+      out.province = string((char *)(service_addr + 0x108),
+                            *(DWORD *)(service_addr + 0x108 + 0x10));
+    }
+
+    if (*(DWORD *)(service_addr + 0x120) == 0 ||
+        *(DWORD *)(service_addr + 0x120 + 0x10) == 0) {
+      out.city = string();
+    } else {
+      out.city = string((char *)(service_addr + 0x120),
+                        *(DWORD *)(service_addr + 0x120 + 0x10));
+    }
+
+    if (*(DWORD *)(service_addr + 0x150) == 0 ||
+        *(DWORD *)(service_addr + 0x150 + 0x10) == 0) {
+      out.name = string();
+    } else {
+      out.name = string((char *)(service_addr + 0x150),
+                        *(DWORD *)(service_addr + 0x150 + 0x10));
+    }
+
+    if (*(DWORD *)(service_addr + 0x304) == 0 ||
+        *(DWORD *)(service_addr + 0x304 + 0x10) == 0) {
+      out.head_img = string();
+    } else {
+      out.head_img = string(*(char **)(service_addr + 0x304),
+                            *(DWORD *)(service_addr + 0x304 + 0x10));
+    }
   }
 
-  if (*(DWORD *)(base + WX_SELF_CITY_OFFSET) == 0 ||
-      *(DWORD *)(base + WX_SELF_CITY_OFFSET + 0x10) == 0) {
-    out.city = string();
-  } else {
-    out.city = string((char *)(base + WX_SELF_CITY_OFFSET),
-                      *(DWORD *)(base + WX_SELF_CITY_OFFSET + 0x10));
+  WeChatString data_save_path;
+  WeChatString current_data_path;
+
+  __asm {
+      PUSHAD
+      LEA     ECX,data_save_path
+      CALL    get_app_save_addr
+      LEA     ECX,current_data_path
+      CALL    get_current_data_path_addr
+      POPAD
   }
 
-  if (*(DWORD *)(base + WX_SELF_PROVINCE_OFFSET) == 0 ||
-      *(DWORD *)(base + WX_SELF_PROVINCE_OFFSET + 0x10) == 0) {
-    out.province = string();
-  } else {
-    out.province = string((char *)(base + WX_SELF_PROVINCE_OFFSET),
-                          *(DWORD *)(base + WX_SELF_PROVINCE_OFFSET + 0x10));
-  }
-
-  if (*(DWORD *)(base + WX_SELF_COUNTRY_OFFSET) == 0 ||
-      *(DWORD *)(base + WX_SELF_COUNTRY_OFFSET + 0x10) == 0) {
-    out.country = string();
-  } else {
-    out.country = string((char *)(base + WX_SELF_COUNTRY_OFFSET),
-                         *(DWORD *)(base + WX_SELF_COUNTRY_OFFSET + 0x10));
-  }
-
-  if (*(DWORD *)(base + WX_SELF_ACCOUNT_OFFSET) == 0 ||
-      *(DWORD *)(base + WX_SELF_ACCOUNT_OFFSET + 0x10) == 0) {
-    out.account = string();
-  } else {
-    out.account = string(*(char **)(base + WX_SELF_ACCOUNT_OFFSET),
-                         *(DWORD *)(base + WX_SELF_ACCOUNT_OFFSET + 0x10));
-  }
-
-  if (*(DWORD *)(base + WX_SELF_ID_OFFSET) == 0 ||
-      *(DWORD *)(base + WX_SELF_ID_OFFSET + 0x10) == 0) {
-    out.wxid = string();
-  } else {
-    out.wxid = string(*(char **)(base + WX_SELF_ID_OFFSET),
-                      *(DWORD *)(base + WX_SELF_ID_OFFSET + 0x10));
-  }
-
-  if (*(DWORD *)(base + WX_SELF_SMALL_IMG_OFFSET) == 0 ||
-      *(DWORD *)(base + WX_SELF_SMALL_IMG_OFFSET + 0x10) == 0) {
-    out.small_img = string();
-  } else {
-    out.small_img = string(*(char **)(base + WX_SELF_SMALL_IMG_OFFSET),
-                           *(DWORD *)(base + WX_SELF_SMALL_IMG_OFFSET + 0x10));
-  }
-
-  if (*(DWORD *)(base + WX_SELF_BIG_IMG_OFFSET) == 0 ||
-      *(DWORD *)(base + WX_SELF_BIG_IMG_OFFSET + 0x10) == 0) {
-    out.big_img = string();
-  } else {
-    out.big_img = string(*(char **)(base + WX_SELF_BIG_IMG_OFFSET),
-                         *(DWORD *)(base + WX_SELF_BIG_IMG_OFFSET + 0x10));
-  }
-
-  if (*(DWORD *)(base + WX_APP_DATA_ROOT_PATH_OFFSET) == 0 ||
-      *(DWORD *)(base + WX_APP_DATA_ROOT_PATH_OFFSET + 0x4) == 0) {
-    out.data_root_path = string();
-  } else {
-    out.data_root_path = Wstring2String(wstring(*(wchar_t **)(base + WX_APP_DATA_ROOT_PATH_OFFSET),
-                         *(DWORD *)(base + WX_APP_DATA_ROOT_PATH_OFFSET + 0x4)));
-  }
-
-  if (*(DWORD *)(base + WX_APP_DATA_SAVE_PATH_OFFSET) == 0 ||
-      *(DWORD *)(base + WX_APP_DATA_SAVE_PATH_OFFSET + 0x4) == 0) {
+  if (data_save_path.ptr) {
+    out.data_save_path =
+        Wstring2String(wstring(data_save_path.ptr, data_save_path.length));
+  }else {
     out.data_save_path = string();
-  } else {
-    out.data_save_path = Wstring2String(wstring(*(wchar_t **)(base + WX_APP_DATA_SAVE_PATH_OFFSET),
-                         *(DWORD *)(base + WX_APP_DATA_SAVE_PATH_OFFSET + 0x4)));
-  }
-  if (*(DWORD *)(base + WX_CURRENT_DATA_PATH_OFFSET) == 0 ||
-      *(DWORD *)(base + WX_CURRENT_DATA_PATH_OFFSET + 0x4) == 0) {
-    out.current_data_path = string();
-  } else {
-    out.current_data_path = Wstring2String(wstring(*(wchar_t **)(base + WX_CURRENT_DATA_PATH_OFFSET),
-                         *(DWORD *)(base + WX_CURRENT_DATA_PATH_OFFSET + 0x4)));
   }
 
+    if (current_data_path.ptr) {
+    out.current_data_path =
+        Wstring2String(wstring(current_data_path.ptr, current_data_path.length));
+  }else {
+    out.current_data_path = string();
+  }
   return 1;
 }
 
 
 int CheckLogin(){
   DWORD base = GetWeChatWinBase();
-  return *(DWORD*) (base + WX_LOGIN_STATUS_OFFSET);
+  DWORD accout_service_addr = base + WX_ACCOUNT_SERVICE_OFFSET;
+  DWORD service_addr = NULL;
+  __asm {
+      PUSHAD 
+      CALL       accout_service_addr                          
+      MOV        service_addr,EAX
+      POPAD
+  }
+  if (service_addr) {
+    return *(DWORD *)(service_addr + 0x4C8);
+  }
+  else {
+    return 0;
+  }
 }
 
 
@@ -147,7 +164,7 @@ int Logout(){
     return success;
   }
   DWORD base = GetWeChatWinBase();
-  DWORD account_service_addr = base + WX_ACCOUT_SERVICE_OFFSET;
+  DWORD account_service_addr = base + WX_ACCOUNT_SERVICE_OFFSET;
   DWORD logout_addr = base + WX_LOGOUT_OFFSET;
   __asm{
     PUSHAD

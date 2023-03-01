@@ -221,9 +221,8 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
             {"account", self_info.account},
             {"wxid", self_info.wxid},
             {"mobile", self_info.mobile},
-            {"smallImage", self_info.small_img},
-            {"bigImage", self_info.big_img},
-            {"dataRootPath",self_info.data_root_path},
+            {"headImage", self_info.head_img},
+            {"signature",self_info.signature},
             {"dataSavePath",self_info.data_save_path},
             {"currentDataPath",self_info.current_data_path},
         };

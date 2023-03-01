@@ -149,10 +149,9 @@ struct SelfInfoInner{
   std::string account;
   std::string wxid;
   std::string mobile;
-  std::string  small_img;
-  std::string big_img;
-  std::string data_root_path;
+  std::string head_img;
   std::string data_save_path;
+  std::string signature;
   std::string current_data_path;
 };
 

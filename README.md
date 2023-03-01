@@ -197,17 +197,16 @@ vcpkg
 |result|string|成功提示|
 |data|object|响应内容|
 |account|string|账号|
-|bigImage|string|头像大图|
+|headImage|string|头像|
 |city|string|城市|
 |country|string|国家|
-|currentDataPath|string|当前数据目录|
-|dataRootPath|string|根目录|
-|dataSavePath|string|保存目录|
+|currentDataPath|string|当前数据目录,登录的账号目录|
+|dataSavePath|string|微信保存目录|
 |mobile|string|手机|
 |name|string|昵称|
 |province|string|省|
-|smallImage|string|小头像|
 |wxid|string|wxid|
+|signature|string|个人签名|
 
 ###### 接口示例
 入参：
@@ -215,7 +214,7 @@ vcpkg
 ```
 响应：
 ``` javascript
-{"code":1,"data":{"account":"xx","bigImage":"https://wx.qlogo.cn/mmhead/ver_1xx","city":"xx","country":"CN","currentDataPath":"xxx","dataRootPath":"C:\\xx","dataSavePath":"C:\\xx","mobie":"13949175447","name":"xx","province":"xx","smallImage":"xx","wxid":"xx"},"result":"OK"}
+{"code":1,"data":{"account":"xx","headImage":"https://wx.qlogo.cn/mmhead/ver_1xx","city":"xx","country":"CN","currentDataPath":"C:\\xx\\wxid_xxxxx","dataSavePath":"C:\\xx","mobie":"13812345678","name":"xx","province":"xx","signature":"xx","wxid":"xx"},"result":"OK"}
 ```
 
 
