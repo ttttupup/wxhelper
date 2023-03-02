@@ -240,6 +240,16 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       break;
     }
     case WECHAT_MSG_SEND_AT: {
+      wstring chat_room_id = get_http_req_param(hm, j_param, "chatRoomId", is_post);
+      vector<wstring> wxids = get_http_param_array(hm, j_param, "wxids", is_post);
+      wstring msg = get_http_req_param(hm, j_param, "msg", is_post);
+      vector<wchar_t *> wxid_list;
+      for (unsigned int i = 0; i < wxids.size(); i++){
+        wxid_list.push_back(WS2LW(wxids[i]));
+      }
+      int success = SendAtText(WS2LW(chat_room_id), wxid_list.data(), wxid_list.size(),WS2LW(msg));
+      json ret_data = {{"code", success}, {"result", "OK"}};
+      ret = ret_data.dump();
       break;
     }
     case WECHAT_MSG_SEND_CARD: {

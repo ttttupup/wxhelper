@@ -259,6 +259,47 @@ vcpkg
 
 
 
+#### 3.发送@文本消息**
+###### 接口功能
+> 发送@文本消息
+
+###### 接口地址
+> [/api/?type=3](/api/?type=3)
+
+###### HTTP请求方式
+> POST  JSON
+
+###### 请求参数
+|参数|必选|类型|说明|
+|---|---|---|---|
+|chatRoomId |true |string| 群id |
+|msg|true |string|消息文本内容|  
+|wxids |true |string| @的用户微信id用,号分隔， @所有人 传 notify@all ，区分大小写 |  
+
+###### 返回字段
+|返回字段|字段类型|说明                              |
+|---|---|---|
+|code|int|返回状态,不为0成功, 0失败|
+|result|string|成功提示|
+
+
+###### 接口示例
+
+入参：
+``` javascript
+{
+    "chatRoomId": "123333@chatroom",
+    "wxids":"notify@all,wxid_122221",
+    "msg": "12333"
+}
+```
+响应：
+``` javascript
+{"code":345686720,"result":"OK"}
+```
+
+
+
 #### 5.发送图片消息**
 ###### 接口功能
 > 发送图片消息

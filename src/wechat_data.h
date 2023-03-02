@@ -180,4 +180,10 @@ struct UserInfo {
   DWORD sex;
   BOOL over;
 };
+
+struct AtInner{
+  DWORD start;
+  DWORD finsh;
+  DWORD end;
+};
 #endif
