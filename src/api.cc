@@ -23,6 +23,7 @@
 #include "confirm_receipt.h"
 #include "sns.h"
 #include "search_contact.h"
+#include "download.h"
 
 #pragma comment(lib, "ws2_32.lib")
 using namespace std;
@@ -649,6 +650,13 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       wstring pri_id = get_http_req_param(hm, j_param, "id", is_post);
       wstring name =GetContactOrChatRoomNickname(WS2LW(pri_id));
       json ret_data = {{"code", 1}, {"result", "OK"},{"name",unicode_to_utf8(WS2LW(name))}};
+      ret = ret_data.dump();
+      break;
+    }
+    case WECHAT_ATTACH_DOWNLOAD:{
+      ULONG64 msg_id = get_http_param_ulong64(hm, j_param, "msgId", is_post);
+      int success = DoDownloadTask(msg_id);
+      json ret_data = {{"code", success}, {"result", "OK"}};
       ret = ret_data.dump();
       break;
     }
