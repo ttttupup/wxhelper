@@ -125,6 +125,8 @@ vcpkg
 31.修改群昵称  
 32.获取数据库句柄     
 34.查询数据库    
+35.hook日志   
+36.关闭hook日志    
 40.转发消息     
 44.退出登录  
 45.确认收款  
@@ -941,6 +943,73 @@ vcpkg
 {"code":1,"data":[["localId","TalkerId","MsgSvrID","Type","SubType","IsSender","CreateTime","Sequence","StatusEx","FlagEx","Status","MsgServerSeq","MsgSequence","StrTalker","StrContent","DisplayContent","Reserved0","Reserved1","Reserved2","Reserved3","Reserved4","Reserved5","Reserved6","CompressContent","BytesExtra","BytesTrans"],["6346","24","8985035417589024392","1","0","0","1670897832","1670897832000","0","0","2","1","778715089","wxid_1222","112","","0","2","","","","","","","CgQIEBAAGkEIBxI9PG1zZ3NvdXJjZT4KCTxzaWduYXR1cmU+djFfSFFyeVAwZTE8L3NpZ25hdHVyZT4KPC9tc2dzb3VyY2U+ChokCAISIDU5NjI1NjUxNWE0YzU2ZDQxZDJlOWMyYmIxMjFhNmZl",""]],"result":"OK"}
 ```
 
+
+
+#### 35.hook日志**
+###### 接口功能
+> hook微信日志，在控制台打印日志，方便调试
+
+###### 接口地址
+> [/api/?type=35](/api/?type=35)
+
+###### HTTP请求方式
+> POST  JSON
+
+###### 请求参数
+|参数|必选|类型|说明|
+|---|---|---|---|
+
+
+###### 返回字段
+|返回字段|字段类型|说明                              |
+|---|---|---|
+|code|int|返回状态,1成功, 0失败|
+|result|string|成功提示|
+
+
+###### 接口示例
+入参：
+``` javascript
+
+```
+响应：
+``` javascript
+{"code":1,"result":"OK"}
+```
+
+
+#### 36.取消hook日志**
+###### 接口功能
+> 取消hook日志
+
+###### 接口地址
+> [/api/?type=36](/api/?type=36)
+
+###### HTTP请求方式
+> POST  JSON
+
+###### 请求参数
+|参数|必选|类型|说明|
+|---|---|---|---|
+
+
+
+###### 返回字段
+|返回字段|字段类型|说明                              |
+|---|---|---|
+|code|int|返回状态,1成功, 0失败|
+|result|string|成功提示|
+
+
+###### 接口示例
+入参：
+``` javascript
+
+```
+响应：
+``` javascript
+{"code":1,"result":"OK"}
+```
 
 #### 40.转发消息**
 ###### 接口功能

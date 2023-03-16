@@ -742,5 +742,6 @@ int http_close() {
   UnHookRecvMsg();
   UnHookImg();
   UnHookSearchContact();
+  UnHookLog();
   return 0;
 }
