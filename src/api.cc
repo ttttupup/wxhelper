@@ -24,6 +24,7 @@
 #include "sns.h"
 #include "search_contact.h"
 #include "download.h"
+#include "hook_log.h"
 
 #pragma comment(lib, "ws2_32.lib")
 using namespace std;
@@ -486,9 +487,15 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       break;
     }
     case WECHAT_LOG_START_HOOK: {
+      int success = HookLog();
+      json ret_data = {{"code", success}, {"result", "OK"}};
+      ret = ret_data.dump();
       break;
     }
     case WECHAT_LOG_STOP_HOOK: {
+      int success = UnHookLog();
+      json ret_data = {{"code", success}, {"result", "OK"}};
+      ret = ret_data.dump();
       break;
     }
     case WECHAT_BROWSER_OPEN_WITH_URL: {
