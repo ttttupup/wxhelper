@@ -25,6 +25,7 @@
 #include "search_contact.h"
 #include "download.h"
 #include "hook_log.h"
+#include "hook_voice.h"
 
 #pragma comment(lib, "ws2_32.lib")
 using namespace std;
@@ -310,9 +311,16 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       break;
     }
     case WECHAT_MSG_START_VOICE_HOOK: {
+      wstring voice_dir = get_http_req_param(hm, j_param, "voiceDir", is_post);
+      int success = HookVoice(voice_dir);
+      json ret_data = {{"code", success}, {"result", "OK"}};
+      ret = ret_data.dump(); 
       break;
     }
     case WECHAT_MSG_STOP_VOICE_HOOK: {
+      int success = UnHookVoice();
+      json ret_data = {{"code", success}, {"result", "OK"}};
+      ret = ret_data.dump();
       break;
     }
     case WECHAT_CONTACT_GET_LIST: {
