@@ -6,11 +6,11 @@
 #include "wechat_data.h"
 #include "contact.h"
 
-#define WX_SEND_TEXT_OFFSET 0xc71a60
+#define WX_SEND_TEXT_OFFSET 0xce6c80
 
-#define WX_SEND_MESSAGE_MGR_OFFSET 0x706d30
+#define WX_SEND_MESSAGE_MGR_OFFSET 0x768140
 
-#define WX_FREE_CHAT_MSG_OFFSET 0x6f4ea0
+#define WX_FREE_CHAT_MSG_OFFSET 0x756960
 using namespace std;
 /// @brief ÂèëÁîüÊñáÊú¨Ê∂àÊÅØ
 /// @param wxid wxid
@@ -26,7 +26,7 @@ int  SendText(wchar_t* wxid, wchar_t* msg) {
   DWORD send_message_mgr_addr = base + WX_SEND_MESSAGE_MGR_OFFSET;
   DWORD send_text_msg_addr = base + WX_SEND_TEXT_OFFSET;
   DWORD free_chat_msg_addr = base + WX_FREE_CHAT_MSG_OFFSET;
-  char chat_msg[0x2C4] ={0};
+  char chat_msg[0x2D8] ={0};
   __asm{
       PUSHAD
       CALL       send_message_mgr_addr
@@ -59,7 +59,7 @@ int SendAtText(wchar_t* chat_room_id,wchar_t** wxids,int len,wchar_t* msg){
   for (int i = 0; i < len; i++) {
     wstring nickname;
     if (!lstrcmpiW((wchar_t *)wxids[i], (wchar_t *)L"notify@all")) {
-      nickname = L"À˘”–»À";
+      nickname = L"ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ";
     } else {
       nickname = GetContactOrChatRoomNickname(wxids[i]);
     }
