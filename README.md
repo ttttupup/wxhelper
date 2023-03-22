@@ -91,12 +91,15 @@ vcpkg
     //-i  注入程序名   -p 注入dll路径   
     // -u 卸载程序名   -d 卸载dll名称
     // -m pid  关闭微信互斥体，多开微信
+    // -P port 指定http端口，需要使用 specify-port 分支的生成的dll
     //注入  
     ConsoleInject.exe  -i demo.exe -p E:\testInject.dll
     //卸载 
     ConsoleInject.exe  -u demo.exe -d  testInject.dll
     //多开
     ConsoleInject.exe  -m 1222
+    // 注入并指定http端口
+    ConsoleInject.exe  -i demo.exe -p E:\testInject.dll  -P  18888
 ```
 
 #### 更新说明
