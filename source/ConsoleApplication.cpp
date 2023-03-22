@@ -9,12 +9,13 @@
 
 #include "ntstatus.h"
 
+
 #define NT_SUCCESS(Status)    (((NTSTATUS)(Status)) >= 0)
 
 bool endsWith(const std::string& str, const std::string suffix) {
 	if (suffix.length() > str.length()) { return false; }
 	return (str.rfind(suffix) == (str.length() - suffix.length()));
-} 
+}
 
 typedef struct _UNICODE_STRING {
 	USHORT Length;
@@ -329,7 +330,7 @@ typedef NTSTATUS(WINAPI* PNtDuplicateObject)(
 	_In_      ULONG Options
 	);
 
-int FindHandles(ULONG pid, LPSTR handleName, BOOL closeHandle,BOOL suffix) {
+int FindHandles(ULONG pid, LPSTR handleName, BOOL closeHandle, BOOL suffix) {
 	HMODULE ntdll = GetModuleHandle(TEXT("ntdll.dll"));
 	if (NULL == ntdll) {
 		printf("Failed to load 'ntdll.dll'\n");
@@ -398,7 +399,7 @@ int FindHandles(ULONG pid, LPSTR handleName, BOOL closeHandle,BOOL suffix) {
 					continue;
 				}
 			}
-			
+
 			if (TRUE == closeHandle) {
 				HANDLE hProcess = OpenProcess(PROCESS_DUP_HANDLE, FALSE, HandleToLong(uniqueProcessId));
 				DuplicateHandle(hProcess, handleValue, 0, 0, 0, 0, DUPLICATE_CLOSE_SOURCE);
@@ -431,6 +432,74 @@ int CloseHandle(ULONG pid, LPSTR handleName) {
 	return FindHandles(pid, handleName, TRUE, FALSE);
 }
 
+HANDLE FindHandleByName(ULONG pid, LPSTR handleName) {
+	HMODULE ntdll = GetModuleHandle(TEXT("ntdll.dll"));
+	if (NULL == ntdll) {
+		printf("Failed to load 'ntdll.dll'\n");
+		return 0;
+	}
+	PNtQuerySystemInformation pQuerySystemInformation = (PNtQuerySystemInformation)GetProcAddress(ntdll, "NtQuerySystemInformation");
+	PNtQueryObject pQueryObject = (PNtQueryObject)GetProcAddress(ntdll, "NtQueryObject");
+	PNtDuplicateObject pDuplicateObject = (PNtDuplicateObject)GetProcAddress(ntdll, "NtDuplicateObject");
+	if (NULL == pQuerySystemInformation || NULL == pQueryObject || NULL == pDuplicateObject) {
+		printf("Failed to call 'GetProcAddress()'\n");
+		return 0;
+	}
+
+	ULONG len = 0x10000;
+	NTSTATUS status;
+	PSYSTEM_HANDLE_INFORMATION_EX pHandleInfo = NULL;
+	do {
+		if (len > 0x4000000) {
+			return 0;
+		}
+		len *= 2;
+		pHandleInfo = (PSYSTEM_HANDLE_INFORMATION_EX)GlobalAlloc(GMEM_ZEROINIT, len);
+		status = pQuerySystemInformation(SystemExtendedHandleInformation, pHandleInfo, len, &len);
+	} while (status == STATUS_INFO_LENGTH_MISMATCH);
+
+	if (!NT_SUCCESS(status)) {
+		printf("Failed to call 'NtQuerySystemInformation()' with error code 0x%X\n", status);
+		return 0;
+	}
+
+	HANDLE currentProcess = GetCurrentProcess();
+	for (int i = 0; i < pHandleInfo->HandleCount; i++) {
+		SYSTEM_HANDLE handle = pHandleInfo->Handles[i];
+		PVOID object = handle.Object;
+		HANDLE handleValue = handle.HandleValue;
+		HANDLE uniqueProcessId = handle.UniqueProcessId;
+		if (NULL != pid && HandleToLong(uniqueProcessId) != pid) {
+			continue;
+		}
+		LPSTR pName = NULL;
+		LPSTR pType = NULL;
+		HANDLE sourceProcess = OpenProcess(PROCESS_ALL_ACCESS | PROCESS_DUP_HANDLE | PROCESS_SUSPEND_RESUME, FALSE, HandleToULong(uniqueProcessId));
+		HANDLE targetHandle = NULL;
+		NTSTATUS status = pDuplicateObject(sourceProcess, handleValue, currentProcess, &targetHandle, 0, FALSE, DUPLICATE_SAME_ACCESS);
+		if (NT_SUCCESS(status)) {
+			//printf("Failed to call 'NtDuplicateObject()' with error code 0x%X\n", status);
+			POBJECT_NAME_INFORMATION pNameInfo = (POBJECT_NAME_INFORMATION)GlobalAlloc(GMEM_ZEROINIT, len);
+			POBJECT_TYPE_INFORMATION pTypeInfo = (POBJECT_TYPE_INFORMATION)GlobalAlloc(GMEM_ZEROINIT, len);
+			if (NT_SUCCESS(pQueryObject(targetHandle, ObjectNameInformation, pNameInfo, len, NULL))) {
+				pName = (LPSTR)GlobalAlloc(GMEM_ZEROINIT, pNameInfo->Name.Length);
+				WideCharToMultiByte(CP_ACP, 0, pNameInfo->Name.Buffer, -1, pName, pNameInfo->Name.Length, NULL, NULL);
+			}
+			if (NT_SUCCESS(pQueryObject(targetHandle, ObjectTypeInformation, pTypeInfo, len, NULL))) {
+				pType = (LPSTR)GlobalAlloc(GMEM_ZEROINIT, pTypeInfo->TypeName.Length);
+				WideCharToMultiByte(CP_ACP, 0, pTypeInfo->TypeName.Buffer, -1, pType, pTypeInfo->TypeName.Length, NULL, NULL);
+			}
+		}
+		if (NULL != handleName) {
+
+			if (NULL == pName || 0 != strcmp(pName, handleName)) {
+				continue;
+			}
+			return handleValue;
+		}
+
+	}
+}
 
 
 std::wstring Utf8ToUnicode(const char* buffer) {
@@ -502,10 +571,209 @@ HMODULE GetDLLHandle(wchar_t* wDllName, DWORD dPid)
 }
 
 
+static unsigned char GetProcAddressAsmCode[] = {
+	0x55,                         // push ebp;
+	0x8B, 0xEC,                   // mov ebp, esp;
+	0x83, 0xEC, 0x40,             // sub esp, 0x40;
+	0x57,                         // push edi;
+	0x51,                         // push ecx;
+	0x8B, 0x7D, 0x08,             // mov edi, dword ptr[ebp + 0x8];
+	0x8B, 0x07,                   // mov eax,dword ptr[edi];
+	0x50,                         // push eax;
+	0xE8, 0x00, 0x00, 0x00, 0x00, // call GetModuleHandleW;
+	0x83, 0xC4, 0x04,             // add esp,0x4;
+	0x83, 0xC7, 0x04,             // add edi,0x4;
+	0x8B, 0x0F,                   // mov ecx, dword ptr[edi];
+	0x51,                         // push ecx;
+	0x50,                         // push eax;
+	0xE8, 0x00, 0x00, 0x00, 0x00, // call GetProcAddress;
+	0x83, 0xC4, 0x08,             // add esp, 0x8;
+	0x59,                         // pop ecx;
+	0x5F,                         // pop edi;
+	0x8B, 0xE5,                   // mov esp, ebp;
+	0x5D,                         // pop ebp;
+	0xC3                          // retn;
+};
+
+LPVOID FillAsmCode(HANDLE handle) {
+	DWORD pGetModuleHandleW = (DWORD)GetModuleHandleW;
+	DWORD pGetProcAddress = (DWORD)GetProcAddress;
+	PVOID fillCall1 = (PVOID)&GetProcAddressAsmCode[15];
+	PVOID fillCall2 = (PVOID)&GetProcAddressAsmCode[30];
+	LPVOID pAsmFuncAddr = VirtualAllocEx(handle, NULL, 1, MEM_COMMIT, PAGE_EXECUTE);
+	if (!pAsmFuncAddr) {
+		return 0;
+	}
+	*(DWORD*)fillCall1 = pGetModuleHandleW - (DWORD)pAsmFuncAddr - 14 - 5;
+	*(DWORD*)fillCall2 = pGetProcAddress - (DWORD)pAsmFuncAddr - 29 - 5;
+	//*(DWORD*)fillCall1 = pGetModuleHandleW ;
+	//*(DWORD*)fillCall2 = pGetProcAddress;
+	SIZE_T dwWriteSize;
+	WriteProcessMemory(handle, pAsmFuncAddr, GetProcAddressAsmCode, sizeof(GetProcAddressAsmCode), &dwWriteSize);
+	return pAsmFuncAddr;
+
+}
+
+BOOL RemoteLibraryFunction(HANDLE hProcess, LPCSTR lpModuleName, LPCSTR lpProcName, LPVOID lpParameters, SIZE_T dwParamSize, PVOID* ppReturn)
+{
+	LPVOID lpRemoteParams = NULL;
+
+	LPVOID lpFunctionAddress = GetProcAddress(GetModuleHandleA(lpModuleName), lpProcName);
+	if (!lpFunctionAddress) lpFunctionAddress = GetProcAddress(LoadLibraryA(lpModuleName), lpProcName);
+	if (!lpFunctionAddress) goto ErrorHandler;
+
+	if (lpParameters)
+	{
+		lpRemoteParams = VirtualAllocEx(hProcess, NULL, dwParamSize, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+		if (!lpRemoteParams) goto ErrorHandler;
+
+		SIZE_T dwBytesWritten = 0;
+		BOOL result = WriteProcessMemory(hProcess, lpRemoteParams, lpParameters, dwParamSize, &dwBytesWritten);
+		if (!result || dwBytesWritten < 1) goto ErrorHandler;
+	}
+
+	HANDLE hThread = CreateRemoteThread(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)lpFunctionAddress, lpRemoteParams, NULL, NULL);
+	if (!hThread) goto ErrorHandler;
+
+	DWORD dwOut = 0;
+	while (GetExitCodeThread(hThread, &dwOut)) {
+		if (dwOut != STILL_ACTIVE) {
+			*ppReturn = (PVOID)dwOut;
+			break;
+		}
+	}
+
+	return TRUE;
+
+ErrorHandler:
+	if (lpRemoteParams) VirtualFreeEx(hProcess, lpRemoteParams, dwParamSize, MEM_RELEASE);
+	return FALSE;
+}
+
+int  InjectDllAndStartHttp(wchar_t* szPName, wchar_t* szDllPath, DWORD port)
+{
+	int result = 0;
+	HANDLE hRemoteThread = NULL;
+	LPTHREAD_START_ROUTINE lpSysLibAddr = NULL;
+	HINSTANCE__* hKernelModule = NULL;
+	LPVOID lpRemoteDllBase = NULL;
+	HANDLE hProcess;
+	unsigned int dwPid;
+	size_t ulDllLength;
+	wchar_t* dllName = L"wxhelper.dll";
+	size_t dllNameLen = wcslen(dllName) * 2 + 2;
+	char* funcName = "http_start";
+	size_t funcNameLen = strlen(funcName) + 1;
+
+	HANDLE  hStartHttp = NULL;
+	LPVOID portAddr = NULL;
+	HANDLE  getProcThread = NULL;
+
+	LPVOID paramsAddr = NULL;
+	LPVOID param1Addr = NULL;
+	LPVOID param2Addr = NULL;
+	LPVOID  GetProcFuncAddr = NULL;
+
+	DWORD params[2] = { 0 };
+
+	dwPid = GetPIDForProcess(szPName);
+	ulDllLength = (wcslen(szDllPath) + 1) * sizeof(wchar_t);
+	hProcess = OpenProcess(PROCESS_ALL_ACCESS, false, dwPid);
+	if (!hProcess) {
+		goto error;
+	}
+
+	lpRemoteDllBase = VirtualAllocEx(hProcess, NULL, ulDllLength, MEM_COMMIT, PAGE_READWRITE);
+	if (lpRemoteDllBase)
+	{
+		if (WriteProcessMemory(hProcess, lpRemoteDllBase, szDllPath, ulDllLength, NULL)
+			&& (hKernelModule = GetModuleHandleW(L"kernel32.dll")) != 0
+			&& (lpSysLibAddr = (LPTHREAD_START_ROUTINE)GetProcAddress(hKernelModule, "LoadLibraryW")) != 0
+			&& (hRemoteThread = CreateRemoteThread(hProcess, NULL, 0, lpSysLibAddr, lpRemoteDllBase, 0, NULL)) != 0)
+		{
+			WaitForSingleObject(hRemoteThread, INFINITE);
+			GetProcFuncAddr = FillAsmCode(hProcess);
+			param1Addr = VirtualAllocEx(hProcess, NULL, dllNameLen, MEM_COMMIT, PAGE_READWRITE);
+			if (param1Addr) {
+				SIZE_T dwWriteSize;
+				BOOL  bRet = WriteProcessMemory(hProcess, (LPVOID)param1Addr, dllName, dllNameLen, &dwWriteSize);
+				if (!bRet) {
+					goto error;
+				}
+			}
+			param2Addr = VirtualAllocEx(hProcess, NULL, funcNameLen, MEM_COMMIT, PAGE_READWRITE);
+			if (param2Addr) {
+				SIZE_T dwWriteSize;
+				BOOL  bRet = WriteProcessMemory(hProcess, (LPVOID)param2Addr, funcName, funcNameLen, &dwWriteSize);
+				if (!bRet) {
+					goto error;
+				}
+			}
+
+			params[0] = (DWORD)param1Addr;
+			params[1] = (DWORD)param2Addr;
+
+			paramsAddr = VirtualAllocEx(hProcess, NULL, sizeof(params), MEM_COMMIT, PAGE_READWRITE);
+			if (paramsAddr) {
+				SIZE_T dwWriteSize;
+				BOOL  bRet = WriteProcessMemory(hProcess, (LPVOID)paramsAddr, &params[0], sizeof(params), &dwWriteSize);
+				if (!bRet) {
+					goto error;
+				}
+			}
+
+			DWORD dwRet = 0;
+			getProcThread = CreateRemoteThread(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)GetProcFuncAddr, paramsAddr, 0, NULL);
+
+			if (getProcThread)
+			{
+				WaitForSingleObject(getProcThread, INFINITE);
+				GetExitCodeThread(getProcThread, &dwRet);
+				if (dwRet) {
+					hStartHttp = CreateRemoteThread(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)dwRet, (LPVOID)port, 0, NULL);
+					WaitForSingleObject(hStartHttp, INFINITE);
+					result = 1;
+				}
+			}
+		}
+	}
+error:
+	if (hRemoteThread) {
+		CloseHandle(hRemoteThread);
+	}
+	if (getProcThread) {
+		CloseHandle(getProcThread);
+	}
+	if (hStartHttp) {
+		CloseHandle(hStartHttp);
+	}
+
+	if (lpRemoteDllBase) {
+		VirtualFreeEx(hProcess, lpRemoteDllBase, ulDllLength, MEM_DECOMMIT | MEM_RELEASE);
+	}
+	if (param1Addr) {
+		VirtualFreeEx(hProcess, param1Addr, dllNameLen, MEM_DECOMMIT | MEM_RELEASE);
+	}
+
+	if (param2Addr) {
+		VirtualFreeEx(hProcess, param1Addr, funcNameLen, MEM_DECOMMIT | MEM_RELEASE);
+	}
+
+	if (paramsAddr) {
+		VirtualFreeEx(hProcess, param1Addr, sizeof(params), MEM_DECOMMIT | MEM_RELEASE);
+	}
+
+	if (GetProcFuncAddr) {
+		VirtualFreeEx(hProcess, GetProcFuncAddr, sizeof(GetProcAddressAsmCode), MEM_DECOMMIT | MEM_RELEASE);
+	}
+
+	CloseHandle(hProcess);
+	return result;
+}
 
 int  InjectDll(wchar_t* szPName, wchar_t* szDllPath)
 {
-	int result;
+	int result = 0;
 	HANDLE hRemoteThread;
 	LPTHREAD_START_ROUTINE lpSysLibAddr;
 	HINSTANCE__* hKernelModule;
@@ -589,6 +857,10 @@ int  UnInjectDll(wchar_t* szPName, wchar_t* szDName)
 	return 0;
 }
 
+FARPROC ShellCode(DWORD param[]) {
+	return GetProcAddress(GetModuleHandleW((LPCWSTR)param[0]), (LPCSTR)param[1]);
+}
+
 
 int main(int argc, char** argv)
 {
@@ -597,10 +869,11 @@ int main(int argc, char** argv)
 	char cUnInjectprogram[MAX_PATH] = { 0 };
 	char cDllPath[MAX_PATH] = { 0 };
 	char cDllName[MAX_PATH] = { 0 };
+	int port = 0;
 
 	ULONG pid = 0;
 
-	while ((param = getopt(argc, argv, "i:p:u:d:m:h")) != -1)
+	while ((param = getopt(argc, argv, "i:p:u:d:m:P:h")) != -1)
 	{
 		switch (param)
 		{
@@ -634,21 +907,37 @@ int main(int argc, char** argv)
 		case 'm':
 			pid = std::stol(optarg);
 			break;
+		case 'P':
+			port = std::atoi(optarg);
+			break;
 		default:
 			abort();
 			break;
 		}
 	}
+
+	if (pid) {
+		FindHandles(pid, "_WeChat_App_Instance_Identity_Mutex_Name", TRUE, TRUE);
+	}
+
 	if (cInjectprogram[0] != 0 && cDllPath[0] != 0)
 	{
 		if (cInjectprogram[0] != '\0' && cDllPath[0] != '\0')
 		{
-			std::wstring wsProgram = Utf8ToUnicode(cInjectprogram);
-			std::wstring wsPath = Utf8ToUnicode(cDllPath);
-			int ret = InjectDll((wchar_t*)wsProgram.c_str(), (wchar_t*)wsPath.c_str());
-			printf(" 注入结果：%i \n", ret);
+			if (port == 0) {
+				std::wstring wsProgram = Utf8ToUnicode(cInjectprogram);
+				std::wstring wsPath = Utf8ToUnicode(cDllPath);
+				int ret = InjectDll((wchar_t*)wsProgram.c_str(), (wchar_t*)wsPath.c_str());
+				printf(" 注入结果：%i \n", ret);
+			}
+			else
+			{
+				std::wstring wsProgram = Utf8ToUnicode(cInjectprogram);
+				std::wstring wsPath = Utf8ToUnicode(cDllPath);
+				int ret = InjectDllAndStartHttp((wchar_t*)wsProgram.c_str(), (wchar_t*)wsPath.c_str(), port);
+				printf(" 注入结果：%i \n", ret);
+			}
 		}
-
 	}
 
 	if (cUnInjectprogram[0] != 0 && cDllName[0] != 0)
@@ -662,8 +951,6 @@ int main(int argc, char** argv)
 		}
 
 	}
-	if (pid) {
-		FindHandles(pid, "_WeChat_App_Instance_Identity_Mutex_Name", TRUE, TRUE);
-	}
+
 	return 0;
 }
