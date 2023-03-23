@@ -10,8 +10,8 @@
 using namespace nlohmann;
 
 using namespace std;
-#define WX_RECV_MSG_HOOK_OFFSET 0xca0284
-#define WX_RECV_MSG_HOOK_NEXT_OFFSET 0x7d5030
+#define WX_RECV_MSG_HOOK_OFFSET 0xd19a0b
+#define WX_RECV_MSG_HOOK_NEXT_OFFSET 0x756960
 #define WX_SNS_HOOK_OFFSET  0x143ef09
 #define WX_SNS_HOOK_NEXT_OFFSET 0x143f1b0
 
@@ -230,7 +230,7 @@ _declspec(naked) void handle_sync_msg() {
   __asm {
     PUSHAD
 		PUSHFD
-		PUSH    ECX
+    PUSH    ECX
 		CALL    OnRecvMsg
 		ADD     ESP, 0x4
 		POPFD
