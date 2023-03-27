@@ -5,9 +5,9 @@
 
 using namespace std;
 
-#define WX_HOOK_VOICE_OFFSET 0xccd561
-#define WX_HOOK_VOICE_NEXT_OFFSET 0x1f74560
-#define WX_SELF_ID_OFFSET 0x2E2CD3C
+#define WX_HOOK_VOICE_OFFSET 0xd4d8d8
+#define WX_HOOK_VOICE_NEXT_OFFSET 0x203d130
+#define WX_SELF_ID_OFFSET 0x2FFD484
 
 static wstring kVoiceStorePath = L"";
 static int kVoiceHooked = FALSE;
@@ -41,11 +41,11 @@ void OnHookVoice(DWORD buff,int len , DWORD msg_addr) {
 /// @brief  hook voice implement
 _declspec(naked) void handle_voice() {
   __asm {
-        PUSHAD
+    PUSHAD
 		PUSHFD
 		PUSH        EDI
-        PUSH        EDX
-        PUSH        EAX
+    PUSH        EDX
+    PUSH        EAX
 		CALL        OnHookVoice
 		ADD         ESP, 0xC
 		POPFD
