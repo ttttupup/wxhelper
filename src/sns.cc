@@ -4,9 +4,9 @@
 #include "common.h"
 #include "wechat_data.h"
 using namespace std;
-#define WX_SNS_DATA_MGR_OFFSET 0xbc4100
-#define WX_SNS_GET_FIRST_PAGE_OFFSET 0x1427be0
-#define WX_SNS_GET_NEXT_PAGE_OFFSET  0x1427c80
+#define WX_SNS_DATA_MGR_OFFSET 0xc39680
+#define WX_SNS_GET_FIRST_PAGE_OFFSET 0x14e2140
+#define WX_SNS_GET_NEXT_PAGE_OFFSET  0x14e21e0
 
 int GetFirstPage() {
   int success = -1;

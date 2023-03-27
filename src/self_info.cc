@@ -141,6 +141,15 @@ int GetSelfInfo(SelfInfoInner &out) {
                               *(DWORD *)(service_addr + 0x304 + 0x10));
       }
     }
+
+    if (*(DWORD *)(service_addr + 0x4CC) == 0 ||
+        *(DWORD *)(service_addr +0x4D0) == 0) {
+      out.db_key = string();
+    } else {
+      DWORD  byte_addr = *(DWORD *)(service_addr + 0x4CC);
+      DWORD len = *(DWORD *)(service_addr +0x4D0);
+      out.db_key = Bytes2Hex((BYTE *)byte_addr,len);
+    }
   }
 
   WeChatString data_save_path;

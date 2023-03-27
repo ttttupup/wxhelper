@@ -228,6 +228,7 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
             {"signature",self_info.signature},
             {"dataSavePath",self_info.data_save_path},
             {"currentDataPath",self_info.current_data_path},
+            {"dbKey",self_info.db_key},
         };
         ret_data["data"] = j_info;
       }

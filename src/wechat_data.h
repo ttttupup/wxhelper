@@ -153,6 +153,7 @@ struct SelfInfoInner{
   std::string data_save_path;
   std::string signature;
   std::string current_data_path;
+  std::string db_key;
 };
 
 struct UserInfo {

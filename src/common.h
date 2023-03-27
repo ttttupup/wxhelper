@@ -55,6 +55,14 @@ BOOL FindOrCreateDirectoryW(const wchar_t *path);
 
 void CloseConsole();
 
+std::string EncodeHexString(const std::string &str);
+
+std::string Hex2String(const std::string &hex_str);
+
+std::string Bytes2Hex(const BYTE *bytes, const int length);
+
+void Hex2Bytes(const std::string &hex, BYTE *bytes);
+
 template <typename T1, typename T2>
 std::vector<T1> split(T1 str, T2 letter) {
   vector<T1> arr;

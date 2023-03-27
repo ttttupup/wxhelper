@@ -29,7 +29,8 @@ int ForwardMsg(wchar_t *wxid, unsigned long long msgid) {
     MOV        ECX,ESP
     LEA        ESI,to_user
     PUSH       ESI
-    CALL       init_chat_msg_addr                                
+    CALL       init_chat_msg_addr      
+    XOR        ECX,ECX                          
     CALL       forward_msg_addr
     MOVZX      EAX,AL
     MOV        success,EAX
