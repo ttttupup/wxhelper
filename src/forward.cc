@@ -4,8 +4,8 @@
 #include "common.h"
 #include "get_db_handle.h"
 #include "wechat_data.h"
-#define WX_FORWARD_MSG_OFFSET 0xc715f0
-#define WX_INIT_CHAT_MSG_OFFSET 0xed3be0
+#define WX_FORWARD_MSG_OFFSET 0xce6730
+#define WX_INIT_CHAT_MSG_OFFSET 0xf59e40
 
 int ForwardMsg(wchar_t *wxid, unsigned long long msgid) {
   int success = 0;
