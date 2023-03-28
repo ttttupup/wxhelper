@@ -244,6 +244,7 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       break;
     }
     case WECHAT_MSG_SEND_AT: {
+      break;
       wstring chat_room_id = get_http_req_param(hm, j_param, "chatRoomId", is_post);
       vector<wstring> wxids = get_http_param_array(hm, j_param, "wxids", is_post);
       wstring msg = get_http_req_param(hm, j_param, "msg", is_post);
@@ -299,6 +300,7 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       break;
     }
     case WECHAT_MSG_START_IMAGE_HOOK: {
+      break;
       wstring img_dir = get_http_req_param(hm, j_param, "imgDir", is_post);
       int success = HookImg(img_dir);
       json ret_data = {{"code", success}, {"result", "OK"}};
@@ -306,6 +308,7 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       break;
     }
     case WECHAT_MSG_STOP_IMAGE_HOOK: {
+      break;
       int success = UnHookImg();
       json ret_data = {{"code", success}, {"result", "OK"}};
       ret = ret_data.dump();
@@ -332,6 +335,7 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       break;
     }
     case WECHAT_CONTACT_DEL: {
+      break;
       wstring user_id = get_http_req_param(hm, j_param, "wxid", is_post);
       int success = DelContact(WS2LW(user_id));
       json ret_data = {{"code", success}, {"result", "OK"}};
@@ -342,6 +346,7 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       break;
     }
     case WECHAT_CONTACT_SEARCH_BY_NET: {
+      break;
       wstring keyword = get_http_req_param(hm, j_param, "keyword", is_post);
       UserInfo *user = nullptr;
       int success = SearchContactNetScene(WS2LW(keyword), &user);
@@ -365,6 +370,7 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       break;
     }
     case WECHAT_CONTACT_ADD_BY_WXID: {
+      break;
       wstring user_id = get_http_req_param(hm, j_param, "wxid", is_post);
       int success = AddFriendByWxid(WS2LW(user_id));
       json ret_data = {{"code", success}, {"result", "OK"}};
@@ -400,6 +406,7 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       break;
     }
     case WECHAT_CHATROOM_GET_MEMBER_NICKNAME: {
+      break;
       wstring room_id = get_http_req_param(hm, j_param, "chatRoomId", is_post);
       wstring member_id = get_http_req_param(hm, j_param, "memberId", is_post);
       
@@ -409,6 +416,7 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       break;
     }
     case WECHAT_CHATROOM_DEL_MEMBER: {
+      break;
       wstring room_id = get_http_req_param(hm, j_param, "chatRoomId", is_post);
       vector<wstring> wxids = get_http_param_array(hm, j_param, "memberIds", is_post);
       vector<wchar_t *> wxid_list;
@@ -421,6 +429,7 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       break;
     }
     case WECHAT_CHATROOM_ADD_MEMBER: {
+      break;
       wstring room_id = get_http_req_param(hm, j_param, "chatRoomId", is_post);
       vector<wstring> wxids = get_http_param_array(hm, j_param, "memberIds", is_post);
       vector<wchar_t *> wxid_list;
@@ -439,6 +448,7 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       break;
     }
     case WECHAT_CHATROOM_SET_SELF_NICKNAME: {
+      break;
       wstring room_id = get_http_req_param(hm, j_param, "chatRoomId", is_post);
       wstring wxid = get_http_req_param(hm, j_param, "wxid", is_post);
       wstring nick = get_http_req_param(hm, j_param, "nickName", is_post);
@@ -496,12 +506,14 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       break;
     }
     case WECHAT_LOG_START_HOOK: {
+      break;
       int success = HookLog();
       json ret_data = {{"code", success}, {"result", "OK"}};
       ret = ret_data.dump();
       break;
     }
     case WECHAT_LOG_STOP_HOOK: {
+      break;
       int success = UnHookLog();
       json ret_data = {{"code", success}, {"result", "OK"}};
       ret = ret_data.dump();
@@ -537,6 +549,7 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       break;
     }
     case WECHAT_GET_TRANSFER: {
+      break;
       wstring wxid = get_http_req_param(hm, j_param, "wxid", is_post);
       wstring transcationid = get_http_req_param(hm, j_param, "transcationId", is_post);
       wstring transferid = get_http_req_param(hm, j_param, "transferId", is_post);
@@ -583,6 +596,7 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       break;
     }
     case WECHAT_GET_CHATROOM_INFO: {
+      break;
       wstring room_id = get_http_req_param(hm, j_param, "chatRoomId", is_post);
       ChatRoomInfoInner chat_room_detail{0};
       int success = GetChatRoomDetailInfo(WS2LW(room_id), chat_room_detail);
@@ -618,6 +632,7 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       break;
     }
     case  WECHAT_DO_OCR:{
+      break;
       wstring image_path = get_http_req_param(hm, j_param, "imagePath", is_post);
       string text("");
       int success = DoOCRTask(WS2LW(image_path),text);
@@ -634,6 +649,7 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       break;
     }
     case WECHAT_SET_TOP_MSG:{
+      break;
       wstring wxid = get_http_req_param(hm, j_param, "wxid", is_post);
       ULONG64 msgid = get_http_param_ulong64(hm, j_param, "msgid", is_post);
       int success = SetTopMsg(WS2LW(wxid),msgid);
@@ -642,6 +658,7 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       break;
     }
     case WECHAT_REMOVE_TOP_MSG:{
+      break;
       wstring room_id = get_http_req_param(hm, j_param, "chatRoomId", is_post);
       ULONG64 msgid = get_http_param_ulong64(hm, j_param, "msgid", is_post);
       int success = RemoveTopMsg(WS2LW(room_id),msgid);
@@ -663,6 +680,7 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       break;
     }
     case WECHAT_CONTACT_NAME:{
+      break;
       wstring pri_id = get_http_req_param(hm, j_param, "id", is_post);
       wstring name =GetContactOrChatRoomNickname(WS2LW(pri_id));
       json ret_data = {{"code", 1}, {"result", "OK"},{"name",unicode_to_utf8(WS2LW(name))}};

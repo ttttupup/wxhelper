@@ -1,5 +1,5 @@
 
-3.9.2.23 测试版，临时测试
+##  3.9.2.23版本，预览功能没有的接口，不能使用，文档仅供参考。
 #### 功能预览：
 0.检查是否登录     
 1.获取登录微信信息  
@@ -36,8 +36,8 @@
 52.群消息取消置顶   -->
 53.朋友圈首页
 54.朋友圈下一页  
-<!-- 55.获取联系人或者群名称    
-56.获取消息附件(图片，视频，文件)  -->
+<!-- 55.获取联系人或者群名称     -->
+56.获取消息附件(图片，视频，文件) 
 ### 接口文档：
 
 
@@ -107,6 +107,7 @@
 |province|string|省|
 |wxid|string|wxid|
 |signature|string|个人签名|
+|dbKey|string|数据库的SQLCipher的加密key，可以使用该key配合decrypt.py解密数据库
 
 ###### 接口示例
 入参：
@@ -114,7 +115,7 @@
 ```
 响应：
 ``` javascript
-{"code":1,"data":{"account":"xx","headImage":"https://wx.qlogo.cn/mmhead/ver_1xx","city":"xx","country":"CN","currentDataPath":"C:\\xx\\wxid_xxxxx","dataSavePath":"C:\\xx","mobie":"13812345678","name":"xx","province":"xx","signature":"xx","wxid":"xx"},"result":"OK"}
+{"code":1,"data":{"account":"xx","headImage":"https://wx.qlogo.cn/mmhead/ver_1xx","city":"xx","country":"CN","currentDataPath":"C:\\xx\\wxid_xxxxx","dataSavePath":"C:\\xx","mobie":"13812345678","name":"xx","province":"xx","signature":"xx","wxid":"xx","dbKey":"aaa2222"},"result":"OK"}
 ```
 
 

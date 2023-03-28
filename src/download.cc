@@ -6,20 +6,20 @@
 
 #include "wechat_data.h"
 
-#define WX_NEW_CHAT_MSG_OFFSET 0x70e2a0
-#define WX_GET_PRE_DOWNLOAD_MGR_OFFSET 0x7ae310
-#define WX_PUSH_ATTACH_TASK_OFFSET 0x7c94a0
-#define WX_FREE_CHAT_MSG_INSTANCE_COUNTER_OFFSET 0x6f5370
-#define WX_FREE_CHAT_MSG_OFFSET 0x6f4ea0
-#define WX_CHAT_MGR_OFFSET 0x732660
-#define WX_GET_MGR_BY_PREFIX_LOCAL_ID_OFFSET 0xb54950
-#define WX_GET_CURRENT_DATA_PATH_OFFSET 0xc11140
-#define WX_APP_MSG_INFO_OFFSET 0x7571d0
-#define WX_GET_APP_MSG_XML_OFFSET 0xddef80
-#define WX_FREE_APP_MSG_INFO_OFFSET 0x73d820
-#define WX_PUSH_THUMB_TASK_OFFSET 0x7c93a0
-#define WX_VIDEO_MGR_OFFSET 0x7c7300
-#define WX_DOWNLOAD_VIDEO_IMG_OFFSET 0xcc6d80
+#define WX_NEW_CHAT_MSG_OFFSET 0x76f010
+#define WX_GET_PRE_DOWNLOAD_MGR_OFFSET 0x80f110
+#define WX_PUSH_ATTACH_TASK_OFFSET 0x82bb40
+#define WX_FREE_CHAT_MSG_INSTANCE_COUNTER_OFFSET 0x756e30
+#define WX_FREE_CHAT_MSG_OFFSET 0x756960
+#define WX_CHAT_MGR_OFFSET 0x792700
+#define WX_GET_MGR_BY_PREFIX_LOCAL_ID_OFFSET 0xbc0370
+#define WX_GET_CURRENT_DATA_PATH_OFFSET 0xc872c0
+#define WX_APP_MSG_INFO_OFFSET 0x7b3d20
+#define WX_GET_APP_MSG_XML_OFFSET 0xe628a0
+#define WX_FREE_APP_MSG_INFO_OFFSET 0x79d900
+#define WX_PUSH_THUMB_TASK_OFFSET 0x82ba40
+#define WX_VIDEO_MGR_OFFSET 0x829820
+#define WX_DOWNLOAD_VIDEO_IMG_OFFSET 0xd46c30
 
 using namespace std;
 
@@ -31,7 +31,7 @@ int DoDownloadTask(ULONG64 msg_id) {
     return -2;
   }
 
-  char chat_msg[0x2C4] = {0};
+  char chat_msg[0x2D8] = {0};
   DWORD base = GetWeChatWinBase();
   DWORD new_chat_msg_addr = base + WX_NEW_CHAT_MSG_OFFSET;
   DWORD get_chat_mgr_addr = base + WX_CHAT_MGR_OFFSET;
@@ -143,7 +143,7 @@ int DoDownloadTask(ULONG64 msg_id) {
   int temp =1;
   memcpy(&chat_msg[0x19C], &w_thumb_path, sizeof(w_thumb_path));
   memcpy(&chat_msg[0x1B0], &w_save_path, sizeof(w_save_path));
-  memcpy(&chat_msg[0x290], &temp, sizeof(temp));
+  memcpy(&chat_msg[0x29C], &temp, sizeof(temp));
   // note： the image has been downloaded and will not be downloaded again
   // use low-level method  
   // this function does not work, need to modify chatmsg.
