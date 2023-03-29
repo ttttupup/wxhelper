@@ -14,7 +14,7 @@ file(GLOB CPP_FILES  ${PROJECT_SOURCE_DIR}/src/*.cc  ${PROJECT_SOURCE_DIR}/src/*
 include_directories(${VCPKG_INSTALLED_DIR}/x86-windows/include)
 
 # add_subdirectory(3rd)
-
+add_subdirectory(source)
 
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(unofficial-mongoose CONFIG REQUIRED)
