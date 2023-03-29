@@ -48,6 +48,7 @@ source: 简单的命令行远程注入源码。
 #### 问题讨论   
 个人常用的方法，请参考https://github.com/ttttupup/wxhelper/wiki    
 使用上的问题，可查询https://github.com/ttttupup/wxhelper/discussions    
+数据库解密，请参考https://github.com/ttttupup/wxhelper/wiki      
  
 
 
