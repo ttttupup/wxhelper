@@ -15,10 +15,39 @@
 #define DB_FUNCTION_MSG_OFFSET 0x11B0
 #define DB_NAME_OFFSET 0x14
 
+#define STORAGE_START_OFFSET  0x13f8
+#define STORAGE_END_OFFSET  0x13fc
+
 #define PUBLIC_MSG_MGR_OFFSET  0x303df74
 #define MULTI_DB_MSG_MGR_OFFSET  0x30403b8
 #define FAVORITE_STORAGE_MGR_OFFSET  0x303fd40
 #define FTS_FAVORITE_MGR_OFFSET  0x2ffe908
+
+#define OP_LOG_STORAGE_VFTABLE 0x2AD3A20
+#define CHAT_MSG_STORAGE_VFTABLE 0x2AC10F0
+#define CHAT_CR_MSG_STORAGE_VFTABLE 0x2ABEF14
+#define SESSION_STORAGE_VFTABLE 0x2AD3578
+#define APP_INFO_STORAGE_VFTABLE 0x2ABCC58
+#define HEAD_IMG_STORAGE_VFTABLE 0x2ACD9DC
+#define HEAD_IMG_URL_STORAGE_VFTABLE 0x2ACDF70
+
+#define BIZ_INFO_STORAGE_VFTABLE 0x2ABD718
+#define TICKET_INFO_STORAGE_VFTABLE 0x2AD5400
+#define CHAT_ROOM_STORAGE_VFTABLE 0x2AC299C
+#define CHAT_ROOM_INFO_STORAGE_VFTABLE 0x2AC245C
+#define MEDIA_STORAGE_VFTABLE 0x2ACE998
+#define NAME_2_ID_STORAGE_VFTABLE 0x2AD222C
+#define EMOTION_PACKAGE_STORAGE_VFTABLE 0x2AC6400
+
+#define EMOTION_STORAGE_VFTABLE 0x2AC7018
+#define BUFINFO_STORAGE_VFTABLE 0x2AC3178
+
+#define CUSTOM_EMOTION_STORAGE_VFTABLE 0x2AC4E90
+#define DEL_SESSIONINFO_STORAGE_VFTABLE 0x2AC5F98
+#define FUNCTION_MSG_STORAGE_VFTABLE 0x2ACD10C
+
+#define FUNCTION_MSG_TASK_STORAGE_VFTABLE 0x2ACC5C8
+#define REVOKE_MSG_STORAGE_VFTABLE 0x2AD27BC
 
 using namespace std;
 map<wstring, DatabaseInfo> dbmap;
@@ -180,6 +209,60 @@ std::vector<void *> GetDbHandles() {
         DWORD *)(p_contact_addr + DB_FUNCTION_MSG_OFFSET + DB_NAME_OFFSET)));
     dbmap[bizchat_msg_name] = bizchat_msg_db;
   }
+ // Storage
+  DWORD storage_start = *(DWORD *)(p_contact_addr + STORAGE_START_OFFSET);
+  DWORD storage_end = *(DWORD *)(p_contact_addr + STORAGE_END_OFFSET);
+
+  // do {
+  //   DWORD vtable_ptr = *(DWORD *)(storage_start);
+    
+  //   if(vtable_ptr == base + OP_LOG_STORAGE_VFTABLE){
+
+  //   }else if(vtable_ptr == base + CHAT_MSG_STORAGE_VFTABLE){
+
+  //   }else if(vtable_ptr == base + CHAT_CR_MSG_STORAGE_VFTABLE){
+
+  //   }else if(vtable_ptr == base + SESSION_STORAGE_VFTABLE){
+
+  //   }else if(vtable_ptr == base + APP_INFO_STORAGE_VFTABLE){
+
+  //   }else if(vtable_ptr == base + HEAD_IMG_STORAGE_VFTABLE){
+
+  //   }else if(vtable_ptr == base + HEAD_IMG_URL_STORAGE_VFTABLE){
+
+  //   }else if(vtable_ptr == base + BIZ_INFO_STORAGE_VFTABLE){
+
+  //   }else if(vtable_ptr == base + TICKET_INFO_STORAGE_VFTABLE){
+
+  //   }else if(vtable_ptr == base + CHAT_ROOM_STORAGE_VFTABLE){
+
+  //   }else if(vtable_ptr == base + CHAT_ROOM_INFO_STORAGE_VFTABLE){
+
+  //   }else if(vtable_ptr == base + MEDIA_STORAGE_VFTABLE){
+
+  //   }else if(vtable_ptr == base + NAME_2_ID_STORAGE_VFTABLE){
+
+  //   }else if(vtable_ptr == base + EMOTION_PACKAGE_STORAGE_VFTABLE){
+
+  //   }else if(vtable_ptr == base + EMOTION_STORAGE_VFTABLE){
+
+  //   }else if(vtable_ptr == base + BUFINFO_STORAGE_VFTABLE){
+
+  //   }else if(vtable_ptr == base + CUSTOM_EMOTION_STORAGE_VFTABLE){
+
+  //   }else if(vtable_ptr == base + DEL_SESSIONINFO_STORAGE_VFTABLE){
+
+  //   }else if(vtable_ptr == base + FUNCTION_MSG_STORAGE_VFTABLE){
+
+  //   }else if(vtable_ptr == base + FUNCTION_MSG_TASK_STORAGE_VFTABLE){
+
+  //   }else if(vtable_ptr == base + REVOKE_MSG_STORAGE_VFTABLE){
+
+  //   }
+  
+  //   storage_start = storage_start + 0x4;
+  // } while (storage_start != storage_end);
+
   DWORD multi_db_mgr_addr = base + MULTI_DB_MSG_MGR_OFFSET;
   DWORD public_msg_mgr_addr = base + PUBLIC_MSG_MGR_OFFSET;
   DWORD favorite_storage_mgr_addr = base + FAVORITE_STORAGE_MGR_OFFSET;
@@ -207,6 +290,21 @@ std::vector<void *> GetDbHandles() {
       dbs.push_back(msg0_db);
       wstring msg_db_name = wstring((wchar_t *)(*(DWORD *)(db_addr)));
       dbmap[msg_db_name] = msg0_db;
+
+      // BufInfoStorage
+      DWORD buf_info_addr = *(DWORD *)(db_addr + 0x14);
+
+      DWORD buf_info_handle = *(DWORD *)(buf_info_addr + 0x38);
+      DatabaseInfo media_msg0_db{0};
+      media_msg0_db.db_name = (wchar_t *)(*(DWORD *)(buf_info_addr + 0x4C));
+      media_msg0_db.db_name_len = *(DWORD *)(buf_info_addr + 0x50);
+      media_msg0_db.handle = buf_info_handle;
+      ExecuteSQL(buf_info_handle,
+                 "select * from sqlite_master where type=\"table\";",
+                 (DWORD)GetDbInfo, &media_msg0_db);
+      dbs.push_back(media_msg0_db);
+      wstring media_msg_db_name = wstring((wchar_t *)(*(DWORD *)(buf_info_addr + 0x4C)));
+      dbmap[media_msg_db_name] = media_msg0_db;
     }
   }
 
@@ -315,4 +413,26 @@ vector<string> GetChatMsgByMsgId(ULONG64 msgid){
     return result[1];
   }
   return {};
+}
+
+std::string GetVoiceBuffByMsgId(ULONG64 msgid) {
+  char sql[260] = {0};
+  sprintf_s(sql, "SELECT Buf from Media  WHERE Reserved0=%llu;", msgid);
+  wchar_t dbname[20] = {0};
+  for (int i = 0;; i++) {
+    swprintf_s(dbname, L"MediaMSG%d.db", i);
+    DWORD handle = GetDbHandleByDbName(dbname);
+    #ifdef _DEBUG
+    cout <<" handle =" <<handle<<endl;
+    #endif
+    if (handle == 0) return "";
+    vector<vector<string>> result;
+    int ret = Select(handle, (const char *)sql, result);
+    #ifdef _DEBUG
+    cout <<" size =" <<result.size()<<endl;
+    #endif
+    if (result.size() == 0) continue;
+    return result[1][0];
+  }
+  return "";
 }

@@ -694,6 +694,14 @@ void api_handle(mg_http_message *hm, struct mg_connection *c, string &ret) {
       ret = ret_data.dump();
       break;
     }
+    case WECHAT_GET_VOICE:{
+      ULONG64 msg_id = get_http_param_ulong64(hm, j_param, "msgId", is_post);
+      wstring voice_dir = get_http_req_param(hm, j_param, "voiceDir", is_post);
+      int success = GetVoice(msg_id,WS2LW(voice_dir));
+      json ret_data = {{"code", success}, {"result", "OK"}};
+      ret = ret_data.dump();
+      break;
+    }
     default:
       break;
   }

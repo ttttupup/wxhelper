@@ -5,6 +5,7 @@
 #include "get_db_handle.h"
 
 #include "wechat_data.h"
+#include "base64.h"
 
 #define WX_NEW_CHAT_MSG_OFFSET 0x76f010
 #define WX_GET_PRE_DOWNLOAD_MGR_OFFSET 0x80f110
@@ -179,5 +180,34 @@ int DoDownloadTask(ULONG64 msg_id) {
     POPAD
   }
 
+  return success;
+}
+
+int GetVoice(ULONG64 msg_id, wchar_t *dir) {
+  int success = -1;
+  string buff = GetVoiceBuffByMsgId(msg_id);
+  if (buff.size() == 0) {
+    success = 0;
+    return success;
+  }
+  wstring save_path = wstring(dir);
+  if (!FindOrCreateDirectoryW(save_path.c_str())) {
+    success = -2;
+    return success;
+  }
+  save_path = save_path + L"\\" + to_wstring(msg_id) + L".amr";
+  HANDLE file_handle = CreateFileW(save_path.c_str(), GENERIC_ALL, 0, NULL,
+                                   CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+  if (file_handle == INVALID_HANDLE_VALUE) {
+    #ifdef _DEBUG
+    wcout <<" save_path =" <<save_path<<endl;
+    #endif
+    return success;
+  }
+  DWORD bytes_write = 0;
+  string decode = base64_decode(buff);
+  WriteFile(file_handle, (LPCVOID)decode.c_str(), decode.size(), &bytes_write, 0);
+  CloseHandle(file_handle);
+  success = 1;
   return success;
 }
