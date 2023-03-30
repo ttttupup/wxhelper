@@ -49,7 +49,7 @@ source: 简单的命令行远程注入源码。
 个人常用的方法，请参考https://github.com/ttttupup/wxhelper/wiki    
 使用上的问题，可查询https://github.com/ttttupup/wxhelper/discussions    
 数据库解密，请参考https://github.com/ttttupup/wxhelper/wiki      
- 
+个人精力有限，只维护最新版本，旧版本的bug会在新版本中修复，不维护旧版本。   
 
 
 #### 编译环境
