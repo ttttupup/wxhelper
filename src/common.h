@@ -2,7 +2,7 @@
 #define COMMON_H_
 #include <string>
 #define READ_WSTRING(addr, offset) ((*(DWORD *)(addr + offset + 0x4) == 0) ? std::wstring(L"") : std::wstring((wchar_t *)(*(DWORD *)(addr + offset)), *(DWORD *)(addr + offset + 0x4)))
-
+#define STR2INT(str) (IsDigit(str) ? stoi(str) : 0)
 /// @brief utf8 转换成unicode
 /// @param buffer utf8
 /// @return  unicode
@@ -62,6 +62,8 @@ std::string Hex2String(const std::string &hex_str);
 std::string Bytes2Hex(const BYTE *bytes, const int length);
 
 void Hex2Bytes(const std::string &hex, BYTE *bytes);
+
+bool IsDigit(std::string str);
 
 template <typename T1, typename T2>
 std::vector<T1> split(T1 str, T2 letter) {

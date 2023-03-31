@@ -188,3 +188,16 @@ void Hex2Bytes(const std::string &hex, BYTE *bytes) {
     bytes[i] = n;
   }
 }
+
+
+bool IsDigit(string str) {
+  if (str.length() == 0) {
+    return false;
+  }
+  for (auto it : str) {
+    if (it < '0' || it > '9') {
+      return false;
+    }
+  }
+  return true;
+}

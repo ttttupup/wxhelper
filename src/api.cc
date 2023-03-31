@@ -31,7 +31,7 @@
 using namespace std;
 using namespace nlohmann;
 
-#define STR2INT(str) (is_digit(str) ? stoi(str) : 0)
+// #define STR2INT(str) (is_digit(str) ? stoi(str) : 0)
 #define WS2LW(wstr) (LPWSTR) wstr.c_str()
 
 static bool kHttpRuning = false;
