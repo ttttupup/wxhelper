@@ -18,6 +18,9 @@ include_directories(${VCPKG_INSTALLED_DIR}/x86-windows/include)
 
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(unofficial-mongoose CONFIG REQUIRED)
+# find_package(spdlog CONFIG REQUIRED)
+# find_package(minhook CONFIG REQUIRED)
+
 
 add_library(wxhelper  SHARED ${CPP_FILES} )
 
@@ -26,6 +29,8 @@ add_library(wxhelper  SHARED ${CPP_FILES} )
 
 target_link_libraries(wxhelper PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(wxhelper PRIVATE unofficial::mongoose::mongoose)
+# target_link_libraries(wxhelper PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
+# target_link_libraries(wxhelper PRIVATE minhook::minhook)
 
 SET_TARGET_PROPERTIES(wxhelper PROPERTIES LINKER_LANGUAGE C
                       ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib

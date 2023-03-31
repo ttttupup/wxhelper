@@ -1,10 +1,10 @@
+#include "pch.h"
 #include "http_server.h"
 
 #include <nlohmann/json.hpp>
 
 #include "api_route.h"
-#include "common.h"
-#include "pch.h"
+
 #pragma comment(lib, "ws2_32.lib")
 using namespace std;
 using namespace nlohmann;
@@ -33,12 +33,12 @@ bool HttpServer::HttpStart() {
     return true;
   }
 #ifdef _DEBUG
-  CreateConsole();
+  Utils::CreateConsole();
 #endif
   running_ = true;
-  CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)StartHttpServer, NULL,
+  thread_ = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)StartHttpServer, NULL,
                NULL, 0);
-  return false;
+  return true;
 }
 
 void HttpServer::StartHttpServer() {
@@ -81,6 +81,20 @@ void HttpServer::HandleWebsocketRequest(struct mg_connection *c,
   mg_ws_send(c, wm->data.ptr, wm->data.len, WEBSOCKET_OP_TEXT);
 }
 
-bool HttpServer::HttpClose() { return false; }
+bool HttpServer::HttpClose() { 
+   if (!running_) {
+    return true;
+  }
+  #ifdef _DEBUG
+    Utils::CloseConsole();
+  #endif
+  running_ = false;
+  if (thread_) {
+    WaitForSingleObject(thread_, -1);
+    CloseHandle(thread_);
+    thread_ = NULL;
+  }
+  return true; 
+}
 
 }  // namespace wxhelper
