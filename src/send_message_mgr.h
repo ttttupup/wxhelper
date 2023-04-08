@@ -2,7 +2,6 @@
 #define WXHELPER_SEND_MESSAGE_MGR_H_
 #include "base_mgr.h"
 namespace wxhelper {
-class GlobalContext ;
 class SendMessageMgr:public BaseMgr {
  public:
    explicit SendMessageMgr(DWORD base);

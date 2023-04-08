@@ -5,6 +5,7 @@
 
 #include "wechat_function.h"
 #include "db.h"
+#include "contact_mgr.h"
 
 namespace wxhelper {
 SendMessageMgr::SendMessageMgr(DWORD base):BaseMgr(base) {}
@@ -51,7 +52,8 @@ int SendMessageMgr::SendAtText(wchar_t* chat_room_id, wchar_t** wxids, int len,
     if (!lstrcmpiW((wchar_t *)wxids[i], (wchar_t *)L"notify@all")) {
       nickname = L"所有人";
     } else {
-      // nickname = GlobalContext::GetInstance().contact_mgr->GetContactOrChatRoomNickname(wxids[i]);
+      ContactMgr contact{base_addr_};
+      nickname = contact.GetContactOrChatRoomNickname(wxids[i]);
     }
     if (nickname.length() == 0) {
       continue;
