@@ -129,17 +129,22 @@ int ContactMgr::AddFriendByWxid(wchar_t *wxid,wchar_t* msg) {
   DWORD fn1_addr = base_addr_ + 0x758720;
   WeChatString user_id(wxid);
   WeChatString w_msg(msg);
-  DWORD null_ptr = 0;
   DWORD instance =0;
-  Unkown null_obj={};
-  null_obj.field6 = 0xF;
+  Unkown null_obj={0,0,0,0,0,0xF};
  __asm{
         PUSHAD
         PUSHFD
         CALL       contact_mgr_addr     
-        MOV        dword ptr [instance],EAX       
+        MOV        dword ptr [instance],EAX     
+        MOV        EDI,0x6
+        MOV        ESI,0
+        MOV        EAX,0x2  
         SUB        ESP,0x18                                         
         MOV        EAX,ESP
+        MOV        dword ptr ds:[EAX],0   
+        MOV        dword ptr ds:[EAX+0x14],0xF
+        MOV        dword ptr ds:[EAX+0x10],0 
+        MOV        byte ptr ds:[EAX],0  
         SUB        ESP,0x18
         LEA        EAX,null_obj                              
         MOV        ECX,ESP
@@ -147,7 +152,8 @@ int ContactMgr::AddFriendByWxid(wchar_t *wxid,wchar_t* msg) {
         CALL       fn1_addr                                     
         PUSH       0x0
         PUSH       0x6
-        MOV        EAX,w_msg                     
+        MOV        EAX,w_msg       
+
         SUB        ESP,0x14
         MOV        ECX,ESP
         PUSH       -0x1
@@ -155,6 +161,7 @@ int ContactMgr::AddFriendByWxid(wchar_t *wxid,wchar_t* msg) {
         CALL       verify_msg_addr                                     
         PUSH       0x2
         LEA        EAX,user_id
+
         SUB        ESP,0x14
         MOV        ECX,ESP
         PUSH       EAX
@@ -165,29 +172,48 @@ int ContactMgr::AddFriendByWxid(wchar_t *wxid,wchar_t* msg) {
         POPFD         
         POPAD
  }
-
-  // __asm {
-  //   PUSHAD
-  //   PUSHFD
-  //   SUB        ESP,0x14
-  //   MOV        ECX,ESP
-  //   PUSH       -0x1
-  //   PUSH       w_msg
-  //   CALL       verify_msg_addr                                   
-  //   PUSH       0x2
-  //   LEA        EAX,user_id
-  //   SUB        ESP,0x14
-  //   MOV        ECX,ESP
-  //   PUSH       EAX
-  //   CALL       set_value_addr                       
-  //   CALL       contact_mgr_addr       
-  //   MOV        ECX,EAX
-  //   CALL       do_verify_user_addr    
-  //   MOV        success,EAX                    
-  //   POPFD
-  //   POPAD
-  // }
   return success;
 }
 
+ int ContactMgr::VerifyApply(wchar_t *v3, wchar_t *v4){
+  int success = -1;
+  DWORD set_value_addr = base_addr_ + WX_INIT_CHAT_MSG_OFFSET;
+  DWORD verify_addr = base_addr_ + WX_VERIFY_OK_OFFSET;
+  DWORD new_helper_addr = base_addr_ + WX_NEW_ADD_FRIEND_HELPER_OFFSET;
+  DWORD free_helper_addr = base_addr_ + WX_FREE_ADD_FRIEND_HELPER_OFFSET;
+  
+  WeChatString v4_str(v4);
+  WeChatString v3_str(v3);
+  char helper_obj[0x40] = {0};
+  char nullbuffer[0x3CC] = {0};
+  __asm {
+      PUSHAD  
+      PUSHFD         
+      LEA        ECX,helper_obj
+      CALL       new_helper_addr
+      MOV        ESI,0x0
+      MOV        EDI,0x6                   
+      PUSH       ESI
+      PUSH       EDI
+      SUB        ESP,0x14
+      MOV        ECX,ESP
+      LEA        EAX,v4_str
+      PUSH       EAX
+      CALL       set_value_addr                                  
+      SUB        ESP,0x8
+      PUSH       0x0
+      LEA        EAX, nullbuffer
+      PUSH       EAX
+      LEA        EAX,v3_str
+      PUSH       EAX
+      LEA        ECX,helper_obj        
+      CALL       verify_addr                       
+      MOV        success,EAX     
+      LEA        ECX,helper_obj
+      CALL       free_helper_addr
+      POPFD         
+      POPAD
+  }
+  return success;
+ }
 }  // namespace wxhelper

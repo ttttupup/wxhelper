@@ -237,11 +237,11 @@ string Dispatch(struct mg_connection *c, struct mg_http_message *hm) {
       break;
     }
     case WECHAT_CONTACT_ADD_BY_WXID: {
-      // wstring user_id = GetWStringParam(j_param, "wxid");
-      // wstring msg = GetWStringParam(j_param, "msg");
-      // int success = g_context.contact_mgr->AddFriendByWxid(WS2LPWS(user_id),WS2LPWS(msg));
-      // json ret_data = {{"code", success}, {"result", "OK"}};
-      // ret = ret_data.dump();
+      wstring user_id = GetWStringParam(j_param, "wxid");
+      wstring msg = GetWStringParam(j_param, "msg");
+      int success = g_context.contact_mgr->AddFriendByWxid(WS2LPWS(user_id),WS2LPWS(msg));
+      json ret_data = {{"code", success}, {"result", "OK"}};
+      ret = ret_data.dump();
       break;
     }
     case WECHAT_CONTACT_ADD_BY_V3: {
@@ -251,6 +251,11 @@ string Dispatch(struct mg_connection *c, struct mg_http_message *hm) {
       break;
     }
     case WECHAT_CONTACT_VERIFY_APPLY: {
+      wstring v3 = GetWStringParam(j_param, "v3");
+      wstring v4 = GetWStringParam(j_param, "v4");
+      int success = g_context.contact_mgr->VerifyApply(WS2LPWS(v3),WS2LPWS(v4));
+      json ret_data = {{"code", success}, {"result", "OK"}};
+      ret = ret_data.dump();
       break;
     }
     case WECHAT_CONTACT_EDIT_REMARK: {
