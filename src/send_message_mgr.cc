@@ -14,10 +14,9 @@ int SendMessageMgr::SendText(wchar_t* wxid, wchar_t* msg) {
   WeChatString to_user(wxid);
   WeChatString text_msg(msg);
   wchar_t** msg_pptr = &text_msg.ptr;
-  DWORD base = Utils::GetWeChatWinBase();
-  DWORD send_message_mgr_addr = base + WX_SEND_MESSAGE_MGR_OFFSET;
-  DWORD send_text_msg_addr = base + WX_SEND_TEXT_OFFSET;
-  DWORD free_chat_msg_addr = base + WX_FREE_CHAT_MSG_OFFSET;
+  DWORD send_message_mgr_addr = base_addr_ + WX_SEND_MESSAGE_MGR_OFFSET;
+  DWORD send_text_msg_addr = base_addr_ + WX_SEND_TEXT_OFFSET;
+  DWORD free_chat_msg_addr = base_addr_ + WX_FREE_CHAT_MSG_OFFSET;
   char chat_msg[0x2D8] = {0};
   __asm {
       PUSHAD
@@ -44,6 +43,66 @@ int SendMessageMgr::SendText(wchar_t* wxid, wchar_t* msg) {
 int SendMessageMgr::SendAtText(wchar_t* chat_room_id, wchar_t** wxids, int len,
                                wchar_t* msg) {
   int success = -1;
+  WeChatString  * at_users = new WeChatString[len+1];
+  std::wstring at_msg = L"";
+  int number =0;
+  for (int i = 0; i < len; i++) {
+    std::wstring nickname;
+    if (!lstrcmpiW((wchar_t *)wxids[i], (wchar_t *)L"notify@all")) {
+      nickname = L"所有人";
+    } else {
+      // nickname = GlobalContext::GetInstance().contact_mgr->GetContactOrChatRoomNickname(wxids[i]);
+    }
+    if (nickname.length() == 0) {
+      continue;
+    }
+
+    WeChatString temp = {0};
+    temp.ptr = (wchar_t *)wxids[i];
+    temp.length = wcslen((wchar_t *)wxids[i]);
+    temp.max_length = wcslen((wchar_t *)wxids[i]) * 2;
+    memcpy(&at_users[number], &temp, sizeof(WeChatString));
+    at_msg = at_msg + L"@" + nickname + L" ";
+    number++;
+  }
+  if (number < 1){
+    return success;
+  }
+  std::wstring origin(msg);
+  at_msg += origin;
+  AtInner at_list = {0};
+  at_list.start = (DWORD)at_users;
+  at_list.finsh = (DWORD)&at_users[number];
+  at_list.end = (DWORD)&at_users[number];
+  WeChatString to_user(chat_room_id);
+  WeChatString text_msg((wchar_t *)at_msg.c_str());
+  wchar_t **msg_pptr = &text_msg.ptr;
+  
+  DWORD send_message_mgr_addr = base_addr_ + WX_SEND_MESSAGE_MGR_OFFSET;
+  DWORD send_text_msg_addr = base_addr_ + WX_SEND_TEXT_OFFSET;
+  DWORD free_chat_msg_addr = base_addr_ + WX_FREE_CHAT_MSG_OFFSET;
+  char chat_msg[0x2D8] = {0};
+  __asm{
+      PUSHAD
+      CALL       send_message_mgr_addr
+      PUSH       0x0
+      PUSH       0x0
+      PUSH       0x0
+      PUSH       0x1
+      LEA        EAX,at_list
+      PUSH       EAX
+      MOV        EAX,msg_pptr
+      PUSH       EAX
+      LEA        EDX,to_user
+      LEA        ECX,chat_msg
+      CALL       send_text_msg_addr 
+      MOV        success,EAX
+      ADD        ESP,0x18
+      LEA        ECX,chat_msg        
+      CALL       free_chat_msg_addr
+      POPAD
+  }
+  LOG_IF((success == -1), ERROR) << "SendText fail";
   return success;
 }
 int SendMessageMgr::SendImage(wchar_t* wxid, wchar_t* image_path) {
@@ -51,11 +110,10 @@ int SendMessageMgr::SendImage(wchar_t* wxid, wchar_t* image_path) {
   WeChatString to_user(wxid);
   WeChatString path(image_path);
   char chat_msg[0x2D8] = {0};
-  DWORD base = Utils::GetWeChatWinBase();
-  DWORD send_message_mgr_addr = base + WX_SEND_MESSAGE_MGR_OFFSET;
-  DWORD init_chat_msg_addr = base + WX_INIT_CHAT_MSG_OFFSET;
-  DWORD send_image_msg_addr = base + WX_SEND_IMAGE_OFFSET;
-  DWORD free_msg_addr = base + WX_FREE_CHAT_MSG_OFFSET;
+  DWORD send_message_mgr_addr = base_addr_ + WX_SEND_MESSAGE_MGR_OFFSET;
+  DWORD init_chat_msg_addr = base_addr_ + WX_INIT_CHAT_MSG_OFFSET;
+  DWORD send_image_msg_addr = base_addr_ + WX_SEND_IMAGE_OFFSET;
+  DWORD free_msg_addr = base_addr_ + WX_FREE_CHAT_MSG_OFFSET;
   DWORD temp = 0;
   WeChatString null_obj = {0};
   __asm {
@@ -88,11 +146,10 @@ int SendMessageMgr::SendFile(wchar_t* wxid, wchar_t* file_path) {
   WeChatString to_user(wxid);
   WeChatString path(file_path);
   char chat_msg[0x2D8] = {0};
-  DWORD base = Utils::GetWeChatWinBase();
-  DWORD app_msg_mgr_addr = base + WX_APP_MSG_MGR_OFFSET;
-  DWORD init_chat_msg_addr = base + WX_INIT_CHAT_MSG_OFFSET;
-  DWORD send_file_addr = base + WX_SEND_FILE_OFFSET;
-  DWORD free_msg_addr = base + WX_FREE_CHAT_MSG_OFFSET;
+  DWORD app_msg_mgr_addr = base_addr_ + WX_APP_MSG_MGR_OFFSET;
+  DWORD init_chat_msg_addr = base_addr_ + WX_INIT_CHAT_MSG_OFFSET;
+  DWORD send_file_addr = base_addr_ + WX_SEND_FILE_OFFSET;
+  DWORD free_msg_addr = base_addr_ + WX_FREE_CHAT_MSG_OFFSET;
   DWORD temp = 0;
   WeChatString null_obj = {0};
   __asm {
@@ -150,9 +207,8 @@ int SendMessageMgr::ForwardMsg(wchar_t* wxid, unsigned long long msgid) {
 
   if (localid == 0) return 0;
   WeChatString to_user(wxid);
-  DWORD base = Utils::GetWeChatWinBase();
-  DWORD forward_msg_addr = base + WX_FORWARD_MSG_OFFSET;
-  DWORD init_chat_msg_addr = base + WX_INIT_CHAT_MSG_OFFSET;
+  DWORD forward_msg_addr = base_addr_ + WX_FORWARD_MSG_OFFSET;
+  DWORD init_chat_msg_addr = base_addr_ + WX_INIT_CHAT_MSG_OFFSET;
   __asm {
     PUSHAD
     PUSHFD
