@@ -1,7 +1,6 @@
-﻿#include "pch.h"
-#include "utils.h"
+﻿#include "utils.h"
 
-
+#include "pch.h"
 
 namespace wxhelper {
 std::wstring Utils::UTF8ToWstring(const std::string &str) {
@@ -19,7 +18,7 @@ std::wstring Utils::AnsiToWstring(const std::string &input, DWORD locale) {
     MultiByteToWideChar(CP_UTF8, 0, input.c_str(), -1, &temp[0], wchar_len);
     return std::wstring(&temp[0]);
   }
-  
+
   return std::wstring();
 }
 
@@ -102,8 +101,6 @@ void Utils::Hex2Bytes(const std::string &hex, BYTE *bytes) {
   }
 }
 
-
-
 bool Utils::IsDigit(std::string str) {
   if (str.length() == 0) {
     return false;
@@ -119,7 +116,8 @@ bool Utils::IsDigit(std::string str) {
 bool Utils::FindOrCreateDirectoryW(const wchar_t *path) {
   WIN32_FIND_DATAW fd;
   HANDLE hFind = ::FindFirstFileW(path, &fd);
-  if (hFind != INVALID_HANDLE_VALUE  && (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+  if (hFind != INVALID_HANDLE_VALUE &&
+      (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
     FindClose(hFind);
     return true;
   }
@@ -174,4 +172,19 @@ std::string Utils::WCharToUTF8(wchar_t *wstr) {
   return std::string();
 }
 
+bool Utils::IsTextUtf8(const char *str, int len) {
+  int needed = MultiByteToWideChar(CP_UTF8, 0, str, len, NULL, 0);
+  wchar_t *wide_str = new wchar_t[needed];
+  MultiByteToWideChar(CP_UTF8, 0, str, len, wide_str, needed);
+
+  char *new_str = new char[len + 1];
+  WideCharToMultiByte(CP_ACP, 0, wide_str, -1, new_str, len + 1, NULL, NULL);
+
+  bool isUtf8 = strcmp(str, new_str) == 0;
+
+  delete[] wide_str;
+  delete[] new_str;
+
+  return isUtf8;
+}
 }  // namespace wxhelper

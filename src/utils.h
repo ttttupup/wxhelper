@@ -47,6 +47,8 @@ class Utils {
 
   static std::string WCharToUTF8(wchar_t *wstr);
 
+  static bool IsTextUtf8(const char *str, int len);
+
   template <typename T1, typename T2>
  static std::vector<T1> split(T1 str, T2 letter) {
     std::vector<T1> arr;
