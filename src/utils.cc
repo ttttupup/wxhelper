@@ -172,19 +172,43 @@ std::string Utils::WCharToUTF8(wchar_t *wstr) {
   return std::string();
 }
 
-bool Utils::IsTextUtf8(const char *str, int len) {
-  int needed = MultiByteToWideChar(CP_UTF8, 0, str, len, NULL, 0);
-  wchar_t *wide_str = new wchar_t[needed];
-  MultiByteToWideChar(CP_UTF8, 0, str, len, wide_str, needed);
+bool Utils::IsTextUtf8(const char *str,int length) {
+  char endian = 1;
+  bool littlen_endian = (*(char *)&endian == 1);
 
-  char *new_str = new char[len + 1];
-  WideCharToMultiByte(CP_ACP, 0, wide_str, -1, new_str, len + 1, NULL, NULL);
+  size_t i;
+  int bytes_num;
+  unsigned char chr;
 
-  bool isUtf8 = strcmp(str, new_str) == 0;
+  i = 0;
+  bytes_num = 0;
+  while (i < length) {
+    if (littlen_endian) {
+      chr = *(str + i);
+    } else {  // Big Endian
+      chr = (*(str + i) << 8) | *(str + i + 1);
+      i++;
+    }
 
-  delete[] wide_str;
-  delete[] new_str;
-
-  return isUtf8;
+    if (bytes_num == 0) {
+      if ((chr & 0x80) != 0) {
+        while ((chr & 0x80) != 0) {
+          chr <<= 1;
+          bytes_num++;
+        }
+        if ((bytes_num < 2) || (bytes_num > 6)) {
+          return false;
+        }
+        bytes_num--;
+      }
+    } else {
+      if ((chr & 0xC0) != 0x80) {
+        return false;
+      }
+      bytes_num--;
+    }
+    i++;
+  }
+  return (bytes_num == 0);
 }
 }  // namespace wxhelper

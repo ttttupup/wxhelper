@@ -588,7 +588,7 @@ void HttpHandler::HandlerRequest(struct mg_connection *c, void *ev_data) {
       ret = res.dump();
     }
     if (ret != "") {
-      mg_http_reply(c, 200, "", ret.c_str(), 0, 0);
+      mg_http_reply(c, 200, "Content-Type: application/json\r\n", "%s\n", ret.c_str());
     }
   } else {
     mg_http_reply(c, 500, NULL, "%s", "Invalid URI");

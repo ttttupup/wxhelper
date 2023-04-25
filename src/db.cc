@@ -123,9 +123,9 @@ int DB::Select(DWORD db_hanle, const char *sql,
           string content(it[i].content);
           item.push_back(content);
         } else {
-          string b64_str =
+          string base64_str =
               base64_encode((BYTE *)it[i].content, it[i].content_len);
-          item.push_back(b64_str);
+          item.push_back(base64_str);
         }
 
       } else {
