@@ -1,15 +1,17 @@
-﻿#ifndef  WXHELPER_CONFIG_H_
+﻿#ifndef WXHELPER_CONFIG_H_
 #define WXHELPER_CONFIG_H_
 
-namespace wxhelper{
+namespace wxhelper {
 
-    class Config
-    {
-    private:
-        /* data */
-    public:
-        Config(/* args */);
-        ~Config();
-    };
-}
+class Config {
+ public:
+  Config(/* args */);
+  ~Config();
+  void Initialize();
+  int  GetPort();
+
+ private:
+  int port_;
+};
+}  // namespace wxhelper
 #endif
