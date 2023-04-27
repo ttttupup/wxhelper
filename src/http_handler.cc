@@ -131,7 +131,6 @@ string Dispatch(struct mg_connection *c, struct mg_http_message *hm) {
       break;
     }
     case WECHAT_MSG_SEND_AT: {
-      break;
       wstring chat_room_id = GetWStringParam(j_param, "chatRoomId");
       vector<wstring> wxids = getArrayParam(j_param, "wxids");
       wstring msg = GetWStringParam(j_param, "msg");
@@ -502,11 +501,11 @@ string Dispatch(struct mg_connection *c, struct mg_http_message *hm) {
       break;
     }
     case WECHAT_DO_OCR: {
-      // wstring image_path = GetWStringParam(j_param, "imagePath");
-      // string text("");
-      // int success = g_context.misc_mgr->DoOCRTask(WS2LPWS(image_path), text);
-      // json ret_data = {{"code", success}, {"result", "OK"}, {"text", text}};
-      // ret = ret_data.dump();
+      wstring image_path = GetWStringParam(j_param, "imagePath");
+      string text("");
+      int success = g_context.misc_mgr->DoOCRTask(WS2LPWS(image_path), text);
+      json ret_data = {{"code", success}, {"result", "OK"}, {"text", text}};
+      ret = ret_data.dump();
       break;
     }
     case WECHAT_SEND_PAT_MSG: {
@@ -589,7 +588,7 @@ void HttpHandler::HandlerRequest(struct mg_connection *c, void *ev_data) {
       ret = res.dump();
     }
     if (ret != "") {
-      mg_http_reply(c, 200, "", ret.c_str(), 0, 0);
+      mg_http_reply(c, 200, "Content-Type: application/json\r\n", "%s\n", ret.c_str());
     }
   } else {
     mg_http_reply(c, 500, NULL, "%s", "Invalid URI");

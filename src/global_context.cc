@@ -11,14 +11,15 @@ void GlobalContext::initialize(HMODULE module) {
   module_ = module;
   DWORD base = Utils::GetWeChatWinBase();
   config.emplace();
+  config->Initialize();
   log.emplace();
-  log->initialize();
+  log->Initialize();
   hide_module.emplace();
   #ifndef _DEBUG
   hide_module->Hide(module_);
   #endif
 
-  HttpServer::GetInstance().Init(19088);
+  HttpServer::GetInstance().Init(config->GetPort());
   HttpServer::GetInstance().HttpStart();
   DB::GetInstance().init(base);
   contact_mgr.emplace(ContactMgr{base});

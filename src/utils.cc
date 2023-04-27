@@ -1,7 +1,6 @@
-﻿#include "pch.h"
-#include "utils.h"
+﻿#include "utils.h"
 
-
+#include "pch.h"
 
 namespace wxhelper {
 std::wstring Utils::UTF8ToWstring(const std::string &str) {
@@ -19,7 +18,7 @@ std::wstring Utils::AnsiToWstring(const std::string &input, DWORD locale) {
     MultiByteToWideChar(CP_UTF8, 0, input.c_str(), -1, &temp[0], wchar_len);
     return std::wstring(&temp[0]);
   }
-  
+
   return std::wstring();
 }
 
@@ -102,8 +101,6 @@ void Utils::Hex2Bytes(const std::string &hex, BYTE *bytes) {
   }
 }
 
-
-
 bool Utils::IsDigit(std::string str) {
   if (str.length() == 0) {
     return false;
@@ -119,7 +116,8 @@ bool Utils::IsDigit(std::string str) {
 bool Utils::FindOrCreateDirectoryW(const wchar_t *path) {
   WIN32_FIND_DATAW fd;
   HANDLE hFind = ::FindFirstFileW(path, &fd);
-  if (hFind != INVALID_HANDLE_VALUE  && (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+  if (hFind != INVALID_HANDLE_VALUE &&
+      (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
     FindClose(hFind);
     return true;
   }
@@ -174,4 +172,43 @@ std::string Utils::WCharToUTF8(wchar_t *wstr) {
   return std::string();
 }
 
+bool Utils::IsTextUtf8(const char *str,int length) {
+  char endian = 1;
+  bool littlen_endian = (*(char *)&endian == 1);
+
+  size_t i;
+  int bytes_num;
+  unsigned char chr;
+
+  i = 0;
+  bytes_num = 0;
+  while (i < length) {
+    if (littlen_endian) {
+      chr = *(str + i);
+    } else {  // Big Endian
+      chr = (*(str + i) << 8) | *(str + i + 1);
+      i++;
+    }
+
+    if (bytes_num == 0) {
+      if ((chr & 0x80) != 0) {
+        while ((chr & 0x80) != 0) {
+          chr <<= 1;
+          bytes_num++;
+        }
+        if ((bytes_num < 2) || (bytes_num > 6)) {
+          return false;
+        }
+        bytes_num--;
+      }
+    } else {
+      if ((chr & 0xC0) != 0x80) {
+        return false;
+      }
+      bytes_num--;
+    }
+    i++;
+  }
+  return (bytes_num == 0);
+}
 }  // namespace wxhelper

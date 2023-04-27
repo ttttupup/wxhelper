@@ -5,6 +5,7 @@
 #include "easylogging++.h"
 
 #include "wechat_function.h"
+#include "utils.h"
 using namespace std;
 
 namespace wxhelper {
@@ -117,8 +118,16 @@ int DB::Select(DWORD db_hanle, const char *sql,
     vector<string> item;
     for (size_t i = 0; i < it.size(); i++) {
       if (!it[i].is_blob) {
-        string content(it[i].content);
-        item.push_back(content);
+        bool is_utf8 = Utils::IsTextUtf8(it[i].content, it[i].content_len);
+        if (is_utf8) {
+          string content(it[i].content);
+          item.push_back(content);
+        } else {
+          string base64_str =
+              base64_encode((BYTE *)it[i].content, it[i].content_len);
+          item.push_back(base64_str);
+        }
+
       } else {
         string b64_str =
             base64_encode((BYTE *)it[i].content, it[i].content_len);

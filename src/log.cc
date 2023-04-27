@@ -7,7 +7,7 @@ Log::Log(/* args */) {}
 
 Log::~Log() {}
 
-void Log::initialize() {
+void Log::Initialize() {
 
   el::Configurations conf;
   // 启用日志

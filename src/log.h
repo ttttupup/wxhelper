@@ -8,7 +8,7 @@ namespace wxhelper{
     public:
         Log(/* args */);
         ~Log();
-         void initialize();
+        void Initialize();
     };
     
 

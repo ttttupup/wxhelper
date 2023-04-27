@@ -90,7 +90,7 @@ int MiscMgr::DoOCRTask(wchar_t *img_path, std::string &result) {
     for (unsigned int i = 0; i < num - 1; i++) {
       DWORD content = *(DWORD *)header;
       result += Utils::WstringToUTF8(READ_WSTRING(content, 0x14));
-
+      result += "\r\n";
       header = content;
     }
   }
