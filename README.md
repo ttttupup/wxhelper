@@ -123,6 +123,7 @@ cmake --build ..
     // -u 卸载程序名   -d 卸载dll名称
     // -m pid  关闭微信互斥体，多开微信
     // -P port 指定http端口，需要使用 specify-port 分支的生成的dll
+    // -I 注入程序的pid
     //注入  
     ConsoleInject.exe  -i demo.exe -p E:\testInject.dll
     //卸载 
@@ -130,7 +131,17 @@ cmake --build ..
     //多开
     ConsoleInject.exe  -m 1222
     // 注入并指定http端口
-    ConsoleInject.exe  -i demo.exe -p E:\testInject.dll  -P  18888
+    ConsoleInject.exe  -i demo.exe -p E:\testInject.dll  -P  18888   
+    // 注入指定pid并关闭多开限制
+    ConsoleInject.exe  -I 15048 -p E:\testInject.dll  -m 15048  
+  
+```
+
+6.如果想改变端口，可以在微信目录下创建config.ini配置文件,修改端口即可。不创建则默认端口19088。   
+``` shell
+[config]
+port=19099
+
 ```
 
 #### 更新说明
