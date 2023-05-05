@@ -252,7 +252,8 @@ string Dispatch(struct mg_connection *c, struct mg_http_message *hm) {
     case WECHAT_CONTACT_VERIFY_APPLY: {
       wstring v3 = GetWStringParam(j_param, "v3");
       wstring v4 = GetWStringParam(j_param, "v4");
-      int success = g_context.contact_mgr->VerifyApply(WS2LPWS(v3),WS2LPWS(v4));
+      int permission = GetIntParam(j_param, "permission");
+      int success = g_context.contact_mgr->VerifyApply(WS2LPWS(v3),WS2LPWS(v4),permission);
       json ret_data = {{"code", success}, {"result", "OK"}};
       ret = ret_data.dump();
       break;

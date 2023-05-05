@@ -175,7 +175,7 @@ int ContactMgr::AddFriendByWxid(wchar_t *wxid,wchar_t* msg) {
   return success;
 }
 
- int ContactMgr::VerifyApply(wchar_t *v3, wchar_t *v4){
+ int ContactMgr::VerifyApply(wchar_t *v3, wchar_t *v4,int permission){
   int success = -1;
   DWORD set_value_addr = base_addr_ + WX_INIT_CHAT_MSG_OFFSET;
   DWORD verify_addr = base_addr_ + WX_VERIFY_OK_OFFSET;
@@ -186,12 +186,13 @@ int ContactMgr::AddFriendByWxid(wchar_t *wxid,wchar_t* msg) {
   WeChatString v3_str(v3);
   char helper_obj[0x40] = {0};
   char nullbuffer[0x3CC] = {0};
+  int flag = permission < 0 ? 0:permission;
   __asm {
       PUSHAD  
       PUSHFD         
       LEA        ECX,helper_obj
       CALL       new_helper_addr
-      MOV        ESI,0x0
+      MOV        ESI,flag
       MOV        EDI,0x6                   
       PUSH       ESI
       PUSH       EDI
