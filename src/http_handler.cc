@@ -9,7 +9,6 @@
 #include "chat_room_mgr.h"
 #include "contact_mgr.h"
 #include "db.h"
-#include "easylogging++.h"
 #include "hooks.h"
 #include "misc_mgr.h"
 #include "send_message_mgr.h"
@@ -71,9 +70,9 @@ string Dispatch(struct mg_connection *c, struct mg_http_message *hm) {
   if (mg_vcasecmp(&hm->method, "POST") == 0) {
     is_post = 1;
   }
-  el::Logger *defaultLogger = el::Loggers::getLogger("default");
-  defaultLogger->info("method: %v   body: %v", hm->method.ptr, hm->body.ptr);
-  LOG_IF(is_post != 1, INFO) << "request method is not post";
+  // el::Logger *defaultLogger = el::Loggers::getLogger("default");
+  // defaultLogger->info("method: %v   body: %v", hm->method.ptr, hm->body.ptr);
+  // LOG_IF(is_post != 1, INFO) << "request method is not post";
 
   if (is_post == 0) {
     json ret_data = {{"result", "ERROR"}, {"msg", "not support method"}};

@@ -5,7 +5,6 @@
 #include "base64.h"
 #include "db.h"
 #include "hooks.h"
-#include "easylogging++.h"
 #define BUFSIZE 1024
 
 #define JPEG0 0xFF
@@ -429,7 +428,7 @@ int MiscMgr::SearchContactNetScene(wchar_t *keyword,UserInfo ** user) {
     }
   }
   *user= &hooks::userinfo;
-  LOG(INFO)<<"user:" <<user;
+  // LOG(INFO)<<"user:" <<user;
   return success;
 }
 

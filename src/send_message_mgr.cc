@@ -1,12 +1,9 @@
 ﻿#include "pch.h"
 #include "send_message_mgr.h"
-
-#include "easylogging++.h"
-
 #include "wechat_function.h"
 #include "db.h"
 #include "contact_mgr.h"
-
+#include "spdlog/spdlog.h"
 namespace wxhelper {
 SendMessageMgr::SendMessageMgr(DWORD base):BaseMgr(base) {}
 SendMessageMgr::~SendMessageMgr() {}
@@ -38,7 +35,8 @@ int SendMessageMgr::SendText(wchar_t* wxid, wchar_t* msg) {
       CALL       free_chat_msg_addr
       POPAD
   }
-  LOG_IF((success == -1), ERROR) << "SendText fail";
+  SPDLOG_INFO("SendText  code = {}",success);
+  SPDLOG_INFO("global log with source info");
   return success;
 }
 int SendMessageMgr::SendAtText(wchar_t* chat_room_id, wchar_t** wxids, int len,
@@ -104,7 +102,7 @@ int SendMessageMgr::SendAtText(wchar_t* chat_room_id, wchar_t** wxids, int len,
       CALL       free_chat_msg_addr
       POPAD
   }
-  LOG_IF((success == -1), ERROR) << "SendText fail";
+  SPDLOG_INFO("SendText  code = {}",success);
   return success;
 }
 int SendMessageMgr::SendImage(wchar_t* wxid, wchar_t* image_path) {
@@ -140,7 +138,7 @@ int SendMessageMgr::SendImage(wchar_t* wxid, wchar_t* image_path) {
       CALL       free_msg_addr
       POPAD
   }
-  LOG_IF((success == -1), ERROR) << "SendImage fail";
+  SPDLOG_INFO("SendImage  code = {}",success);
   return success;
 }
 int SendMessageMgr::SendFile(wchar_t* wxid, wchar_t* file_path) {
@@ -194,10 +192,10 @@ int SendMessageMgr::SendFile(wchar_t* wxid, wchar_t* file_path) {
       POPFD
       POPAD
   }
+  SPDLOG_INFO("SendFile  code = {}",success);
   if (success == 0x31) {
     return 1;
   }
-  LOG_IF((success == -1), ERROR) << "SendFile fail";
   return success;
 }
 

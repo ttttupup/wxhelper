@@ -2,8 +2,6 @@
 #include "db.h"
 
 #include "base64.h"
-#include "easylogging++.h"
-
 #include "wechat_function.h"
 #include "utils.h"
 using namespace std;
@@ -462,9 +460,9 @@ std::vector<void *> DB::GetDbHandles() {
   dbs_.push_back(db_end);
 #ifdef _DEBUG
   for (unsigned int i = 0; i < dbs_.size() - 1; i++) {
-    LOG(INFO) << "dbname =" << dbs_[i].db_name;
-    LOG(INFO) << "handle =" << dbs_[i].handle;
-    LOG(INFO) << "table_count =" << dbs_[i].tables.size();
+    // LOG(INFO) << "dbname =" << dbs_[i].db_name;
+    // LOG(INFO) << "handle =" << dbs_[i].handle;
+    // LOG(INFO) << "table_count =" << dbs_[i].tables.size();
   }
 #endif
   vector<void *> ret_array;
@@ -492,7 +490,7 @@ unsigned int DB::GetLocalIdByMsgId(ULONG64 msgid, int &dbIndex) {
     swprintf_s(dbname, L"MSG%d.db", i);
     DWORD handle = GetDbHandleByDbName(dbname);
     if (handle == 0) {
-      LOG(INFO) << "MSG db handle is null";
+      // LOG(INFO) << "MSG db handle is null";
       return 0;
     }
     vector<vector<string>> result;
@@ -517,7 +515,7 @@ vector<string> DB::GetChatMsgByMsgId(ULONG64 msgid) {
     swprintf_s(dbname, L"MSG%d.db", i);
     DWORD handle = GetDbHandleByDbName(dbname);
     if (handle == 0) {
-      LOG(INFO) << "MSG db handle is null";
+      // LOG(INFO) << "MSG db handle is null";
       return {};
     }
     vector<vector<string>> result;
@@ -536,7 +534,7 @@ std::string DB::GetVoiceBuffByMsgId(ULONG64 msgid) {
     swprintf_s(dbname, L"MediaMSG%d.db", i);
     DWORD handle = GetDbHandleByDbName(dbname);
     if (handle == 0) {
-      LOG(INFO) << "Media db handle is null";
+      // LOG(INFO) << "Media db handle is null";
       return "";
     }
     vector<vector<string>> result;

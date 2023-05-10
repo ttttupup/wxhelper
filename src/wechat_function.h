@@ -22,17 +22,17 @@
 // searchContactMgr
 #define WX_SEARCH_CONTACT_MGR_OFFSET 0xa6cb00
 // appMsgMgr
-#define WX_APP_MSG_MGR_OFFSET   0x76ae20
+#define WX_APP_MSG_MGR_OFFSET   0x76b8c0
 // sendMessageMgr
-#define WX_SEND_MESSAGE_MGR_OFFSET 0x768140
+#define WX_SEND_MESSAGE_MGR_OFFSET 0x768be0
 
 
 // setChatMsgValue
-#define WX_INIT_CHAT_MSG_OFFSET 0xf59e40
+#define WX_INIT_CHAT_MSG_OFFSET 0xf5b3f0
 
 // chatMsg
 #define WX_NEW_CHAT_MSG_OFFSET 0x76f010
-#define WX_FREE_CHAT_MSG_OFFSET 0x756960
+#define WX_FREE_CHAT_MSG_OFFSET 0x7573f0
 #define WX_FREE_CHAT_MSG_2_OFFSET 0x6f4ea0
 #define WX_FREE_CHAT_MSG_INSTANCE_COUNTER_OFFSET 0x756e30
 
@@ -88,7 +88,6 @@
 
 #define WX_PUSH_ATTACH_TASK_OFFSET 0x82bb40
 
-#define WX_FREE_CHAT_MSG_OFFSET 0x756960
 #define WX_GET_MGR_BY_PREFIX_LOCAL_ID_OFFSET 0xbc0370
 #define WX_GET_CURRENT_DATA_PATH_OFFSET 0xc872c0
 #define WX_APP_MSG_INFO_OFFSET 0x7b3d20
@@ -125,11 +124,11 @@
 //forward
 #define WX_FORWARD_MSG_OFFSET 0xce6730
 // send file
-#define WX_SEND_FILE_OFFSET     0xb6d1f0
+#define WX_SEND_FILE_OFFSET     0xb6dfd0
 // send image
-#define WX_SEND_IMAGE_OFFSET  0xce6640
+#define WX_SEND_IMAGE_OFFSET  0xce74b0
 // send text
-#define WX_SEND_TEXT_OFFSET 0xce6c80
+#define WX_SEND_TEXT_OFFSET 0xce7af0
 
 
 //ocr

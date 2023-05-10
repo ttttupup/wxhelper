@@ -1,7 +1,6 @@
 ﻿#include "pch.h"
 #include "global_context.h"
 #include "http_server.h"
-#include "easylogging++.h"
 #include "hooks.h"
 
 

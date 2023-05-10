@@ -1,6 +1,5 @@
 ﻿#include "pch.h"
 #include "account_mgr.h"
-#include "easylogging++.h"
 
 
 #include "wechat_function.h"

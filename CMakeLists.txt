@@ -4,15 +4,18 @@ project(wxhelper VERSION 1.0.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D '_UNICODE' /D 'UNICODE' /D 'ELPP_THREAD_SAFE'")
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D '_UNICODE' /D 'UNICODE' ")
 
 file(GLOB CPP_FILES  ${PROJECT_SOURCE_DIR}/src/*.cc  ${PROJECT_SOURCE_DIR}/src/*.cpp)
 
 
 
-include_directories(${VCPKG_INSTALLED_DIR}/x86-windows/include)
+include_directories(${VCPKG_INSTALLED_DIR}/x86-windows/include  ${PROJECT_SOURCE_DIR}/spdlog/include)
 
+add_subdirectory(spdlog)
 # add_subdirectory(3rd)
 # add_subdirectory(source)
 
@@ -29,6 +32,7 @@ add_library(wxhelper  SHARED ${CPP_FILES} )
 
 target_link_libraries(wxhelper PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(wxhelper PRIVATE unofficial::mongoose::mongoose)
+target_include_directories(wxhelper PRIVATE spdlog )
 # target_link_libraries(wxhelper PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
 # target_link_libraries(wxhelper PRIVATE minhook::minhook)
 
