@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
+include(ExternalProject)
 project(wxhelper VERSION 1.0.0)
 
 
@@ -15,14 +16,15 @@ file(GLOB CPP_FILES  ${PROJECT_SOURCE_DIR}/src/*.cc  ${PROJECT_SOURCE_DIR}/src/*
 
 include_directories(${VCPKG_INSTALLED_DIR}/x86-windows/include  ${PROJECT_SOURCE_DIR}/spdlog/include)
 
+
+
 add_subdirectory(spdlog)
-# add_subdirectory(3rd)
 # add_subdirectory(source)
 
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(unofficial-mongoose CONFIG REQUIRED)
-# find_package(spdlog CONFIG REQUIRED)
-# find_package(minhook CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
+
 
 
 add_library(wxhelper  SHARED ${CPP_FILES} )
@@ -32,8 +34,8 @@ add_library(wxhelper  SHARED ${CPP_FILES} )
 
 target_link_libraries(wxhelper PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(wxhelper PRIVATE unofficial::mongoose::mongoose)
-target_include_directories(wxhelper PRIVATE spdlog )
-# target_link_libraries(wxhelper PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
+target_link_libraries(wxhelper PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
+
 # target_link_libraries(wxhelper PRIVATE minhook::minhook)
 
 SET_TARGET_PROPERTIES(wxhelper PROPERTIES LINKER_LANGUAGE C
