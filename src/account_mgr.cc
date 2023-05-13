@@ -128,16 +128,16 @@ int AccountMgr::GetSelfInfo(SelfInfoInner &out) {
       }
     }
 
-    if (*(DWORD *)(service_addr + 0x304) == 0 ||
-        *(DWORD *)(service_addr + 0x304 + 0x10) == 0) {
+    if (*(DWORD *)(service_addr + 0x31C) == 0 ||
+        *(DWORD *)(service_addr + 0x31C + 0x10) == 0) {
       out.head_img = string();
     } else {
-      if (*(DWORD *)(service_addr + 0x304 + 0x14) == 0xF) {
-        out.head_img = string((char *)(service_addr + 0x304),
-                              *(DWORD *)(service_addr + 0x304 + 0x10));
+      if (*(DWORD *)(service_addr + 0x31C + 0x14) == 0xF) {
+        out.head_img = string((char *)(service_addr + 0x31C),
+                              *(DWORD *)(service_addr + 0x31C + 0x10));
       } else {
-        out.head_img = string(*(char **)(service_addr + 0x304),
-                              *(DWORD *)(service_addr + 0x304 + 0x10));
+        out.head_img = string(*(char **)(service_addr + 0x31C),
+                              *(DWORD *)(service_addr + 0x31C + 0x10));
       }
     }
 

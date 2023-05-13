@@ -23,7 +23,7 @@ add_subdirectory(spdlog)
 
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(unofficial-mongoose CONFIG REQUIRED)
-find_package(spdlog CONFIG REQUIRED)
+# find_package(spdlog CONFIG REQUIRED)
 
 
 

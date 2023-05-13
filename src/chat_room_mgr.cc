@@ -108,6 +108,7 @@ int ChatRoomMgr::DelMemberFromChatRoom(wchar_t* chat_room_id, wchar_t** wxids,
   DWORD init_chat_msg_addr = base_addr_ + WX_INIT_CHAT_MSG_OFFSET;
   __asm {
          PUSHAD
+         PUSHFD
          CALL       get_chat_room_mgr_addr                              
          SUB        ESP,0x14
          MOV        ESI,EAX
@@ -120,6 +121,7 @@ int ChatRoomMgr::DelMemberFromChatRoom(wchar_t* chat_room_id, wchar_t** wxids,
          PUSH       EAX
          CALL       del_member_addr   
          MOV        success,EAX        
+         POPFD
          POPAD
   }
   return success;

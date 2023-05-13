@@ -18,6 +18,7 @@ int SendMessageMgr::SendText(wchar_t* wxid, wchar_t* msg) {
   char chat_msg[0x2D8] = {0};
   __asm {
       PUSHAD
+      PUSHFD
       CALL       send_message_mgr_addr
       PUSH       0x0
       PUSH       0x0
@@ -33,6 +34,7 @@ int SendMessageMgr::SendText(wchar_t* wxid, wchar_t* msg) {
       ADD        ESP,0x18
       LEA        ECX,chat_msg        
       CALL       free_chat_msg_addr
+      POPFD
       POPAD
   }
   SPDLOG_INFO("SendText  code = {}",success);
@@ -84,6 +86,7 @@ int SendMessageMgr::SendAtText(wchar_t* chat_room_id, wchar_t** wxids, int len,
   char chat_msg[0x2D8] = {0};
   __asm{
       PUSHAD
+      PUSHFD
       CALL       send_message_mgr_addr
       PUSH       0x0
       PUSH       0x0
@@ -100,6 +103,7 @@ int SendMessageMgr::SendAtText(wchar_t* chat_room_id, wchar_t** wxids, int len,
       ADD        ESP,0x18
       LEA        ECX,chat_msg        
       CALL       free_chat_msg_addr
+      POPFD
       POPAD
   }
   SPDLOG_INFO("SendText  code = {}",success);
@@ -118,6 +122,7 @@ int SendMessageMgr::SendImage(wchar_t* wxid, wchar_t* image_path) {
   WeChatString null_obj = {0};
   __asm {
       PUSHAD
+      PUSHFD
       CALL       send_message_mgr_addr                        
       SUB        ESP,0x14
       MOV        temp,EAX
@@ -136,6 +141,7 @@ int SendMessageMgr::SendImage(wchar_t* wxid, wchar_t* image_path) {
       MOV        success,EAX
       LEA        ECX,chat_msg
       CALL       free_msg_addr
+      POPFD
       POPAD
   }
   SPDLOG_INFO("SendImage  code = {}",success);

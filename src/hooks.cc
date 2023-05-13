@@ -56,12 +56,12 @@ void SendSocketMessage(InnerMessageStruct *msg) {
   string jstr = j_msg.dump() + "\n";
 
   if (server_port_ == 0) {
-    // LOG(INFO) << "http server port error :" << server_port_;
+    SPDLOG_ERROR("http server port error :{}",server_port_);
     return;
   }
   SOCKET client_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
   if (client_socket < 0) {
-    // LOG(INFO) << "socket init  fail";
+     SPDLOG_ERROR("socket init  fail");
     return;
   }
   BOOL status = false;
@@ -72,13 +72,13 @@ void SendSocketMessage(InnerMessageStruct *msg) {
   InetPtonA(AF_INET, server_ip_, &client_addr.sin_addr.s_addr);
   if (connect(client_socket, reinterpret_cast<sockaddr *>(&client_addr),
               sizeof(sockaddr)) < 0) {
-    // LOG(INFO) << "socket connect  fail";
+    SPDLOG_ERROR("socket connect  fail");
     return;
   }
   char recv_buf[1024] = {0};
   int ret = send(client_socket, jstr.c_str(), jstr.size(), 0);
   if (ret == -1 || ret == 0) {
-    // LOG(INFO) << "socket send  fail ,ret:" << ret;
+    SPDLOG_ERROR("socket send  fail ,ret::{}",ret);
     closesocket(client_socket);
     return;
   }
@@ -86,7 +86,8 @@ void SendSocketMessage(InnerMessageStruct *msg) {
   ret = recv(client_socket, recv_buf, sizeof(recv_buf), 0);
   closesocket(client_socket);
   if (ret == -1 || ret == 0) {
-    // LOG(INFO) << "socket recv  fail ,ret:" << ret;
+    SPDLOG_ERROR("socket recv  fail ,ret:{}",ret);
+    return;
   }
 }
 
@@ -213,38 +214,35 @@ int HookRecvMsg(char *client_ip, int port) {
   strcpy_s(server_ip_, client_ip);
   DWORD base = Utils::GetWeChatWinBase();
   if (!base) {
+    SPDLOG_INFO("base addr is null");
     return -1;
   }
 
   if (msg_hook_flag_) {
+    SPDLOG_INFO("recv msg hook already called");
     return 2;
   }
 
   DWORD hook_recv_msg_addr = base + WX_RECV_MSG_HOOK_OFFSET;
   msg_next_addr_ = base + WX_RECV_MSG_HOOK_NEXT_OFFSET;
-  // msg_back_addr_ = hook_recv_msg_addr + 0x5;
-  // LOG(INFO) << "base" << base;
-  // LOG(INFO) << "msg_next_addr_" << msg_next_addr_;
-  // LOG(INFO) << "msg_back_addr_" << msg_back_addr_;
+   msg_back_addr_ = hook_recv_msg_addr + 0x5;
   Utils::HookAnyAddress(hook_recv_msg_addr, (LPVOID)HandleSyncMsg,
                         msg_asm_code_);
 
   DWORD hook_sns_msg_addr = base + WX_SNS_HOOK_OFFSET;
   sns_next_addr_ = base + WX_SNS_HOOK_NEXT_OFFSET;
   sns_back_addr_ = hook_sns_msg_addr + 0x5;
-  // LOG(INFO) << "base" << base;
-  // LOG(INFO) << "sns_next_addr_" << sns_next_addr_;
-  // LOG(INFO) << "sns_back_addr_" << sns_back_addr_;
   Utils::HookAnyAddress(hook_sns_msg_addr, (LPVOID)HandleSNSMsg, sns_asm_code_);
 
   msg_hook_flag_ = true;
+  SPDLOG_INFO("hook recv msg success");
   return 1;
 }
 
 int UnHookRecvMsg() {
   server_port_ = 0;
   if (!msg_hook_flag_) {
-    // LOG(INFO) << "this port already hooked";
+    SPDLOG_INFO("recv msg hook already called");
     return 2;
   }
   DWORD base = Utils::GetWeChatWinBase();
@@ -272,7 +270,6 @@ void PrintLog(DWORD addr) {
   WideCharToMultiByte(CP_ACP, 0, w_msg, -1, ansi_message, size, 0, 0);
   delete[] w_msg;
   w_msg = NULL;
-  // LOG(INFO) << ansi_message;
   delete[] ansi_message;
   ansi_message = NULL;
 }
