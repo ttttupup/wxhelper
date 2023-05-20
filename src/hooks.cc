@@ -3,7 +3,7 @@
 #include <winsock2.h>
 
 #include <nlohmann/json.hpp>
-
+#include "thread_pool.h"
 #include "wechat_function.h"
 using namespace nlohmann;
 using namespace std;
@@ -91,6 +91,78 @@ void SendSocketMessage(InnerMessageStruct *msg) {
   }
 }
 
+VOID CALLBACK SendMsgCallback(PTP_CALLBACK_INSTANCE instance, PVOID context,
+                             PTP_WORK Work) {
+  InnerMessageStruct *msg = (InnerMessageStruct *)context;
+  if (msg == NULL) {
+    SPDLOG_INFO("add work:msg is null");
+    return;
+  }
+  unique_ptr<InnerMessageStruct> sms(msg);
+  json j_msg =
+      json::parse(msg->buffer, msg->buffer + msg->length, nullptr, false);
+  if (j_msg.is_discarded() == true) {
+    return;
+  }
+  string jstr = j_msg.dump() + "\n";
+
+  if (server_port_ == 0) {
+    SPDLOG_ERROR("http server port error :{}", server_port_);
+    return;
+  }
+  WSADATA was_data = {0};
+  int ret = WSAStartup(MAKEWORD(2, 2), &was_data);
+  if (ret != 0) {
+    SPDLOG_ERROR("WSAStartup failed:{}", ret);
+    return;
+  }
+
+  SOCKET client_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+  if (client_socket < 0) {
+    SPDLOG_ERROR("socket init  fail");
+    return;
+  }
+  BOOL status = false;
+  sockaddr_in client_addr;
+  memset(&client_addr, 0, sizeof(client_addr));
+  client_addr.sin_family = AF_INET;
+  client_addr.sin_port = htons((u_short)server_port_);
+  InetPtonA(AF_INET, server_ip_, &client_addr.sin_addr.s_addr);
+  if (connect(client_socket, reinterpret_cast<sockaddr *>(&client_addr),
+              sizeof(sockaddr)) < 0) {
+    SPDLOG_ERROR("socket connect  fail");
+    closesocket(client_socket);
+    WSACleanup();
+    return ;
+  }
+  char recv_buf[1024] = {0};
+  ret = send(client_socket, jstr.c_str(), jstr.size(), 0);
+  if (ret == -1 || ret == 0) {
+    SPDLOG_ERROR("socket send  fail ,ret:{}", ret);
+    closesocket(client_socket);
+    WSACleanup();
+    return;
+  }
+  ret = shutdown(client_socket, SD_SEND);
+  if (ret == SOCKET_ERROR) {
+    SPDLOG_ERROR("shutdown failed with erro:{}", ret);
+    closesocket(client_socket);
+    WSACleanup();
+    return ;
+  }
+
+  memset(recv_buf, 0, sizeof(recv_buf));
+  ret = recv(client_socket, recv_buf, sizeof(recv_buf), 0);
+  closesocket(client_socket);
+  if (ret == -1 || ret == 0) {
+    SPDLOG_ERROR("socket recv  fail ,ret:{}", ret);
+    WSACleanup();
+    return;
+  }
+  WSACleanup();
+  return;
+}
+
 void __cdecl OnRecvMsg(DWORD msg_addr) {
   json j_msg;
   unsigned long long msgid = *(unsigned long long *)(msg_addr + 0x30);
@@ -138,12 +210,16 @@ void __cdecl OnRecvMsg(DWORD msg_addr) {
   inner_msg->buffer = new char[jstr.size() + 1];
   memcpy(inner_msg->buffer, jstr.c_str(), jstr.size() + 1);
   inner_msg->length = jstr.size();
-  HANDLE thread = CreateThread(
-      NULL, 0, (LPTHREAD_START_ROUTINE)SendSocketMessage, inner_msg, NULL, 0);
-  if (thread) {
-    CloseHandle(thread);
-  }
+  bool add = ThreadPool::GetInstance().AddWork(SendMsgCallback,inner_msg);
+  SPDLOG_INFO("add work:{}",add);
+  // HANDLE thread = CreateThread(
+  //     NULL, 0, (LPTHREAD_START_ROUTINE)SendSocketMessage, inner_msg, NULL, 0);
+  // if (thread) {
+  //   CloseHandle(thread);
+  // }
 }
+
+
 
 /// @brief  hook msg implement
 _declspec(naked) void HandleSyncMsg() {

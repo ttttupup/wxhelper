@@ -2,6 +2,7 @@
 #include "global_context.h"
 #include "http_server.h"
 #include "hooks.h"
+#include "thread_pool.h"
 
 
 namespace wxhelper {
@@ -27,6 +28,7 @@ void GlobalContext::initialize(HMODULE module) {
   account_mgr.emplace(AccountMgr{base});
   chat_room_mgr.emplace(ChatRoomMgr{base});
   sns_mgr.emplace(SNSMgr{base});
+  ThreadPool::GetInstance().Create(1,512);
 }
 
 void GlobalContext::finally() { 
