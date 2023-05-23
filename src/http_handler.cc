@@ -226,8 +226,12 @@ string Dispatch(struct mg_connection *c, struct mg_http_message *hm) {
             {"province",  Utils::WCharToUTF8(user->province)},
             {"sex", user->sex},
             {"signature",  Utils::WCharToUTF8(user->signature)},
-            {"v2",  Utils::WCharToUTF8(user->v2)},
+            // {"v2",  Utils::WCharToUTF8(user->v2)},
             {"v3",  Utils::WCharToUTF8(user->v3)},
+            {"V3",  Utils::WCharToUTF8(user->V3)},
+            {"account",  Utils::WCharToUTF8(user->account)},
+            // {"friendName",  Utils::WCharToUTF8(user->friend_name)},
+            // {"py",  Utils::WCharToUTF8(user->py)},
         };
         ret_data["userInfo"] = info;
       }

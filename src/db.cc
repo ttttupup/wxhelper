@@ -490,7 +490,7 @@ unsigned int DB::GetLocalIdByMsgId(ULONG64 msgid, int &dbIndex) {
     swprintf_s(dbname, L"MSG%d.db", i);
     DWORD handle = GetDbHandleByDbName(dbname);
     if (handle == 0) {
-      // LOG(INFO) << "MSG db handle is null";
+      SPDLOG_INFO("MSG db handle is null");
       return 0;
     }
     vector<vector<string>> result;

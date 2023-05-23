@@ -20,7 +20,7 @@
 // patMgr
 #define  WX_PAT_MGR_OFFSET  0x931730
 // searchContactMgr
-#define WX_SEARCH_CONTACT_MGR_OFFSET 0xa6cb00
+#define WX_SEARCH_CONTACT_MGR_OFFSET 0xa6d860
 // appMsgMgr
 #define WX_APP_MSG_MGR_OFFSET   0x76b8c0
 // sendMessageMgr
@@ -77,11 +77,11 @@
 #define WX_SET_VALUE_OFFSET 0x1f80900
 #define WX_DO_DEL_CONTACT_OFFSET 0xca6480
 #define WX_GET_CONTACT_OFFSET  0xc05ca0
-#define WX_DO_VERIFY_USER_OFFSET  0xc02100
-#define WX_VERIFY_MSG_OFFSET  0xf59d40
-#define WX_VERIFY_OK_OFFSET  0xa18bd0
-#define WX_NEW_ADD_FRIEND_HELPER_OFFSET 0xa17d50
-#define WX_FREE_ADD_FRIEND_HELPER_OFFSET 0xa17e70
+#define WX_DO_VERIFY_USER_OFFSET  0xc02f90
+#define WX_VERIFY_MSG_OFFSET  0xf5b2f0
+#define WX_VERIFY_OK_OFFSET  0xa19940
+#define WX_NEW_ADD_FRIEND_HELPER_OFFSET 0xa18ac0
+#define WX_FREE_ADD_FRIEND_HELPER_OFFSET 0xa18be0
 
 // pushAttachTask
 
@@ -121,7 +121,7 @@
 
 
 //forward
-#define WX_FORWARD_MSG_OFFSET 0xce6730
+#define WX_FORWARD_MSG_OFFSET 0xce75a0
 // send file
 #define WX_SEND_FILE_OFFSET     0xb6dfd0
 // send image
@@ -152,7 +152,7 @@
 #define STORAGE_END_OFFSET  0x13fc
 
 #define PUBLIC_MSG_MGR_OFFSET  0x30400a4
-#define MULTI_DB_MSG_MGR_OFFSET  0x30403b8
+#define MULTI_DB_MSG_MGR_OFFSET  0x30424dc
 #define FAVORITE_STORAGE_MGR_OFFSET  0x3041e70
 #define FTS_FAVORITE_MGR_OFFSET  0x3000948
 
@@ -576,12 +576,20 @@ struct UserInfo {
   int keyword_len;
   wchar_t *v3;
   int v3_len;
+  wchar_t *V3;
+  int V3_len;
+  wchar_t *account;
+  int account_len;
+  wchar_t *friend_name;
+  int friend_name_len;
   wchar_t *nickname;
   int nickname_len;
   wchar_t *signature;
   int signature_len;
   wchar_t *v2;
   int v2_len;
+  wchar_t *py;
+  int py_len;
   wchar_t *nation;
   int nation_len;
   wchar_t *province;

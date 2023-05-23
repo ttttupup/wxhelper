@@ -393,7 +393,7 @@ int UnHookLog() {
 void SetErrorCode(int code) { userinfo.error_code = code; }
 
 void SetUserInfoDetail(DWORD address) {
-  // LOG(INFO) << "hook userinfo addr" <<&userinfo;
+  SPDLOG_INFO("hook userinfo addr = {}",address);
   DWORD length = *(DWORD *)(address + 0x8);
   userinfo.keyword = new wchar_t[length + 1];
   userinfo.keyword_len = length;
@@ -424,6 +424,36 @@ void SetUserInfoDetail(DWORD address) {
     ZeroMemory(userinfo.big_image, (length + 1) * sizeof(wchar_t));
   }
 
+  length = *(DWORD *)(address + 0x6C);
+  userinfo.V3 = new wchar_t[length + 1];
+  userinfo.V3_len = length;
+  if (length) {
+    memcpy(userinfo.V3, (wchar_t *)(*(DWORD *)(address + 0x68)),
+           (length + 1) * sizeof(wchar_t));
+  } else {
+    ZeroMemory(userinfo.V3, (length + 1) * sizeof(wchar_t));
+  }
+
+  length = *(DWORD *)(address + 0x80);
+  userinfo.account = new wchar_t[length + 1];
+  userinfo.account_len = length;
+  if (length) {
+    memcpy(userinfo.account, (wchar_t *)(*(DWORD *)(address + 0x7C)),
+           (length + 1) * sizeof(wchar_t));
+  } else {
+    ZeroMemory(userinfo.account, (length + 1) * sizeof(wchar_t));
+  }
+
+  // length = *(DWORD *)(address + 0x94);
+  // userinfo.friend_name = new wchar_t[length + 1];
+  // userinfo.friend_name_len = length;
+  // if (length) {
+  //   memcpy(userinfo.friend_name, (wchar_t *)(*(DWORD *)(address + 0x90)),
+  //          (length + 1) * sizeof(wchar_t));
+  // } else {
+  //   ZeroMemory(userinfo.friend_name, (length + 1) * sizeof(wchar_t));
+  // }
+
   length = *(DWORD *)(address + 0xC8);
   userinfo.nickname = new wchar_t[length + 1];
   userinfo.nickname_len = length;
@@ -434,15 +464,28 @@ void SetUserInfoDetail(DWORD address) {
     ZeroMemory(userinfo.nickname, (length + 1) * sizeof(wchar_t));
   }
 
-  length = *(DWORD *)(address + 0x108);
-  userinfo.v2 = new wchar_t[length + 1];
-  userinfo.v2_len = length;
-  if (length) {
-    memcpy(userinfo.v2, (wchar_t *)(*(DWORD *)(address + 0x104)),
-           (length + 1) * sizeof(wchar_t));
-  } else {
-    ZeroMemory(userinfo.v2, (length + 1) * sizeof(wchar_t));
-  }
+  // the results of calling and UI operations are different
+  //  
+  // length = *(DWORD *)(address + 0x108);
+  // userinfo.v2 = new wchar_t[length + 1];
+  // userinfo.v2_len = length;
+  // if (length) {
+  //   memcpy(userinfo.v2, (wchar_t *)(*(DWORD *)(address + 0x104)),
+  //          (length + 1) * sizeof(wchar_t));
+  // } else {
+  //   ZeroMemory(userinfo.v2, (length + 1) * sizeof(wchar_t));
+  // }
+
+  // length = *(DWORD *)(address + 0x11C);
+  // userinfo.py = new wchar_t[length + 1];
+  // userinfo.py_len = length;
+  // if (length) {
+  //   memcpy(userinfo.py, (wchar_t *)(*(DWORD *)(address + 0x118)),
+  //          (length + 1) * sizeof(wchar_t));
+  // } else {
+  //   ZeroMemory(userinfo.py, (length + 1) * sizeof(wchar_t));
+  // }
+
 
   length = *(DWORD *)(address + 0x16C);
   userinfo.small_image = new wchar_t[length + 1];
@@ -508,8 +551,20 @@ void DeleteUserInfoCache() {
   if (userinfo.v3) {
     delete userinfo.v3;
   }
+  if (userinfo.V3) {
+    delete userinfo.V3;
+  }
+  if (userinfo.account) {
+    delete userinfo.account;
+  }
+  if (userinfo.friend_name) {
+    delete userinfo.friend_name;
+  }
   if (userinfo.nickname) {
     delete userinfo.nickname;
+  }
+  if (userinfo.py) {
+    delete userinfo.py;
   }
   if (userinfo.nation) {
     delete userinfo.nation;
@@ -569,11 +624,11 @@ int HookSearchContact() {
   if (search_contact_flag_) {
     return 2;
   }
-  DWORD hook_error_code_addr = base + WX_SEARCH_CONTACT_ERROR_CODE_HOOK_OFFSET;
-  error_code_next_addr_ = base + WX_SEARCH_CONTACT_ERROR_CODE_HOOK_NEXT_OFFSET;
-  error_code_back_addr_ = hook_error_code_addr + 0x5;
-  Utils::HookAnyAddress(hook_error_code_addr, (LPVOID)HandleErrorCode,
-                        error_code_asm_code_);
+  // DWORD hook_error_code_addr = base + WX_SEARCH_CONTACT_ERROR_CODE_HOOK_OFFSET;
+  // error_code_next_addr_ = base + WX_SEARCH_CONTACT_ERROR_CODE_HOOK_NEXT_OFFSET;
+  // error_code_back_addr_ = hook_error_code_addr + 0x5;
+  // Utils::HookAnyAddress(hook_error_code_addr, (LPVOID)HandleErrorCode,
+  //                       error_code_asm_code_);
 
   DWORD hook_user_info_addr = base + WX_SEARCH_CONTACT_DETAIL_HOOK_OFFSET;
   user_info_next_addr_ = base + WX_SEARCH_CONTACT_DETAIL_HOOK_NEXT_OFFSET;

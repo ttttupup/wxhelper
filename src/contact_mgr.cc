@@ -126,7 +126,7 @@ int ContactMgr::AddFriendByWxid(wchar_t *wxid,wchar_t* msg) {
   DWORD verify_msg_addr = base_addr_ + WX_VERIFY_MSG_OFFSET;
   DWORD set_value_addr = base_addr_ + WX_INIT_CHAT_MSG_OFFSET;
   DWORD do_verify_user_addr = base_addr_ + WX_DO_VERIFY_USER_OFFSET;
-  DWORD fn1_addr = base_addr_ + 0x758720;
+  DWORD fn1_addr = base_addr_ + 0x7591b0;
   WeChatString user_id(wxid);
   WeChatString w_msg(msg);
   DWORD instance =0;

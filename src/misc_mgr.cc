@@ -401,8 +401,8 @@ int MiscMgr::GetImgByName(wchar_t* file_path,wchar_t* save_dir) {
 
 int MiscMgr::SearchContactNetScene(wchar_t *keyword,UserInfo ** user) {
   int success = -1;
-  hooks::HookSearchContact();
   hooks::DeleteUserInfoCache();
+  hooks::HookSearchContact();
   DWORD search_contact_mgr_addr = base_addr_ + WX_SEARCH_CONTACT_MGR_OFFSET;
   DWORD search_contact_addr = base_addr_ + WX_SEARCH_CONTACT_OFFSET;
   WeChatString key(keyword);
@@ -419,16 +419,15 @@ int MiscMgr::SearchContactNetScene(wchar_t *keyword,UserInfo ** user) {
 		popad;
   }
   success = 1;
-  while (hooks::userinfo.error_code == 1 && hooks::user_info_flag_) {
-    Sleep(20);
-  }
-  if (hooks::userinfo.error_code == 0) {
+  // while (hooks::userinfo.error_code == 1 && hooks::user_info_flag_) {
+  //   Sleep(20);
+  // }
+  // if (hooks::userinfo.error_code == 0) {
     while (hooks::userinfo.over == false && hooks::user_info_flag_) {
-      Sleep(20);
+      Sleep(2);
     }
-  }
+  // }
   *user= &hooks::userinfo;
-  // LOG(INFO)<<"user:" <<user;
   return success;
 }
 
