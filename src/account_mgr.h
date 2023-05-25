@@ -8,6 +8,9 @@ namespace wxhelper{
     public:
     explicit  AccountMgr(DWORD base);
      ~AccountMgr();
+
+     std::string GetLoginUrl();
+
      int GetSelfInfo(SelfInfoInner& out);
 
      int CheckLogin();
