@@ -153,8 +153,8 @@ int MiscMgr::DoDownloadTask(ULONG64 msg_id) {
   DWORD get_current_data_path_addr = base_addr_ + WX_GET_CURRENT_DATA_PATH_OFFSET;
   DWORD free_app_msg_info_addr = base_addr_ + WX_FREE_APP_MSG_INFO_OFFSET;
   DWORD push_thumb_task_addr = base_addr_ + WX_PUSH_THUMB_TASK_OFFSET;
-  DWORD video_mgr_addr = base_addr_ + WX_VIDEO_MGR_OFFSET;
-  DWORD download_video_image_addr = base_addr_ + WX_VIDEO_MGR_OFFSET;
+
+
 
   WeChatString current_data_path;
 
@@ -255,23 +255,7 @@ int MiscMgr::DoDownloadTask(ULONG64 msg_id) {
   memcpy(&chat_msg[0x19C], &w_thumb_path, sizeof(w_thumb_path));
   memcpy(&chat_msg[0x1B0], &w_save_path, sizeof(w_save_path));
   memcpy(&chat_msg[0x29C], &temp, sizeof(temp));
-  // note： the image has been downloaded and will not be downloaded again
-  // use low-level method  
-  // this function does not work, need to modify chatmsg.
-  // if (type == 0x3E || type == 0x2B){
-  //   __asm{
-  //      PUSHAD
-  //      PUSHFD
-  //      CALL       video_mgr_addr
-  //      LEA        ECX,chat_msg
-  //      PUSH       ECX
-  //      MOV        ECX,EAX
-  //      CALL       download_video_image_addr
-  //      POPFD
-  //      POPAD
-  //   }
-  // }
-
+ 
   __asm {
     PUSHAD
     PUSHFD

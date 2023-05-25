@@ -344,6 +344,7 @@ void PrintLog(DWORD addr) {
   char *ansi_message = new char[size + 1];
   memset(ansi_message, 0, size + 1);
   WideCharToMultiByte(CP_ACP, 0, w_msg, -1, ansi_message, size, 0, 0);
+  spdlog::info("wechat log:{}", ansi_message);
   delete[] w_msg;
   w_msg = NULL;
   delete[] ansi_message;
