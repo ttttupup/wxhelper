@@ -94,7 +94,7 @@ string Dispatch(struct mg_connection *c, struct mg_http_message *hm) {
     case WECHAT_IS_LOGIN: {
       int success = -1;
       success = g_context.account_mgr->CheckLogin();
-      json ret_data = {{"result", "OK"}, {"code", success}};
+      json ret_data = {{"result", "OK"}, {"code", success}, {"login_url", g_context.account_mgr->GetLoginUrl()}};
       ret = ret_data.dump();
       break;
     }

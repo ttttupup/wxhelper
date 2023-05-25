@@ -181,6 +181,11 @@ int AccountMgr::GetSelfInfo(SelfInfoInner &out) {
   return 1;
 }
 
+string AccountMgr::GetLoginUrl() {
+  DWORD login_url_addr = base_addr_ + WX_LOGIN_URL_OFFSET;
+  return "http://weixin.qq.com/x/" + std::string(reinterpret_cast<char*>(*(DWORD*)login_url_addr));
+}
+
 int AccountMgr::CheckLogin() {
   int success = -1;
   DWORD accout_service_addr = base_addr_ + WX_ACCOUNT_SERVICE_OFFSET;
