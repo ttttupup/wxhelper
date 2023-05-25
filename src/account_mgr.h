@@ -13,6 +13,8 @@ namespace wxhelper{
      int CheckLogin();
 
      int Logout();
+
+     std::string GetQRCodeUrl();
     };
     
 }

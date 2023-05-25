@@ -572,6 +572,12 @@ string Dispatch(struct mg_connection *c, struct mg_http_message *hm) {
       ret = ret_data.dump();
       break;
     }
+    case WECHAT_GET_QRCODE: {
+      string url = g_context.account_mgr->GetQRCodeUrl();
+      json ret_data = {{"code", 1}, {"result", "OK"},{"qrCodeUrl",url}};
+      ret = ret_data.dump();
+      break;
+    }
     default:
       break;
   }
