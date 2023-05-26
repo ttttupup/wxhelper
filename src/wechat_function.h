@@ -25,6 +25,8 @@
 #define WX_APP_MSG_MGR_OFFSET   0x76b8c0
 // sendMessageMgr
 #define WX_SEND_MESSAGE_MGR_OFFSET 0x768be0
+// shareRecordMgr
+#define WX_SHARE_RECORD_MGR_OFFSET 0x78d5f0                
 
 
 // setChatMsgValue
