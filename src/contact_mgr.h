@@ -15,6 +15,7 @@ class ContactMgr : public BaseMgr {
   std::wstring GetContactOrChatRoomNickname(wchar_t* id);
   int AddFriendByWxid(wchar_t* wxid,wchar_t* msg);
   int VerifyApply(wchar_t *v3, wchar_t *v4,int permission);
+  int GetContactByWxid(wchar_t* wxid,ContactProfile& profile);
 };
 }  // namespace wxhelper
 

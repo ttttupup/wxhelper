@@ -217,4 +217,42 @@ int ContactMgr::AddFriendByWxid(wchar_t *wxid,wchar_t* msg) {
   }
   return success;
  }
+
+ int ContactMgr::GetContactByWxid(wchar_t *wxid,ContactProfile& profile){
+  int success = -1;
+  char buff[0x440] = {0};
+  WeChatString pri(wxid);
+  DWORD contact_mgr_addr = base_addr_ + WX_CONTACT_MGR_OFFSET;
+  DWORD get_contact_addr = base_addr_ + WX_GET_CONTACT_OFFSET;
+  DWORD free_contact_addr = base_addr_ + WX_FREE_CONTACT_OFFSET;
+  __asm {
+      PUSHAD
+      PUSHFD
+      CALL       contact_mgr_addr                                   
+      LEA        ECX,buff
+      PUSH       ECX
+      LEA        ECX,pri
+      PUSH       ECX
+      MOV        ECX,EAX
+      CALL       get_contact_addr                            
+      POPFD
+      POPAD
+  }
+  success = 0;
+  profile.wxid = READ_WSTRING(buff, 0x10);
+  profile.account = READ_WSTRING(buff, 0x24);
+  profile.v3 = READ_WSTRING(buff, 0x38);
+  profile.nickname = READ_WSTRING(buff, 0x6C);
+  profile.head_image = READ_WSTRING(buff, 0x110);
+  __asm {
+      PUSHAD
+      PUSHFD
+      LEA        ECX,buff
+      CALL       free_contact_addr    
+      POPFD
+      POPAD
+  }
+  success = 1;
+  return success;
+ }
 }  // namespace wxhelper

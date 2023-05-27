@@ -591,7 +591,32 @@ string Dispatch(struct mg_connection *c, struct mg_http_message *hm) {
       ret = ret_data.dump();
       break;
     }
+    case WECHAT_GET_MEMBER_PROFILE: {
+      wstring pri_id = GetWStringParam(j_param, "wxid");
+      ContactProfile profile;
+      int success =
+          g_context.contact_mgr->GetContactByWxid(WS2LPWS(pri_id),profile);
+      if(success==1){
+        json ret_data = {
+            {"code", success},
+            {"result", "OK"},
+            {"account", Utils::WstringToUTF8(profile.account)},
+            {"headImage", Utils::WstringToUTF8(profile.head_image)},
+            {"nickname", Utils::WstringToUTF8(profile.nickname)},
+            {"v3", Utils::WstringToUTF8(profile.v3)},
+            {"wxid", Utils::WstringToUTF8(profile.wxid)},
+        };
+        ret = ret_data.dump();
+      } else {
+        json ret_data = {{"result", "ok"}, {"code", success}};
+        ret = ret_data.dump();
+      }
+
+      break;
+    }
     default:
+      json ret_data = {{"result", "ERROR"}, {"msg", "not support api"}};
+      ret = ret_data.dump();
       break;
   }
 

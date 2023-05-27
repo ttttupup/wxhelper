@@ -778,4 +778,12 @@ struct Unkown{
   DWORD field5= 0;
   DWORD field6= 0;
 };
+
+struct ContactProfile{
+  std::wstring wxid;
+  std::wstring account;
+  std::wstring v3;
+  std::wstring nickname;
+  std::wstring head_image;
+};
 #endif
