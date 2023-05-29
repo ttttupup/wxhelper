@@ -186,7 +186,7 @@ int AccountMgr::CheckLogin() {
       POPAD
   }
   if (service_addr) {
-    success = *(DWORD *)(service_addr + 0x4C8);
+    success = *(DWORD *)(service_addr + 0x4E0);
   }
   return success;
 }
