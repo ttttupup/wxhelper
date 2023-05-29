@@ -415,4 +415,45 @@ int MiscMgr::SearchContactNetScene(wchar_t *keyword,UserInfo ** user) {
   return success;
 }
 
+int MiscMgr::RevokeMsg(ULONG64 msg_id){
+  int success = -1;
+  char chat_msg[0x2D8] = {0};
+  DWORD new_chat_msg_addr = base_addr_ + WX_NEW_CHAT_MSG_OFFSET;  
+  DWORD free_addr = base_addr_ + WX_FREE_CHAT_MSG_INSTANCE_COUNTER_OFFSET;
+  DWORD get_chat_mgr_addr = base_addr_ + WX_CHAT_MGR_OFFSET;
+  DWORD get_by_local_Id_addr = base_addr_ + WX_GET_MGR_BY_PREFIX_LOCAL_ID_OFFSET;
+  DWORD revoke_msg_addr = base_addr_ + WX_REVOKE_MSG_OFFSET;
+
+  int db_index = 0;
+  int local_id =  DB::GetInstance().GetLocalIdByMsgId(msg_id, db_index);
+  if (local_id < 1) {
+    return -2;
+  }
+  __asm{
+    PUSHAD
+    PUSHFD
+    LEA        ECX,chat_msg
+    CALL       new_chat_msg_addr
+    CALL       get_chat_mgr_addr                                       
+    PUSH       dword ptr [db_index]
+    LEA        ECX,chat_msg
+    PUSH       dword ptr [local_id]
+    CALL       get_by_local_Id_addr               
+    ADD        ESP,0x8
+    CALL       get_chat_mgr_addr 
+    LEA        ECX,chat_msg
+    PUSH       ECX
+    MOV        ECX,EAX
+    CALL       revoke_msg_addr
+    MOV        success,EAX
+    LEA        ECX,chat_msg
+    PUSH       0x0
+    CALL       free_addr
+    POPFD
+    POPAD
+  }
+
+  return success;
+
+}
 }  // namespace wxhelper

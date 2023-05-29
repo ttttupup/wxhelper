@@ -614,6 +614,13 @@ string Dispatch(struct mg_connection *c, struct mg_http_message *hm) {
 
       break;
     }
+    case WECHAT_REVOKE_MSG:{
+      ULONG64 msg_id = GetULong64Param(j_param, "msgId");
+      int success = g_context.misc_mgr->RevokeMsg(msg_id);
+      json ret_data = {{"code", success}, {"result", "OK"}};
+      ret = ret_data.dump();
+      break;
+    }
     default:
       json ret_data = {{"result", "ERROR"}, {"msg", "not support api"}};
       ret = ret_data.dump();

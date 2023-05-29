@@ -9,6 +9,7 @@ SendMessageMgr::SendMessageMgr(DWORD base):BaseMgr(base) {}
 SendMessageMgr::~SendMessageMgr() {}
 int SendMessageMgr::SendText(wchar_t* wxid, wchar_t* msg) {
   int success = -1;
+  unsigned long long msgid = 0;
   WeChatString to_user(wxid);
   WeChatString text_msg(msg);
   wchar_t** msg_pptr = &text_msg.ptr;
@@ -31,13 +32,18 @@ int SendMessageMgr::SendText(wchar_t* wxid, wchar_t* msg) {
       LEA        ECX,chat_msg
       CALL       send_text_msg_addr 
       MOV        success,EAX
+      LEA        ECX,msgid
+      MOV        EDI,dword ptr[EAX +0x2b0]
+      MOV        ESI,dword ptr[EAX+0x2b4]
+      MOV        [ECX],EDI
+      MOV        [ECX + 0x4],ESI
       ADD        ESP,0x18
       LEA        ECX,chat_msg        
       CALL       free_chat_msg_addr
       POPFD
       POPAD
   }
-  SPDLOG_INFO("SendText  code = {}",success);
+  SPDLOG_INFO("SendText  code = {}",msgid);
   SPDLOG_INFO("global log with source info");
   return success;
 }

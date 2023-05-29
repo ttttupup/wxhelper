@@ -18,6 +18,7 @@ class MiscMgr :public BaseMgr{
    int GetVoice(ULONG64 msg_id, wchar_t* dir);
    int GetImgByName(wchar_t* file_path,wchar_t* save_dir);
    int SearchContactNetScene(wchar_t *keyword,UserInfo ** user);
+   int RevokeMsg(ULONG64 msg_id);
 };
 }  // namespace wxhelper
 

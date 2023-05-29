@@ -98,7 +98,8 @@
 #define WX_DOWNLOAD_VIDEO_IMG_OFFSET 0xd46c30
 
 
-
+// revoke
+#define WX_REVOKE_MSG_OFFSET 0xbb6dc0
 
 
 // pat
