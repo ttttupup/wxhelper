@@ -235,4 +235,58 @@ int SendMessageMgr::ForwardMsg(wchar_t* wxid, unsigned long long msgid) {
   }
   return success;
 }
+
+int SendMessageMgr::ForwardPublicMsg(wchar_t* wxid, wchar_t* title, wchar_t* url, wchar_t* thumburl,wchar_t* senderId,wchar_t* senderName,wchar_t* digest) {
+  int success = -1;
+  char buff[0x238] = {0};
+  DWORD init_chat_msg_addr = base_addr_ + WX_INIT_CHAT_MSG_OFFSET;
+  DWORD app_msg_mgr_addr = base_addr_ + WX_APP_MSG_MGR_OFFSET;
+  DWORD new_item_addr = base_addr_ + NEW_MM_READ_ITEM_OFFSET;
+  DWORD free_item_2_addr = base_addr_ + FREE_MM_READ_ITEM_2_OFFSET;
+  DWORD forward_public_msg_addr = base_addr_ + FORWARD_PUBLIC_MSG_OFFSET;
+  __asm {
+    PUSHAD
+    PUSHFD
+    LEA        ECX,buff
+    CALL       new_item_addr
+    POPFD
+    POPAD
+  }
+  WeChatString to_user(wxid);
+  WeChatString wtitle(title);
+  WeChatString wurl(url);
+  WeChatString wthumburl(thumburl);
+  WeChatString wsender(senderId);
+  WeChatString wname(senderName);
+  WeChatString wdigest(digest);
+  memcpy(&buff[0x4], &wtitle, sizeof(wtitle));
+  memcpy(&buff[0x2c], &wurl, sizeof(wurl));
+  memcpy(&buff[0x6c], &wthumburl, sizeof(wthumburl));
+  memcpy(&buff[0x94], &wdigest, sizeof(wdigest));
+  memcpy(&buff[0x1A0], &wsender, sizeof(wsender));
+  memcpy(&buff[0x1B4], &wname, sizeof(wname));
+  __asm {
+    PUSHAD
+    PUSHFD
+    CALL       app_msg_mgr_addr
+    LEA        ECX,buff
+    PUSH       ECX
+    SUB        ESP,0x14
+    MOV        EDI,EAX
+    MOV        ECX,ESP
+    LEA        EBX,to_user
+    PUSH       EBX
+    CALL       init_chat_msg_addr                                  
+    MOV        ECX,EDI
+    CALL       forward_public_msg_addr
+    MOV        success,EAX
+    ADD        EBX,0x14
+    LEA        ECX,buff
+    PUSH       0x0
+    CALL       free_item_2_addr
+    POPFD
+    POPAD
+  }
+  return success;
+}
 }  // namespace wxhelper

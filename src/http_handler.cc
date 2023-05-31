@@ -621,6 +621,19 @@ string Dispatch(struct mg_connection *c, struct mg_http_message *hm) {
       ret = ret_data.dump();
       break;
     }
+    case WECHAT_FORWARD_PUBLIC_MSG:{
+      wstring wxid = GetWStringParam(j_param, "wxid");
+      wstring appname = GetWStringParam(j_param, "appname");
+      wstring username = GetWStringParam(j_param, "username");
+      wstring title = GetWStringParam(j_param, "title");
+      wstring url = GetWStringParam(j_param, "url");
+      wstring thumburl = GetWStringParam(j_param, "thumburl");
+      wstring digest = GetWStringParam(j_param, "digest");
+      int success = g_context.send_mgr->ForwardPublicMsg(WS2LPWS(wxid),  WS2LPWS(title), WS2LPWS(url) , WS2LPWS(thumburl) ,WS2LPWS(username),WS2LPWS(appname),WS2LPWS(digest));
+      json ret_data = {{"code", success}, {"result", "OK"}};
+      ret = ret_data.dump();
+      break;
+    }
     default:
       json ret_data = {{"result", "ERROR"}, {"msg", "not support api"}};
       ret = ret_data.dump();

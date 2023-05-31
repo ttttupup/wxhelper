@@ -188,6 +188,13 @@
 
 
 
+// public msg forward
+
+#define NEW_MM_READ_ITEM_OFFSET  0x76f0d0
+#define FREE_MM_READ_ITEM_OFFSET  0x76e4d0
+#define FREE_MM_READ_ITEM_2_OFFSET  0x76edf0
+#define FORWARD_PUBLIC_MSG_OFFSET  0xb73de0
+
 /*******************hook*********************************************/  
 
 
