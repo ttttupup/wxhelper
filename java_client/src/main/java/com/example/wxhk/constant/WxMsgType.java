@@ -16,7 +16,7 @@ public enum WxMsgType {
     收到名片(42),
     表情(47),
     转账和收款(49),
-    收到转账之后(51),
+    收到转账之后或者文件助手等信息(51),
     /**
      * 扫码触发,会触发2次, 有一次有编号,一次没有,还有登陆之后也有,很多情况都会调用这个
      */
@@ -25,11 +25,11 @@ public enum WxMsgType {
     ;
     Integer type;
 
-    public Integer getType() {
-        return type;
-    }
-
     WxMsgType(Integer type) {
         this.type = type;
+    }
+
+    public Integer getType() {
+        return type;
     }
 }

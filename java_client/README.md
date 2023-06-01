@@ -1,5 +1,6 @@
 环境为jdk17
 执行之后会在当前项目所处磁盘根路径生成一个exec文件夹,然后会把src/main/resources/exec下的文件放在那避免因为路径问题出错
+java_client/src/main/resources/exec/c.exe 为注入器,只不过把名字改短了,更新的话换成最新版,改个名字就行, wxhelper.dll同理
 
 项目启动之后,会生成一个tcp服务端,用来接受hook信息,然后把接收的信息放在队列中,之后用一个线程去循环处理消息.
 具体实现可以看

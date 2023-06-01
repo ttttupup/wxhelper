@@ -16,18 +16,20 @@ import org.dromara.hutool.log.Log;
  * @date 2023/05/25
  */
 public class HttpSyncUtil {
+    protected static final Log log = Log.get();
     static final ClientEngine engine;
-    protected  static final   Log log = Log.get();
+
     static {
         ClientConfig clientConfig = ClientConfig.of()
                 .setTimeout(30 * 1000);
         engine = ClientEngineFactory.createEngine(clientConfig);
 
     }
-    public static JsonObject exec(HttpAsyncUtil.Type type,JsonObject obj){
+
+    public static JsonObject exec(HttpAsyncUtil.Type type, JsonObject obj) {
         String post = engine.send(Request.of("http://localhost:" + InitWeChat.wxPort + "/api/?type=" + type.getType()).method(Method.POST).body(obj.encode())).bodyStr();
         if (log.isDebugEnabled()) {
-            log.debug("type:{},{}",type.getType(),post);
+            log.debug("type:{},{}", type.getType(), post);
         }
         return new JsonObject(post);
     }
