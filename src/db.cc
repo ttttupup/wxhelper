@@ -421,8 +421,25 @@ std::vector<void *> DB::GetDbHandles() {
     }
   }
 
+  // publicMsgMedia.db
+  DWORD public_msg_media_ptr = *(DWORD *)(*(DWORD *)(public_msg_mgr_addr) + 0x8);
+  if (public_msg_media_ptr) {
+    DWORD public_msg_media_db_addr = *(DWORD *)(public_msg_media_ptr + 0x38);
+    DatabaseInfo public_msg_media_db{0};
+    public_msg_media_db.db_name = (wchar_t *)(*(DWORD *)(public_msg_media_ptr + 0x4C));
+    public_msg_media_db.db_name_len = *(DWORD *)(public_msg_media_ptr + 0x50);
+    public_msg_media_db.handle = public_msg_media_db_addr;
+    ExecuteSQL(public_msg_media_db_addr,
+               "select * from sqlite_master where type=\"table\";",
+               (DWORD)GetDbInfo, &public_msg_media_db);
+    dbs_.push_back(public_msg_media_db);
+    wstring public_msg_media_db_name =
+        wstring((wchar_t *)(*(DWORD *)(public_msg_media_ptr + 0x4C)));
+    dbmap_[public_msg_media_db_name] = public_msg_media_db;
+  }
+
   // publicMsg.db
-  DWORD public_msg_ptr = *(DWORD *)(*(DWORD *)(public_msg_mgr_addr) + 0x8);
+  DWORD public_msg_ptr = *(DWORD *)(*(DWORD *)(public_msg_mgr_addr) + 0xc);
   if (public_msg_ptr) {
     DWORD public_msg_db_addr = *(DWORD *)(public_msg_ptr + 0x38);
     DatabaseInfo public_msg_db{0};
@@ -544,4 +561,22 @@ std::string DB::GetVoiceBuffByMsgId(ULONG64 msgid) {
   }
   return "";
 }
+
+std::string DB::GetPublicMsgCompressContentByMsgId(ULONG64 msgid) {
+  char sql[260] = {0};
+  sprintf_s(sql, "SELECT CompressContent from PublicMsg  WHERE MsgSvrID=%llu;", msgid);
+  wchar_t dbname[20] = {0};
+  swprintf_s( dbname, 20, L"%s", L"PublicMsg.db");
+  DWORD handle = GetDbHandleByDbName(dbname);
+  if (handle == 0) {
+    return "";
+  }
+  vector<vector<string>> result;
+  int ret = Select(handle, (const char *)sql, result);
+  if (result.size() == 0)  {
+    return "";
+  }
+  return result[1][0];
+}
+
 }  // namespace wxhelper

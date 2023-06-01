@@ -634,6 +634,14 @@ string Dispatch(struct mg_connection *c, struct mg_http_message *hm) {
       ret = ret_data.dump();
       break;
     }
+    case WECHAT_FORWARD_PUBLIC_MSG_BY_SVRID:{
+      wstring wxid = GetWStringParam(j_param, "wxid");
+      ULONG64 msg_id = GetULong64Param(j_param, "msgId");
+      int success= g_context.send_mgr->ForwardPublicMsgByMsgSvrId(WS2LPWS(wxid),msg_id);
+      json ret_data = {{"code", success}, {"result", "OK"}};
+      ret = ret_data.dump();
+      break;
+    }
     default:
       json ret_data = {{"result", "ERROR"}, {"msg", "not support api"}};
       ret = ret_data.dump();

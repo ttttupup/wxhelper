@@ -4,6 +4,10 @@
 #include "db.h"
 #include "contact_mgr.h"
 #include "spdlog/spdlog.h"
+#include "base64.h"
+#include "lz4.h"
+#include "tinyxml2.h"
+
 namespace wxhelper {
 SendMessageMgr::SendMessageMgr(DWORD base):BaseMgr(base) {}
 SendMessageMgr::~SendMessageMgr() {}
@@ -288,5 +292,83 @@ int SendMessageMgr::ForwardPublicMsg(wchar_t* wxid, wchar_t* title, wchar_t* url
     POPAD
   }
   return success;
+}
+
+int SendMessageMgr::ForwardPublicMsgByMsgSvrId(wchar_t *wxid, unsigned long long msgid){
+
+  std::string compress_content =DB::GetInstance().GetPublicMsgCompressContentByMsgId(msgid);
+  if (compress_content.empty()) {
+    SPDLOG_INFO("Get compressContent is null from PublicMsg.db");
+    return -3;
+  }
+
+  std::string decode = base64_decode(compress_content);
+  size_t len = decode.size();
+  const char* src = decode.c_str() ;
+  size_t dst_len = (len << 8) ;
+  char* dst = new char[dst_len];
+
+  int decompress_len = LZ4_decompress_safe_partial(src,dst,len,dst_len,dst_len);
+  if (decompress_len < 0) {
+    SPDLOG_INFO("decompress content size :{}",decompress_len);
+    return -1;
+  }
+  tinyxml2::XMLDocument doc;
+  if(doc.Parse(dst,decompress_len-1) != 0){
+    SPDLOG_INFO("tinyxml2 parse error");
+    return -2;
+  }
+  const char* title = doc.FirstChildElement( "msg" )->FirstChildElement( "appmsg" )->FirstChildElement("title")->GetText();
+  const char* digest = doc.FirstChildElement( "msg" )->FirstChildElement( "appmsg" )->FirstChildElement("des")->GetText();
+
+  const char* url = doc.FirstChildElement("msg")
+                        ->FirstChildElement("appmsg")
+                        ->FirstChildElement("mmreader")
+                        ->FirstChildElement("category")
+                        ->FirstChildElement("item")
+                        ->FirstChildElement("url")
+                        ->GetText();
+  const char* thumburl = doc.FirstChildElement("msg")
+                             ->FirstChildElement("appmsg")
+                             ->FirstChildElement("thumburl")
+                             ->GetText();
+  const char* username = doc.FirstChildElement("msg")
+                             ->FirstChildElement("appmsg")
+                             ->FirstChildElement("mmreader")
+                             ->FirstChildElement("publisher")
+                             ->FirstChildElement("username")
+                             ->GetText();
+
+  const char* nickname = doc.FirstChildElement("msg")
+                             ->FirstChildElement("appmsg")
+                             ->FirstChildElement("mmreader")
+                             ->FirstChildElement("publisher")
+                             ->FirstChildElement("nickname")
+                             ->GetText();
+
+  std::string stitle(title);
+  std::string sdigest(digest);
+  std::string surl(url);
+  std::string sthumburl(thumburl);
+  std::string susername(username);
+  std::string snickname(nickname);
+
+  std::wstring wstitle =Utils::UTF8ToWstring(stitle);
+  std::wstring wsdigest =Utils::UTF8ToWstring(sdigest);
+  std::wstring wsurl =Utils::UTF8ToWstring(surl);
+  std::wstring wsthumburl =Utils::UTF8ToWstring(sthumburl);
+  std::wstring wsusername =Utils::UTF8ToWstring(susername);
+  std::wstring wsnickname =Utils::UTF8ToWstring(snickname);
+
+ int code =  ForwardPublicMsg(wxid, const_cast<wchar_t*>(wstitle.c_str()),
+                   const_cast<wchar_t*>(wsurl.c_str()),
+                   const_cast<wchar_t*>(wsthumburl.c_str()),
+                   const_cast<wchar_t*>(wsusername.c_str()),
+                   const_cast<wchar_t*>(wsnickname.c_str()),
+                   const_cast<wchar_t*>(wsdigest.c_str())
+
+  );
+
+ return code;
 }
 }  // namespace wxhelper
