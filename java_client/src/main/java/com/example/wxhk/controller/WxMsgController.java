@@ -5,10 +5,10 @@ import org.dromara.hutool.log.Log;
 
 public class WxMsgController {
 
-    protected static final  Log log = Log.get();
+    protected static final Log log = Log.get();
 
 
-    void init(){
+    void init() {
 
     }
 }

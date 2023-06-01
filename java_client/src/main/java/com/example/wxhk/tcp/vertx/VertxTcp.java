@@ -19,21 +19,20 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * 接受微信hook信息
+ *
  * @author wt
  * @date 2023/05/26
  */
 @Component
 @Order()
 public class VertxTcp extends AbstractVerticle implements CommandLineRunner {
-    protected static final  Log log = Log.get();
-     NetServer netServer;
     public final static LinkedBlockingQueue<JsonObject> LINKED_BLOCKING_QUEUE = new LinkedBlockingQueue<>();
-
-
+    protected static final Log log = Log.get();
+    NetServer netServer;
 
     @Override
     public void start(Promise<Void> startPromise) throws Exception {
-         netServer = vertx.createNetServer(new NetServerOptions()
+        netServer = vertx.createNetServer(new NetServerOptions()
                 .setPort(InitWeChat.getVertxPort())
                 .setIdleTimeout(0)
                 .setLogActivity(false)
@@ -63,9 +62,9 @@ public class VertxTcp extends AbstractVerticle implements CommandLineRunner {
         listen.onComplete(event -> {
             boolean succeeded = event.succeeded();
             if (succeeded) {
-                HttpAsyncUtil.exec(HttpAsyncUtil.Type.开启hook, new JsonObject().put("port", "8080").put("ip", "127.0.0.1"));
+                HttpAsyncUtil.exec(HttpAsyncUtil.Type.开启hook, new JsonObject().put("port", InitWeChat.getVertxPort().toString()).put("ip", "127.0.0.1"));
                 startPromise.complete();
-            }else{
+            } else {
                 startPromise.fail(event.cause());
             }
 
@@ -74,6 +73,6 @@ public class VertxTcp extends AbstractVerticle implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        WxhkApplication.vertx.deployVerticle(this,new DeploymentOptions().setWorkerPoolSize(6));
+        WxhkApplication.vertx.deployVerticle(this, new DeploymentOptions().setWorkerPoolSize(6));
     }
 }

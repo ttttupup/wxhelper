@@ -31,18 +31,14 @@ import java.io.IOException;
 public class InitWeChat implements CommandLineRunner {
 
     public final static Log log = Log.get();
-
+    public static final ConcurrentHashSet<String> WXID_MAP = new ConcurrentHashSet<>();
     public static String wxPath;
-
     public static Integer wxPort;
     public static Integer vertxPort;
     /**
      * wxhelper.dll 所在路径
      */
     public static File DLL_PATH;
-
-    public static final ConcurrentHashSet<String> WXID_MAP=new ConcurrentHashSet<>();
-
 
     public static void 注入dll(String wxPid) throws IOException {
         String format = StrUtil.format("cmd /C  c.exe -I {} -p {}\\wxhelper.dll -m {}", wxPid, DLL_PATH.getAbsolutePath(), wxPid);
@@ -138,15 +134,15 @@ public class InitWeChat implements CommandLineRunner {
             注入dll(wxPid);
         }
         ThreadUtil.execute(() -> {
-            while (!Thread.currentThread().isInterrupted()){
+            while (!Thread.currentThread().isInterrupted()) {
                 JsonObject exec = HttpSyncUtil.exec(HttpAsyncUtil.Type.检查微信登陆, new JsonObject());
-                if(exec.getInteger("code").equals(1)){
+                if (exec.getInteger("code").equals(1)) {
                     JsonObject dl = HttpSyncUtil.exec(HttpAsyncUtil.Type.获取登录信息, new JsonObject());
                     JsonObject jsonObject = dl.getJsonObject("data");
                     String wx = jsonObject.getString("wxid");
                     WXID_MAP.add(wx);
                     if (log.isDebugEnabled()) {
-                        log.debug("检测到微信登陆:{}",wx);
+                        log.debug("检测到微信登陆:{}", wx);
                     }
                     break;
                 }

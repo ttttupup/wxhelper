@@ -19,9 +19,9 @@ import org.dromara.hutool.log.Log;
  * @date 2023/05/25
  */
 public class HttpAsyncUtil {
-    protected static final Log log = Log.get();
-    public static final WebClient client = WebClient.create(WxhkApplication.vertx,new WebClientOptions().setDefaultHost("localhost").setDefaultPort(InitWeChat.wxPort)
+    public static final WebClient client = WebClient.create(WxhkApplication.vertx, new WebClientOptions().setDefaultHost("localhost").setDefaultPort(InitWeChat.wxPort)
             .setConnectTimeout(10000).setMaxPoolSize(10).setPoolEventLoopSize(10));
+    protected static final Log log = Log.get();
 
     public static Future<HttpResponse<Buffer>> exec(Type type, JsonObject object) {
         return client.post(InitWeChat.wxPort, "localhost", "/api/?type=" + type.getType())
@@ -29,7 +29,7 @@ public class HttpAsyncUtil {
                 .onSuccess(event ->
                         {
                             if (log.isDebugEnabled()) {
-                                log.debug("type:{},{}",type.getType(), event.bodyAsJsonObject());
+                                log.debug("type:{},{}", type.getType(), event.bodyAsJsonObject());
                             }
                         }
                 );
@@ -65,12 +65,12 @@ public class HttpAsyncUtil {
         ;
         String type;
 
-        public String getType() {
-            return type;
-        }
-
         Type(String type) {
             this.type = type;
+        }
+
+        public String getType() {
+            return type;
         }
     }
 }

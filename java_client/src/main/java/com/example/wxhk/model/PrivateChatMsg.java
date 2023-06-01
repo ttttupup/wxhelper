@@ -17,6 +17,7 @@ import java.io.Serializable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PrivateChatMsg implements Serializable {
 
+    String path;
     /**
      * 内容
      */
@@ -41,8 +42,6 @@ public class PrivateChatMsg implements Serializable {
     private String signature;
     private String time;
     private Integer timestamp;
-
-    String path;
     /**
      * 类型
      */
