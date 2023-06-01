@@ -19,7 +19,7 @@ include_directories(${VCPKG_INSTALLED_DIR}/x86-windows/include  ${PROJECT_SOURCE
 
 
 add_subdirectory(spdlog)
-# add_subdirectory(source)
+add_subdirectory(source)
 
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(unofficial-mongoose CONFIG REQUIRED)
