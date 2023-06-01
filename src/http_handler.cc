@@ -650,6 +650,16 @@ string Dispatch(struct mg_connection *c, struct mg_http_message *hm) {
       ret = ret_data.dump();
       break;
     }
+    case WECHAT_REFUSE:{
+      wstring wxid = GetWStringParam(j_param, "wxid");
+      wstring transcationid = GetWStringParam(j_param, "transcationId");
+      wstring transferid = GetWStringParam(j_param, "transferId");
+      BOOL response =g_context.misc_mgr->DoRefuseReceipt(
+          WS2LPWS(wxid), WS2LPWS(transcationid), WS2LPWS(transferid));
+      json ret_data = {{"msg", response}, {"result", "OK"}};
+      ret = ret_data.dump();
+      break;
+    }
     default:
       json ret_data = {{"result", "ERROR"}, {"msg", "not support api"}};
       ret = ret_data.dump();

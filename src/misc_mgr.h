@@ -13,6 +13,8 @@ class MiscMgr :public BaseMgr{
    int DoOCRTask(wchar_t* img_path, std::string& result);
    int DoConfirmReceipt(wchar_t* wxid, wchar_t* transcationid,
                               wchar_t* transferid);
+   int DoRefuseReceipt(wchar_t* wxid, wchar_t* transcationid,
+                              wchar_t* transferid);
    int DoDownloadTask(ULONG64 msg_id);
 
    int GetVoice(ULONG64 msg_id, wchar_t* dir);

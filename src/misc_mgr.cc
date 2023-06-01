@@ -135,6 +135,44 @@ int MiscMgr::DoConfirmReceipt(wchar_t *wxid, wchar_t *transcationid,
   return success;
 }
 
+int MiscMgr::DoRefuseReceipt(wchar_t *wxid, wchar_t *transcationid,
+                     wchar_t *transferid) {
+  int success = -1;
+  WeChatString recv_id(wxid);
+  WeChatString transcation_id(transcationid);
+  WeChatString transfer_id(transferid);
+  char pay_info[0x134] = {0};
+  DWORD new_pay_info_addr = base_addr_ + WX_NEW_WCPAYINFO_OFFSET;
+  DWORD free_pay_info_addr = base_addr_ + WX_FREE_WCPAYINFO_OFFSET;
+  DWORD do_confirm_addr = base_addr_ + WX_CONFIRM_RECEIPT_OFFSET;
+  __asm {
+    PUSHAD
+    LEA        ECX,pay_info
+    CALL       new_pay_info_addr
+    MOV        dword ptr [pay_info + 0x4], 0x1
+    MOV        dword ptr [pay_info + 0x4C], 0x1        
+    POPAD
+  }
+  memcpy(&pay_info[0x1c], &transcation_id, sizeof(transcation_id));
+  memcpy(&pay_info[0x38], &transfer_id, sizeof(transfer_id));
+
+  __asm {
+    PUSHAD
+    PUSH       0x0
+    SUB        ESP,0x8
+    LEA        EDX,recv_id
+    LEA        ECX,pay_info
+    CALL       do_confirm_addr  
+    MOV        success,EAX  
+    ADD        ESP,0xC
+    PUSH       0x0
+    LEA        ECX,pay_info
+    CALL       free_pay_info_addr 
+    POPAD
+  }
+  return success;
+}
+
 int MiscMgr::DoDownloadTask(ULONG64 msg_id) {
   int success = -1;
   int db_index = 0;
