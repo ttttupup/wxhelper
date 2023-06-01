@@ -2,6 +2,8 @@ package com.example.wxhk.util;
 
 import com.example.wxhk.model.PrivateChatMsg;
 import com.example.wxhk.model.request.*;
+import com.example.wxhk.model.response.ContactList;
+import com.example.wxhk.model.response.GroupMembers;
 import com.example.wxhk.tcp.vertx.ArrHandle;
 import com.example.wxhk.tcp.vertx.InitWeChat;
 import io.vertx.core.json.JsonObject;
@@ -96,14 +98,24 @@ public class HttpSendUtil {
         return exec.getJsonObject("data").getString("wxid");
     }
 
-    public static JsonObject 联系人列表(){
+    public static ContactList 联系人列表(){
         JsonObject exec = HttpSyncUtil.exec(HttpAsyncUtil.Type.联系人列表, new JsonObject());
-        return exec.getJsonObject("data");
+        return exec.mapTo(ContactList.class);
     }
     public static JsonObject 开启hook(OpenHook hook){
         JsonObject exec = HttpSyncUtil.exec(HttpAsyncUtil.Type.开启hook,hook.toJson());
-        return exec.getJsonObject("data");
+        return exec;
     }
+    public static JsonObject 关闭hook(){
+        JsonObject exec = HttpSyncUtil.exec(HttpAsyncUtil.Type.关闭hook,new JsonObject());
+        return exec;
+    }
+
+    public static GroupMembers 获取群成员(GetGroupMembers p){
+        return HttpSyncUtil.exec(HttpAsyncUtil.Type.获取群成员, p.toJson()).mapTo(GroupMembers.class);
+
+    }
+
 
     @Deprecated
     public static com.example.wxhk.infe.SendMsg of(HttpAsyncUtil.Type type) {

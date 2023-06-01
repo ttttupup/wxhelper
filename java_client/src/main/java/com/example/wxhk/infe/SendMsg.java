@@ -8,13 +8,10 @@ import io.vertx.core.json.JsonObject;
  * @author wt
  * @date 2023/06/01
  */
-@FunctionalInterface
 public interface SendMsg<T> extends java.io.Serializable{
 
     default JsonObject toJson(){
         return JsonObject.mapFrom(this);
     }
 
-
-    T of();
 }

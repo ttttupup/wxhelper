@@ -44,6 +44,5 @@ class HttpAsyncUtilTest {
     @Test
     void exec2() {
 
-
     }
 }
