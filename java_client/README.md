@@ -11,6 +11,8 @@ com.example.wxhk.tcp.vertx.VertxTcp  这个是tcp服务端,接受信息
 com.example.wxhk.tcp.vertx.InitWeChat 微信环境初始化
 
 com.example.wxhk.tcp.vertx.ArrHandle 循环消息处理
+![image](https://github.com/sglmsn/wxhelper/assets/36943585/59d49401-a492-46a9-8ed9-dab7fb1822b4)
+
 
 
 启动项目需要去修改配置文件的微信路径

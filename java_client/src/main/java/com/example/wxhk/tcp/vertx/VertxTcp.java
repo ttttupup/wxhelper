@@ -1,6 +1,7 @@
 package com.example.wxhk.tcp.vertx;
 
 import com.example.wxhk.WxhkApplication;
+import com.example.wxhk.constant.WxMsgType;
 import com.example.wxhk.util.HttpAsyncUtil;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
@@ -15,6 +16,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -27,6 +29,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Order()
 public class VertxTcp extends AbstractVerticle implements CommandLineRunner {
     public final static LinkedBlockingQueue<JsonObject> LINKED_BLOCKING_QUEUE = new LinkedBlockingQueue<>();
+    /**
+     * 这个只保留交易相关的类型
+     */
+    public final static LinkedBlockingQueue<JsonObject> LINKED_BLOCKING_QUEUE_MON = new LinkedBlockingQueue<>();
     protected static final Log log = Log.get();
     NetServer netServer;
 
@@ -51,7 +57,14 @@ public class VertxTcp extends AbstractVerticle implements CommandLineRunner {
                     case END_ARRAY -> {
                     }
                     case VALUE -> {
-                        LINKED_BLOCKING_QUEUE.add(event.objectValue());
+                        JsonObject entries = event.objectValue();
+
+                        if(Objects.equals(entries.getInteger("type"), WxMsgType.扫码触发.getType()) ||
+                                Objects.equals(entries.getInteger("type"), WxMsgType.转账和收款.getType())){
+                            LINKED_BLOCKING_QUEUE_MON.add(entries);
+                        }else{
+                            LINKED_BLOCKING_QUEUE.add(entries);
+                        }
                     }
                 }
             });
