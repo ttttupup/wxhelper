@@ -7,6 +7,8 @@ import com.example.wxhk.util.HttpAsyncUtil;
 import com.example.wxhk.util.HttpSendUtil;
 import com.example.wxhk.util.HttpSyncUtil;
 import io.vertx.core.json.JsonObject;
+import jakarta.annotation.PostConstruct;
+import org.dromara.hutool.core.text.StrUtil;
 import org.dromara.hutool.core.util.XmlUtil;
 import org.dromara.hutool.log.Log;
 import org.springframework.stereotype.Component;
@@ -21,35 +23,50 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Component
 public class WxMsgHandle {
     public static final ConcurrentHashMap<Integer, Handle> map = new ConcurrentHashMap<>(32);
     protected static final Log log = Log.get();
-    public static ConcurrentHashMap<String, String> cache = new ConcurrentHashMap<>();
+    /**
+     * 文件传输助手
+     */
+    public static final String FILEHELPER = "filehelper";
+    /**
+     * 收款码缓存 因为有2段信息,一段是交易id,里面可以解析出来源方,二段解析出金额
+     */
+    public static ConcurrentHashMap<String, String> collection_code_caching = new ConcurrentHashMap<>();
+
+    /**
+     * 看
+     */
+    public static final ReentrantReadWriteLock LOOK = new ReentrantReadWriteLock();
 
 
-    public WxMsgHandle() {
+    @PostConstruct
+    public void init() {
         add(chatMsg -> {
-            if(Objects.equals(chatMsg.getIsSendMsg(), 1) && Objects.equals(chatMsg.getIsSendByPhone(), 1)){
-                log.info("手机端对:{}发出:{}",chatMsg.getFromUser(),chatMsg.getContent());
+            if (Objects.equals(chatMsg.getIsSendMsg(), 1) && Objects.equals(chatMsg.getIsSendByPhone(), 1)) {
+                log.info("手机端对:{}发出:{}", chatMsg.getFromUser(), chatMsg.getContent());
                 return 1;
             }
             return 1;
         }, WxMsgType.私聊信息);
         add(chatMsg -> {
-            if("filehelper".equals(chatMsg.getFromUser())){
-                log.info("文件助手:{},",chatMsg.getContent());
+            if (FILEHELPER.equals(chatMsg.getFromUser())) {
+                log.info("文件助手:{},", chatMsg.getContent());
             }
             return 1;
         }, WxMsgType.收到转账之后或者文件助手等信息);
         add(chatMsg -> {
-            if("filehelper".equals(chatMsg.getFromUser())){
+            if (FILEHELPER.equals(chatMsg.getFromUser())) {
                 Document document = XmlUtil.parseXml(chatMsg.getContent());
                 Element documentElement = document.getDocumentElement();
                 String username = documentElement.getAttribute("username");
-                String alias = documentElement.getAttribute("alias");
-                HttpSendUtil.发送文本(username);
+                if (StrUtil.isNotBlank(username)) {
+                    HttpSendUtil.发送文本(username);
+                }
             }
             return 1;
         }, WxMsgType.收到名片);
@@ -71,8 +88,6 @@ public class WxMsgHandle {
             boolean f = 解析扫码支付第一段(chatMsg);
             return null;
         }, WxMsgType.扫码触发);
-
-
     }
 
     /**
@@ -93,7 +108,7 @@ public class WxMsgHandle {
                     if (outtradeno.getLength() > 0) {
                         String textContent = outtradeno.item(0).getTextContent();
                         String textContent1 = documentElement.getElementsByTagName("username").item(0).getTextContent();
-                        cache.put(textContent, textContent1);
+                        collection_code_caching.put(textContent, textContent1);
                         return false;
                     }
                 }
@@ -120,7 +135,7 @@ public class WxMsgHandle {
                 NodeList outtradeno = documentElement.getElementsByTagName("weapp_path");
                 if (outtradeno.getLength() > 1) {
                     String textContent = outtradeno.item(1).getTextContent();
-                    Set<Map.Entry<String, String>> entries = cache.entrySet();
+                    Set<Map.Entry<String, String>> entries = collection_code_caching.entrySet();
                     Iterator<Map.Entry<String, String>> iterator = entries.iterator();
                     while (iterator.hasNext()) {
                         Map.Entry<String, String> next = iterator.next();
