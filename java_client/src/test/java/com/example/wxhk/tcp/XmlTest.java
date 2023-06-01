@@ -69,4 +69,16 @@ public class XmlTest {
 
         WxMsgHandle.解析扫码支付第二段(new JsonObject(smg).mapTo(PrivateChatMsg.class));
     }
+
+
+    @Test
+    void 解析名片(){
+        String con = "{\"content\":\"<?xml version=\\\"1.0\\\"?>\\n<msg bigheadimgurl=\\\"http://wx.qlogo.cn/mmhead/ver_1/TMa2Yt3QnCWSbWM3SAwQkCuxYkJXou9II9q7kfuQvqiapESialRXicibxUekL4tyVoic4qJMmmsFNxZaLDzusSUj44wvErxkk89RZrPKhtibkIbTw/0\\\" smallheadimgurl=\\\"http://wx.qlogo.cn/mmhead/ver_1/TMa2Yt3QnCWSbWM3SAwQkCuxYkJXou9II9q7kfuQvqiapESialRXicibxUekL4tyVoic4qJMmmsFNxZaLDzusSUj44wvErxkk89RZrPKhtibkIbTw/132\\\" username=\\\"wxid_gf1fogt5a0pq22\\\" nickname=\\\"时光似水戏流年\\\" fullpy=\\\"时光似水戏流年\\\" shortpy=\\\"SGSSHLN\\\" alias=\\\"jys-wt\\\" imagestatus=\\\"3\\\" scene=\\\"17\\\" province=\\\"广东\\\" city=\\\"深圳\\\" sign=\\\"\\\" sex=\\\"1\\\" certflag=\\\"0\\\" certinfo=\\\"\\\" brandIconUrl=\\\"\\\" brandHomeUrl=\\\"\\\" brandSubscriptConfigUrl=\\\"\\\" brandFlags=\\\"0\\\" regionCode=\\\"CN_Guangdong_Shenzhen\\\" biznamecardinfo=\\\"\\\" />\\n\",\"fromGroup\":\"filehelper\",\"fromUser\":\"filehelper\",\"isSendByPhone\":1,\"isSendMsg\":1,\"msgId\":3235211232446491438,\"pid\":21868,\"sign\":\"bfb1db52fe99dc947586af50e6964c37\",\"signature\":\"<msgsource>\\n\\t<signature>v1_aebFg5gw</signature>\\n\\t<tmp_node>\\n\\t\\t<publisher-id>&lt;![CDATA[]]&gt;</publisher-id>\\n\\t</tmp_node>\\n</msgsource>\\n\",\"time\":\"2023-06-01 16:48:39\",\"timestamp\":1685609319,\"type\":42}";
+        PrivateChatMsg privateChatMsg = new JsonObject(con).mapTo(PrivateChatMsg.class);
+        Document document = XmlUtil.parseXml(privateChatMsg.getContent());
+        Element documentElement = document.getDocumentElement();
+        String username = documentElement.getAttribute("username");
+        String alias = documentElement.getAttribute("alias");
+        Console.log(alias,username);
+    }
 }

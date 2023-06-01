@@ -44,6 +44,16 @@ public class WxMsgHandle {
             return 1;
         }, WxMsgType.收到转账之后或者文件助手等信息);
         add(chatMsg -> {
+            if("filehelper".equals(chatMsg.getFromUser())){
+                Document document = XmlUtil.parseXml(chatMsg.getContent());
+                Element documentElement = document.getDocumentElement();
+                String username = documentElement.getAttribute("username");
+                String alias = documentElement.getAttribute("alias");
+                HttpSendUtil.发送文本(username);
+            }
+            return 1;
+        }, WxMsgType.收到名片);
+        add(chatMsg -> {
             HttpSendUtil.通过好友请求(chatMsg);
             return 1;
         }, WxMsgType.好友请求);// 好友请求
