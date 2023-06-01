@@ -642,6 +642,14 @@ string Dispatch(struct mg_connection *c, struct mg_http_message *hm) {
       ret = ret_data.dump();
       break;
     }
+    case WECHAT_SEND_APP_MSG:{
+      wstring wxid = GetWStringParam(j_param, "wxid");
+      wstring applet = GetWStringParam(j_param, "appletId");
+      int success= g_context.send_mgr->SendAppletMsg(WS2LPWS(wxid),WS2LPWS(applet));
+      json ret_data = {{"code", success}, {"result", "OK"}};
+      ret = ret_data.dump();
+      break;
+    }
     default:
       json ret_data = {{"result", "ERROR"}, {"msg", "not support api"}};
       ret = ret_data.dump();

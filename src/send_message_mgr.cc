@@ -371,4 +371,86 @@ int SendMessageMgr::ForwardPublicMsgByMsgSvrId(wchar_t *wxid, unsigned long long
 
  return code;
 }
+
+int SendMessageMgr::SendAppletMsg(wchar_t* wxid, wchar_t* appletid){
+  int success = -1;
+  
+  DWORD init_chat_msg_addr = base_addr_ + WX_INIT_CHAT_MSG_OFFSET;
+  DWORD new_share_app_msg_req_addr = base_addr_ + NEW_SHARE_APP_MSG_REQ_OFFSET;
+  DWORD free_share_app_msg_req_addr = base_addr_ + FREE_SHARE_APP_MSG_REQ_OFFSET;
+  DWORD send_app_msg_addr = base_addr_ + SEND_APP_MSG_OFFSET;
+  DWORD new_wa_updatable_msg_info_addr = base_addr_ + NEW_WA_UPDATABLE_MSG_INFO_OFFSET;
+  DWORD free_wa_addr = base_addr_ + FREE_WA_UPDATABLE_MSG_INFO_OFFSET;
+
+  std::wstring applet_id(appletid);
+  std::string s_applet_id = Utils::WCharToUTF8(appletid);
+  const char * c_applet_id = s_applet_id.c_str();
+
+  std::vector<WeChatString> receiver_list;
+  WeChatString wwxid(wxid);
+  receiver_list.push_back(wwxid);
+  VectorInner* list = (VectorInner*)&receiver_list;
+  DWORD receiver_list_ptr = (DWORD)&list->start;
+ 
+  WeChatString wapplet(appletid);
+  char req[0x268]={0};
+  char temp[0x4] = {0};
+  char buff[0x88]={0};
+  __asm{
+    PUSHAD
+    PUSHFD
+    LEA        ECX,req
+    CALL       new_share_app_msg_req_addr
+    POPFD
+    POPAD
+  }
+  // 0x40  gh   
+  // 0xE8  img
+  memcpy(&req[0x4], &c_applet_id, sizeof(c_applet_id));
+  __asm{
+    PUSHAD
+    PUSHFD    
+    LEA        ECX,buff
+    CALL       new_wa_updatable_msg_info_addr
+    LEA        EAX,buff
+    PUSH       EAX
+    SUB        ESP,0x14
+    MOV        ESI,ESP
+    MOV        dword ptr [EBP - 0x280],ESP
+    MOV        dword ptr [EBP - 0x27c],ESI
+    MOV        dword ptr [ESI],0x0
+    MOV        dword ptr [ESI + 0x4],0
+    MOV        dword ptr [ESI + 0x8],0
+    MOV        dword ptr [ESI + 0xc],0
+    MOV        dword ptr [ESI + 0x10],0
+                                 
+    LEA        EAX,req
+    PUSH       EAX
+    MOV        EAX,dword ptr[receiver_list_ptr]
+    PUSH       EAX
+    SUB        ESP,0x14
+    LEA        EAX,wapplet
+    MOV        ECX,ESP
+    PUSH       EAX
+    CALL       init_chat_msg_addr                                  
+    LEA        ECX,temp
+    CALL       send_app_msg_addr                           
+    MOV        success,EAX       
+    LEA        ECX,buff
+    CALL       free_wa_addr                            
+    POPFD
+    POPAD
+  }
+
+  __asm{
+    PUSHAD
+    PUSHFD   
+    LEA        ECX,req
+    PUSH       0x0
+    CALL       free_share_app_msg_req_addr
+    POPFD
+    POPAD
+  }
+  return success;
+}
 }  // namespace wxhelper

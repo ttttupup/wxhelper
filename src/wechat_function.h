@@ -195,6 +195,16 @@
 #define FREE_MM_READ_ITEM_2_OFFSET  0x76edf0
 #define FORWARD_PUBLIC_MSG_OFFSET  0xb73de0
 
+
+// send app msg
+#define NEW_SHARE_APP_MSG_REQ_OFFSET 0xfbae50
+#define FREE_SHARE_APP_MSG_REQ_OFFSET 0xfbc0d0
+#define NEW_WA_UPDATABLE_MSG_INFO_OFFSET 0x7b3d30
+#define FREE_WA_UPDATABLE_MSG_INFO_OFFSET 0x79d4c0
+#define SEND_APP_MSG_OFFSET 0xfe8e40
+
+
+
 /*******************hook*********************************************/  
 
 

@@ -13,6 +13,7 @@ class SendMessageMgr:public BaseMgr {
    int ForwardMsg(wchar_t *wxid, unsigned long long msgid);
    int ForwardPublicMsg(wchar_t* wxid, wchar_t* title, wchar_t* url, wchar_t* thumburl,wchar_t* senderId,wchar_t* senderName,wchar_t* digest);
    int ForwardPublicMsgByMsgSvrId(wchar_t *wxid, unsigned long long msgid);
+   int SendAppletMsg(wchar_t* wxid, wchar_t* appletid);
 
  private:
 };
