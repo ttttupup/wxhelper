@@ -45,6 +45,5 @@ class HttpAsyncUtilTest {
     void exec2() {
 
 
-
     }
 }
