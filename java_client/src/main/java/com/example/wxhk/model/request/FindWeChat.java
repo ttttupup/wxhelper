@@ -11,7 +11,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class FindWeChat implements SendMsg {
+public class FindWeChat implements SendMsg<FindWeChat> {
     /**
      * 通过	手机或qq查询信息
      */

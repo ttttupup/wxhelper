@@ -11,7 +11,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class ConfirmThePayment implements SendMsg {
+public class ConfirmThePayment implements SendMsg<ConfirmThePayment> {
     /**
      * 转账人微信id，从hook的消息中获取
      */

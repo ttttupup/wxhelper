@@ -5,12 +5,14 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 /**
- * 获取群成员
+ * 开启hook
+ *
  * @author wt
  * @date 2023/06/01
  */
 @Data
 @Accessors(chain = true)
-public class GetGroupMembers implements SendMsg<GetGroupMembers> {
-    String chatRoomId;
+public class OpenHook implements SendMsg<OpenHook> {
+    String port;
+    String ip;
 }

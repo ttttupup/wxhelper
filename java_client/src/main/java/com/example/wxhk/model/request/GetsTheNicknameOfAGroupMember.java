@@ -11,7 +11,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class GetsTheNicknameOfAGroupMember implements SendMsg {
+public class GetsTheNicknameOfAGroupMember implements SendMsg<GetsTheNicknameOfAGroupMember> {
     /**
      * 聊天室id
      */

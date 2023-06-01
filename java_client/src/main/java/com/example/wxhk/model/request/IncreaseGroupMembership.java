@@ -11,7 +11,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class IncreaseGroupMembership implements SendMsg {
+public class IncreaseGroupMembership implements SendMsg<IncreaseGroupMembership> {
     /**
      * 聊天室id
      */

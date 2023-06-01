@@ -12,7 +12,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class SendText implements SendMsg {
+public class SendText implements SendMsg<SendText> {
     String wxid;
     String msg;
 }

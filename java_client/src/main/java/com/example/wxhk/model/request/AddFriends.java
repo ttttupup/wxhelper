@@ -11,7 +11,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class AddFriends implements SendMsg {
+public class AddFriends implements SendMsg<AddFriends> {
     String wxid;
     /**
      * 验证信息

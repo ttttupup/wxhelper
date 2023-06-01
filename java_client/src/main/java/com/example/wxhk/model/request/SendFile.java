@@ -12,7 +12,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class SendFile implements SendMsg {
+public class SendFile implements SendMsg<SendFile> {
     String wxid;
     /**
      * 发送文件路径

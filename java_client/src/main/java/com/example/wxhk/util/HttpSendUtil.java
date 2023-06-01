@@ -1,7 +1,7 @@
 package com.example.wxhk.util;
 
 import com.example.wxhk.model.PrivateChatMsg;
-import com.example.wxhk.model.request.SendMsg;
+import com.example.wxhk.model.request.*;
 import com.example.wxhk.tcp.vertx.ArrHandle;
 import com.example.wxhk.tcp.vertx.InitWeChat;
 import io.vertx.core.json.JsonObject;
@@ -54,35 +54,81 @@ public class HttpSendUtil {
     }
 
 
-    public static JsonObject 发送文本(String wxid,String msg){
+    public static JsonObject 发送文本(String wxid, String msg) {
         return HttpSyncUtil.exec(HttpAsyncUtil.Type.发送文本, JsonObject.mapFrom(new SendMsg().setMsg(msg).setWxid(wxid)));
     }
-    public static JsonObject 发送文本(String msg){
-        return 发送文本(ArrHandle.getPriMsg().getFromUser(),msg);
+
+    public static JsonObject 发送文本(String msg) {
+        return 发送文本(ArrHandle.getPriMsg().getFromUser(), msg);
     }
-    public static JsonObject 发送at文本(String chatRoomId,String wxids,String msg){
+
+    public static JsonObject 发送at文本(String chatRoomId, String wxids, String msg) {
         return HttpSyncUtil.exec(HttpAsyncUtil.Type.发送at文本, JsonObject.mapFrom(new SendMsg().setMsg(msg).setWxids(wxids).setChatRoomId(chatRoomId)));
     }
-    public static JsonObject 发送at文本(String wxids,String msg){
-        return 发送at文本(ArrHandle.getPriMsg().getFromGroup(),wxids,msg);
+
+    public static JsonObject 发送at文本(String wxids, String msg) {
+        return 发送at文本(ArrHandle.getPriMsg().getFromGroup(), wxids, msg);
     }
-    public static JsonObject 发送图片(String wxid,String msg){
+
+    public static JsonObject 发送图片(String wxid, String msg) {
         return HttpSyncUtil.exec(HttpAsyncUtil.Type.发送图片, JsonObject.mapFrom(new SendMsg().setImagePath(msg).setWxid(wxid)));
     }
-    public static JsonObject 发送图片(String msg){
-        return 发送图片(ArrHandle.getPriMsg().getFromUser(),msg);
+
+    public static JsonObject 发送图片(String msg) {
+        return 发送图片(ArrHandle.getPriMsg().getFromUser(), msg);
     }
-    public static JsonObject 发送文件(String wxid,String msg){
+
+    public static JsonObject 发送文件(String wxid, String msg) {
         return HttpSyncUtil.exec(HttpAsyncUtil.Type.发送文件, JsonObject.mapFrom(new SendMsg().setFilePath(msg).setWxid(wxid)));
     }
-    public static JsonObject 发送文件(String msg){
-        return 发送文件(ArrHandle.getPriMsg().getFromUser(),msg);
+
+    public static JsonObject 发送文件(String msg) {
+        return 发送文件(ArrHandle.getPriMsg().getFromUser(), msg);
+    }
+
+    public static JsonObject 添加好友(AddFriends p) {
+        return HttpSyncUtil.exec(HttpAsyncUtil.Type.添加好友, p.toJson());
     }
 
 
     public static String 获取当前登陆微信id() {
         JsonObject exec = HttpSyncUtil.exec(HttpAsyncUtil.Type.获取登录信息, new JsonObject());
         return exec.getJsonObject("data").getString("wxid");
+    }
+
+    public static JsonObject 联系人列表(){
+        JsonObject exec = HttpSyncUtil.exec(HttpAsyncUtil.Type.联系人列表, new JsonObject());
+        return exec.getJsonObject("data");
+    }
+    public static JsonObject 开启hook(OpenHook hook){
+        JsonObject exec = HttpSyncUtil.exec(HttpAsyncUtil.Type.开启hook,hook.toJson());
+        return exec.getJsonObject("data");
+    }
+
+    @Deprecated
+    public static com.example.wxhk.infe.SendMsg of(HttpAsyncUtil.Type type) {
+        switch (type) {
+
+            case 检查微信登陆 -> {
+
+            }
+            case 获取登录信息 -> {
+            }
+            case 发送文本 -> {
+                return new SendText();
+            }
+            case 发送at文本 -> {
+                return new SendAtText();
+            }
+            case 发送图片 -> {
+                return new SendImg();
+            }
+            case 发送文件 -> {
+                return new SendFile();
+            }
+
+        }
+        return new SendText();
     }
 
 }

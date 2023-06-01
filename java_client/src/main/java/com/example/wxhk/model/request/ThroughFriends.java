@@ -11,7 +11,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class ThroughFriends implements SendMsg {
+public class ThroughFriends implements SendMsg<ThroughFriends> {
     /**
      * 	添加好友消息内容里的encryptusername
      */

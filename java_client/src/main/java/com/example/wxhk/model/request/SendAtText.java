@@ -11,7 +11,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class SendAtText implements SendMsg {
+public class SendAtText implements SendMsg<SendAtText> {
     /**
      * 聊天室id,群聊用
      */

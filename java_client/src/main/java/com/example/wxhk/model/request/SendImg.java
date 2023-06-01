@@ -12,7 +12,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class SendImg implements SendMsg {
+public class SendImg implements SendMsg<SendImg> {
     String wxid;
     /**
      * 发送图片接口

@@ -11,7 +11,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class ForwardMessages implements SendMsg {
+public class ForwardMessages implements SendMsg<ForwardMessages> {
     /**
      * 消息接收人wxid
      */

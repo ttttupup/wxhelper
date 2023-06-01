@@ -41,4 +41,10 @@ class HttpAsyncUtilTest {
 
         ThreadUtil.sync(this);
     }
+    @Test
+    void exec2() {
+
+
+
+    }
 }
