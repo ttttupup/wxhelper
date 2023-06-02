@@ -429,9 +429,9 @@ string Dispatch(struct mg_connection *c, struct mg_http_message *hm) {
       wstring wxid = GetWStringParam(j_param, "wxid");
       wstring transcationid = GetWStringParam(j_param, "transcationId");
       wstring transferid = GetWStringParam(j_param, "transferId");
-      BOOL response =g_context.misc_mgr->DoConfirmReceipt(
+      int success =g_context.misc_mgr->DoConfirmReceipt(
           WS2LPWS(wxid), WS2LPWS(transcationid), WS2LPWS(transferid));
-      json ret_data = {{"msg", response}, {"result", "OK"}};
+      json ret_data = {{"code", success}, {"result", "OK"}};
       ret = ret_data.dump();
       break;
     }
@@ -654,9 +654,17 @@ string Dispatch(struct mg_connection *c, struct mg_http_message *hm) {
       wstring wxid = GetWStringParam(j_param, "wxid");
       wstring transcationid = GetWStringParam(j_param, "transcationId");
       wstring transferid = GetWStringParam(j_param, "transferId");
-      BOOL response =g_context.misc_mgr->DoRefuseReceipt(
+      int success =g_context.misc_mgr->DoRefuseReceipt(
           WS2LPWS(wxid), WS2LPWS(transcationid), WS2LPWS(transferid));
-      json ret_data = {{"msg", response}, {"result", "OK"}};
+      json ret_data = {{"code", success}, {"result", "OK"}};
+      ret = ret_data.dump();
+      break;
+    }
+    case WECHAT_GET_HEAD_IMG:{
+      wstring wxid = GetWStringParam(j_param, "wxid");
+      wstring url = GetWStringParam(j_param, "imageUrl");
+      int success =g_context.contact_mgr->GetHeadImage(WS2LPWS(wxid), WS2LPWS(url));
+      json ret_data = {{"code", success}, {"result", "OK"}};
       ret = ret_data.dump();
       break;
     }

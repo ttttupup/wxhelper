@@ -16,6 +16,7 @@ class ContactMgr : public BaseMgr {
   int AddFriendByWxid(wchar_t* wxid,wchar_t* msg);
   int VerifyApply(wchar_t *v3, wchar_t *v4,int permission);
   int GetContactByWxid(wchar_t* wxid,ContactProfile& profile);
+  int GetHeadImage(wchar_t* wxid,wchar_t* url);
 };
 }  // namespace wxhelper
 

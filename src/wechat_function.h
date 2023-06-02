@@ -26,7 +26,9 @@
 // sendMessageMgr
 #define WX_SEND_MESSAGE_MGR_OFFSET 0x768be0
 // shareRecordMgr
-#define WX_SHARE_RECORD_MGR_OFFSET 0x78d5f0                
+#define WX_SHARE_RECORD_MGR_OFFSET 0x78d5f0     
+// headImageMgr
+#define WX_HEAD_IMAGE_MGR_OFFSET 0x808850
 
 
 // setChatMsgValue
@@ -203,6 +205,8 @@
 #define FREE_WA_UPDATABLE_MSG_INFO_OFFSET 0x79d4c0
 #define SEND_APP_MSG_OFFSET 0xfe8e40
 
+// query head image  then download 
+#define QUERY_THEN_DOWNLOAD_OFFSET  0xc642f0
 
 
 /*******************hook*********************************************/  

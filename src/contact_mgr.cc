@@ -255,4 +255,30 @@ int ContactMgr::AddFriendByWxid(wchar_t *wxid,wchar_t* msg) {
   success = 1;
   return success;
  }
+
+ int ContactMgr::GetHeadImage(wchar_t* wxid,wchar_t* url){
+  int success = -1;
+  WeChatString contact(wxid);
+  WeChatString img_url(url);
+  DWORD head_image_mgr_addr = base_addr_ + WX_HEAD_IMAGE_MGR_OFFSET;
+  DWORD get_img_download_addr = base_addr_ + QUERY_THEN_DOWNLOAD_OFFSET;
+  char temp[0x8] ={0};
+  __asm{
+      PUSHAD
+      PUSHFD
+      CALL       head_image_mgr_addr
+      LEA        ECX,img_url
+      PUSH       ECX
+      LEA        ECX,contact
+      PUSH       ECX
+      LEA        ECX,temp
+      PUSH       ECX
+      MOV        ECX,EAX
+      CALL       get_img_download_addr    
+      POPFD
+      POPAD
+  }
+  success = 1;
+  return success;
+ }
 }  // namespace wxhelper
