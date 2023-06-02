@@ -51,9 +51,10 @@ public class ArrHandle {
                             continue;
                         }
                         WxMsgHandle.exec(privateChatMsg);
-                        chatMsgThreadLocal.remove();
                     } catch (Exception e) {
                         log.error(e);
+                    }finally {
+                        chatMsgThreadLocal.remove();
                     }
                 }
                 log.error("退出线程了");
@@ -72,9 +73,10 @@ public class ArrHandle {
                         continue;
                     }
                     WxMsgHandle.exec(privateChatMsg);
-                    chatMsgThreadLocal.remove();
                 } catch (Exception e) {
                     log.error(e);
+                }finally {
+                    chatMsgThreadLocal.remove();
                 }
             }
             log.error("退出线程了");
