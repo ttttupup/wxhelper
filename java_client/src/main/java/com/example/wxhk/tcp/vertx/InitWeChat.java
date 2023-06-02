@@ -150,9 +150,8 @@ public class InitWeChat implements CommandLineRunner {
             }
 
         });
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            HttpSyncUtil.exec(HttpAsyncUtil.Type.关闭hook, new JsonObject());
-        }));
+        // FIXME: 2023/6/2 程序结束后关闭hook会偶尔出现微信闪退情况,暂时禁用
+//        Runtime.getRuntime().addShutdownHook(new Thread(HttpSendUtil::关闭hook));
         //netstat -aon|findstr "端口号"
         // c.exe -I 4568 -p D:\exec\wxhelper.dll -m 4568
     }
