@@ -148,6 +148,7 @@ public class WxMsgHandle {
                                 String substring = monery.substring(1);
                                 BigDecimal decimal = new BigDecimal(substring);
                                 log.info("扫码收款:{},付款人:{},付款备注:{}", decimal.stripTrailingZeros().toPlainString(), next.getValue(), remark);
+                                HttpSendUtil.发送文本(next.getValue(), StrUtil.format("扫码收款:{},备注:{}", decimal.stripTrailingZeros().toPlainString(), remark));
                                 iterator.remove();
                                 return false;
                             }
@@ -182,6 +183,7 @@ public class WxMsgHandle {
                         String substring = monery.substring(1);
                         BigDecimal decimal = new BigDecimal(substring);
                         log.info("收款:{},付款人:{},付款备注:{}", decimal.stripTrailingZeros().toPlainString(), receiver_username, remark);
+                        HttpSendUtil.发送文本(receiver_username, StrUtil.format("收到款项:{},备注:{}", decimal.stripTrailingZeros().toPlainString(), remark));
                         return false;
                     }
                 }
