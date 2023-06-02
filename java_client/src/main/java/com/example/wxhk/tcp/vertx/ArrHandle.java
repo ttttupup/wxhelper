@@ -22,6 +22,9 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class ArrHandle {
 
+    /**
+     * 线程处理消息队列,但是必须保证核心数大于2,其中必定要有一个线程可以单独处理交易队列信息
+     */
     public static final ThreadPoolExecutor sub = new ThreadPoolExecutor(4, 10, 30, TimeUnit.MINUTES, new LinkedBlockingQueue<>(), new NamedThreadFactory("sub", false));
     public static final ThreadLocal<PrivateChatMsg> chatMsgThreadLocal = new InheritableThreadLocal<>();
     protected static final Log log = Log.get();
@@ -51,9 +54,10 @@ public class ArrHandle {
                             continue;
                         }
                         WxMsgHandle.exec(privateChatMsg);
-                        chatMsgThreadLocal.remove();
                     } catch (Exception e) {
                         log.error(e);
+                    }finally {
+                        chatMsgThreadLocal.remove();
                     }
                 }
                 log.error("退出线程了");
@@ -72,9 +76,10 @@ public class ArrHandle {
                         continue;
                     }
                     WxMsgHandle.exec(privateChatMsg);
-                    chatMsgThreadLocal.remove();
                 } catch (Exception e) {
                     log.error(e);
+                }finally {
+                    chatMsgThreadLocal.remove();
                 }
             }
             log.error("退出线程了");
