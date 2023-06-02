@@ -206,7 +206,11 @@ public class WxMsgHandle {
         try {
             String content = chatMsg.getContent();
             Document document = XmlUtil.parseXml(content);
-            Node paysubtype = document.getElementsByTagName("paysubtype").item(0);
+            NodeList paysubtype1 = document.getElementsByTagName("paysubtype");
+            if(paysubtype1.getLength()==0){
+                return true;
+            }
+            Node paysubtype = paysubtype1.item(0);
             if ("1".equals(paysubtype.getTextContent().trim())) {
                 // 手机发出去的
                 String textContent = document.getElementsByTagName("receiver_username").item(0).getTextContent();
