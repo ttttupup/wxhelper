@@ -13,9 +13,6 @@ class ThreadPool :public Singleton<ThreadPool>{
   bool AddWork(PTP_WORK_CALLBACK callback,PVOID opt);
 
  private:
-  void operator=(const ThreadPool&) = delete;
-  void operator=(ThreadPool&&) = delete;
-
   PTP_POOL pool_;
   PTP_CLEANUP_GROUP cleanup_group_;
   TP_CALLBACK_ENVIRON env_;

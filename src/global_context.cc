@@ -18,7 +18,7 @@ void GlobalContext::initialize(HMODULE module) {
   #ifndef _DEBUG
   hide_module->Hide(module_);
   #endif
-
+  ThreadPool::GetInstance().Create(2,8);
   HttpServer::GetInstance().Init(config->GetPort());
   HttpServer::GetInstance().HttpStart();
   DB::GetInstance().init(base);
@@ -28,7 +28,6 @@ void GlobalContext::initialize(HMODULE module) {
   account_mgr.emplace(AccountMgr{base});
   chat_room_mgr.emplace(ChatRoomMgr{base});
   sns_mgr.emplace(SNSMgr{base});
-  ThreadPool::GetInstance().Create(1,512);
 }
 
 void GlobalContext::finally() { 

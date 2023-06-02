@@ -6,10 +6,16 @@
 
 namespace wxhelper {
 ThreadPool::~ThreadPool() {
-  CloseThreadpoolCleanupGroupMembers(cleanup_group_, true, NULL);
-  CloseThreadpoolCleanupGroup(cleanup_group_);
-  CloseThreadpool(pool_);
+  if(cleanup_group_){
+    CloseThreadpoolCleanupGroupMembers(cleanup_group_, true, NULL);
+    CloseThreadpoolCleanupGroup(cleanup_group_);
+  }
+  DestroyThreadpoolEnvironment(&env_);
+  if (pool_){
+    CloseThreadpool(pool_);
+  }
 }
+
 bool ThreadPool::Create(unsigned long min, unsigned long max) {
   InitializeThreadpoolEnvironment(&env_);
   pool_ = CreateThreadpool(NULL);
@@ -38,4 +44,5 @@ bool ThreadPool::AddWork(PTP_WORK_CALLBACK callback,PVOID opt) {
   SubmitThreadpoolWork(work);
   return true;
 }
+
 }  // namespace wxhelper

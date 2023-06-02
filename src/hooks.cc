@@ -43,54 +43,6 @@ static DWORD user_info_next_addr_ = 0;
 
 UserInfo userinfo = {};
 
-void SendSocketMessage(InnerMessageStruct *msg) {
-  if (msg == NULL) {
-    return;
-  }
-  unique_ptr<InnerMessageStruct> sms(msg);
-  json j_msg =
-      json::parse(msg->buffer, msg->buffer + msg->length, nullptr, false);
-  if (j_msg.is_discarded() == true) {
-    return;
-  }
-  string jstr = j_msg.dump() + "\n";
-
-  if (server_port_ == 0) {
-    SPDLOG_ERROR("http server port error :{}",server_port_);
-    return;
-  }
-  SOCKET client_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-  if (client_socket < 0) {
-     SPDLOG_ERROR("socket init  fail");
-    return;
-  }
-  BOOL status = false;
-  sockaddr_in client_addr;
-  memset(&client_addr, 0, sizeof(client_addr));
-  client_addr.sin_family = AF_INET;
-  client_addr.sin_port = htons((u_short)server_port_);
-  InetPtonA(AF_INET, server_ip_, &client_addr.sin_addr.s_addr);
-  if (connect(client_socket, reinterpret_cast<sockaddr *>(&client_addr),
-              sizeof(sockaddr)) < 0) {
-    SPDLOG_ERROR("socket connect  fail");
-    return;
-  }
-  char recv_buf[1024] = {0};
-  int ret = send(client_socket, jstr.c_str(), jstr.size(), 0);
-  if (ret == -1 || ret == 0) {
-    SPDLOG_ERROR("socket send  fail ,ret::{}",ret);
-    closesocket(client_socket);
-    return;
-  }
-  memset(recv_buf, 0, sizeof(recv_buf));
-  ret = recv(client_socket, recv_buf, sizeof(recv_buf), 0);
-  closesocket(client_socket);
-  if (ret == -1 || ret == 0) {
-    SPDLOG_ERROR("socket recv  fail ,ret:{}",ret);
-    return;
-  }
-}
-
 VOID CALLBACK SendMsgCallback(PTP_CALLBACK_INSTANCE instance, PVOID context,
                              PTP_WORK Work) {
   InnerMessageStruct *msg = (InnerMessageStruct *)context;
@@ -131,34 +83,26 @@ VOID CALLBACK SendMsgCallback(PTP_CALLBACK_INSTANCE instance, PVOID context,
   if (connect(client_socket, reinterpret_cast<sockaddr *>(&client_addr),
               sizeof(sockaddr)) < 0) {
     SPDLOG_ERROR("socket connect  fail");
-    closesocket(client_socket);
-    WSACleanup();
-    return ;
+    goto clean;
   }
   char recv_buf[1024] = {0};
   ret = send(client_socket, jstr.c_str(), jstr.size(), 0);
-  if (ret == -1 || ret == 0) {
+  if (ret < 0) {
     SPDLOG_ERROR("socket send  fail ,ret:{}", ret);
-    closesocket(client_socket);
-    WSACleanup();
-    return;
+    goto clean;
   }
   ret = shutdown(client_socket, SD_SEND);
   if (ret == SOCKET_ERROR) {
     SPDLOG_ERROR("shutdown failed with erro:{}", ret);
-    closesocket(client_socket);
-    WSACleanup();
-    return ;
+    goto clean;
   }
-
-  memset(recv_buf, 0, sizeof(recv_buf));
   ret = recv(client_socket, recv_buf, sizeof(recv_buf), 0);
-  closesocket(client_socket);
-  if (ret == -1 || ret == 0) {
+  if (ret < 0) {
     SPDLOG_ERROR("socket recv  fail ,ret:{}", ret);
-    WSACleanup();
-    return;
+    goto clean;
   }
+clean:
+  closesocket(client_socket);
   WSACleanup();
   return;
 }
@@ -211,12 +155,7 @@ void __cdecl OnRecvMsg(DWORD msg_addr) {
   memcpy(inner_msg->buffer, jstr.c_str(), jstr.size() + 1);
   inner_msg->length = jstr.size();
   bool add = ThreadPool::GetInstance().AddWork(SendMsgCallback,inner_msg);
-  SPDLOG_INFO("add work:{}",add);
-  // HANDLE thread = CreateThread(
-  //     NULL, 0, (LPTHREAD_START_ROUTINE)SendSocketMessage, inner_msg, NULL, 0);
-  // if (thread) {
-  //   CloseHandle(thread);
-  // }
+  SPDLOG_INFO("add msg work:{}",add);
 }
 
 
@@ -263,11 +202,8 @@ void __cdecl OnSnsTimeLineMsg(DWORD msg_addr) {
   inner_msg->buffer = new char[jstr.size() + 1];
   memcpy(inner_msg->buffer, jstr.c_str(), jstr.size() + 1);
   inner_msg->length = jstr.size();
-  HANDLE thread = CreateThread(
-      NULL, 0, (LPTHREAD_START_ROUTINE)SendSocketMessage, inner_msg, NULL, 0);
-  if (thread) {
-    CloseHandle(thread);
-  }
+  bool add = ThreadPool::GetInstance().AddWork(SendMsgCallback,inner_msg);
+  SPDLOG_INFO("add sns work:{}",add);
 }
 
 /// @brief  hook sns msg implement
