@@ -200,7 +200,8 @@
 
 // send app msg
 #define NEW_SHARE_APP_MSG_REQ_OFFSET 0xfbae50
-#define FREE_SHARE_APP_MSG_REQ_OFFSET 0xfbc0d0
+// #define FREE_SHARE_APP_MSG_REQ_OFFSET 0xfbc0d0
+#define FREE_SHARE_APP_MSG_REQ_OFFSET 0xfbc100
 #define NEW_WA_UPDATABLE_MSG_INFO_OFFSET 0x7b3d30
 #define FREE_WA_UPDATABLE_MSG_INFO_OFFSET 0x79d4c0
 #define SEND_APP_MSG_OFFSET 0xfe8e40
@@ -807,5 +808,31 @@ struct ContactProfile{
   std::wstring v3;
   std::wstring nickname;
   std::wstring head_image;
+};
+
+struct WeChatStr{
+  char * ptr;
+  DWORD  field1;
+  DWORD  field2;
+  DWORD  field3;
+  DWORD  len;
+  DWORD  maxlen;
+
+   WeChatStr(const char* p) {
+    ptr = (char *)p;
+    field1 = 0;
+    field2 = 0;
+    field3 = 0;
+    len = strlen(p);
+    maxlen = len | 0xF;
+  }
+   WeChatStr() {
+    ptr = NULL;
+    field1 = 0;
+    field2 = 0;
+    field3 = 0;
+    len = 0;
+    maxlen = 0xF;
+  }
 };
 #endif

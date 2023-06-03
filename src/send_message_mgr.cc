@@ -391,11 +391,16 @@ int SendMessageMgr::SendAppletMsg(wchar_t* wxid, wchar_t* appletid){
   receiver_list.push_back(wwxid);
   VectorInner* list = (VectorInner*)&receiver_list;
   DWORD receiver_list_ptr = (DWORD)&list->start;
- 
+
   WeChatString wapplet(appletid);
-  char req[0x268]={0};
+  char req[0x268] = {0};
   char temp[0x4] = {0};
-  char buff[0x88]={0};
+  char buff[0x88] = {0};
+  DWORD flag = 0xF;
+  DWORD zero = 0;
+  WeChatStr clean;
+  WeChatStr app_id(c_applet_id);
+
   __asm{
     PUSHAD
     PUSHFD
@@ -406,7 +411,8 @@ int SendMessageMgr::SendAppletMsg(wchar_t* wxid, wchar_t* appletid){
   }
   // 0x40  gh   
   // 0xE8  img
-  memcpy(&req[0x4], &c_applet_id, sizeof(c_applet_id));
+  memcpy(&req[0x4], &app_id, sizeof(app_id));
+
   __asm{
     PUSHAD
     PUSHFD    
@@ -442,15 +448,18 @@ int SendMessageMgr::SendAppletMsg(wchar_t* wxid, wchar_t* appletid){
     POPAD
   }
 
-  __asm{
+// no need for WeChat to release memory
+memcpy(&req[0x4], &clean, sizeof(clean));
+memcpy(&req[0xC8], &zero, sizeof(zero));
+memcpy(&req[0xCC], &flag, sizeof(flag));
+__asm {
     PUSHAD
     PUSHFD   
     LEA        ECX,req
-    PUSH       0x0
     CALL       free_share_app_msg_req_addr
     POPFD
     POPAD
-  }
-  return success;
 }
-}  // namespace wxhelper
+return success;
+}
+}  // namespace wxhelperg
