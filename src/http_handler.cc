@@ -171,12 +171,21 @@ string Dispatch(struct mg_connection *c, struct mg_http_message *hm) {
       break;
     }
     case WECHAT_MSG_START_HOOK: {
+     
       int port = GetIntParam(j_param, "port");
       wstring ip = GetWStringParam(j_param, "ip");
       string client_ip = Utils::WstringToUTF8(ip);
+      int enable = GetIntParam(j_param, "enableHttp");
+      string s_url ="";
+      int timeout = 0;
+      if(enable){
+        wstring url = GetWStringParam(j_param, "url");
+        timeout = GetIntParam(j_param, "timeout");
+        s_url = Utils::WstringToUTF8(url);
+      }
       char ip_cstr[16];
       strcpy_s(ip_cstr, client_ip.c_str());
-      int success = hooks::HookRecvMsg(ip_cstr, port);
+      int success = hooks::HookRecvMsg(ip_cstr, port,(char *)s_url.c_str(),timeout,enable);
       json ret_data = {{"code", success}, {"result", "OK"}};
       ret = ret_data.dump();
       break;

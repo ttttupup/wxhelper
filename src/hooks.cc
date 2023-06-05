@@ -5,8 +5,10 @@
 #include <nlohmann/json.hpp>
 #include "thread_pool.h"
 #include "wechat_function.h"
+#include "http_client.h"
 using namespace nlohmann;
 using namespace std;
+
 namespace wxhelper {
 namespace hooks {
 static int server_port_ = 0;
@@ -42,6 +44,8 @@ static DWORD user_info_back_addr_ = 0;
 static DWORD user_info_next_addr_ = 0;
 
 UserInfo userinfo = {};
+
+static bool enable_http_ = false;
 
 VOID CALLBACK SendMsgCallback(PTP_CALLBACK_INSTANCE instance, PVOID context,
                              PTP_WORK Work) {
@@ -107,6 +111,25 @@ clean:
   return;
 }
 
+VOID CALLBACK SendHttpMsgCallback(PTP_CALLBACK_INSTANCE instance, PVOID context,
+                                  PTP_WORK Work) {
+  InnerMessageStruct *msg = (InnerMessageStruct *)context;
+  if (msg == NULL) {
+    SPDLOG_INFO("http msg is null");
+    return;
+  }
+
+  unique_ptr<InnerMessageStruct> sms(msg);
+  json j_msg =
+      json::parse(msg->buffer, msg->buffer + msg->length, nullptr, false);
+  if (j_msg.is_discarded() == true) {
+    return;
+  }
+  string jstr = j_msg.dump() + "\n";
+  HttpClient::GetInstance().SendRequest(jstr);
+}
+
+
 void __cdecl OnRecvMsg(DWORD msg_addr) {
   json j_msg;
   unsigned long long msgid = *(unsigned long long *)(msg_addr + 0x30);
@@ -154,8 +177,14 @@ void __cdecl OnRecvMsg(DWORD msg_addr) {
   inner_msg->buffer = new char[jstr.size() + 1];
   memcpy(inner_msg->buffer, jstr.c_str(), jstr.size() + 1);
   inner_msg->length = jstr.size();
-  bool add = ThreadPool::GetInstance().AddWork(SendMsgCallback,inner_msg);
-  SPDLOG_INFO("add msg work:{}",add);
+  if(enable_http_){
+    bool add = ThreadPool::GetInstance().AddWork(SendHttpMsgCallback,inner_msg);
+    SPDLOG_INFO("add http msg work:{}",add);
+  }else{
+    bool add = ThreadPool::GetInstance().AddWork(SendMsgCallback,inner_msg);
+    SPDLOG_INFO("add msg work:{}",add);
+  }
+
 }
 
 
@@ -202,8 +231,13 @@ void __cdecl OnSnsTimeLineMsg(DWORD msg_addr) {
   inner_msg->buffer = new char[jstr.size() + 1];
   memcpy(inner_msg->buffer, jstr.c_str(), jstr.size() + 1);
   inner_msg->length = jstr.size();
-  bool add = ThreadPool::GetInstance().AddWork(SendMsgCallback,inner_msg);
-  SPDLOG_INFO("add sns work:{}",add);
+   if(enable_http_){
+    bool add = ThreadPool::GetInstance().AddWork(SendHttpMsgCallback,inner_msg);
+    SPDLOG_INFO("add http msg work:{}",add);
+  }else{
+    bool add = ThreadPool::GetInstance().AddWork(SendMsgCallback,inner_msg);
+    SPDLOG_INFO("add msg work:{}",add);
+  }
 }
 
 /// @brief  hook sns msg implement
@@ -221,7 +255,12 @@ _declspec(naked) void HandleSNSMsg() {
   }
 }
 
-int HookRecvMsg(char *client_ip, int port) {
+int HookRecvMsg(char *client_ip, int port,char* url,uint64_t timeout,bool enable) {
+  
+  enable_http_ = enable;
+  if(enable_http_){
+    HttpClient::GetInstance().SetConfig(url,timeout);
+  }
   server_port_ = port;
   strcpy_s(server_ip_, client_ip);
   DWORD base = Utils::GetWeChatWinBase();
@@ -253,6 +292,7 @@ int HookRecvMsg(char *client_ip, int port) {
 
 int UnHookRecvMsg() {
   server_port_ = 0;
+  enable_http_ = false;
   if (!msg_hook_flag_) {
     SPDLOG_INFO("recv msg hook already called");
     return 2;
