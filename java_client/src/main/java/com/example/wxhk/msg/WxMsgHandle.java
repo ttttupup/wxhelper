@@ -54,7 +54,9 @@ public class WxMsgHandle {
             return null;
         }, WxMsgType.私聊信息);
         add(chatMsg -> {
-            wxSmgServer.文件助手(chatMsg);
+            if (FILEHELPER.equals(chatMsg.getFromUser())) {
+                wxSmgServer.文件助手(chatMsg);
+            }
             return 1;
         }, WxMsgType.收到转账之后或者文件助手等信息);
         add(chatMsg -> {

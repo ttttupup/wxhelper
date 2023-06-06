@@ -37,9 +37,7 @@ public class WxSmgServerImpl implements com.example.wxhk.server.WxSmgServer {
 
     @Override
     public void 文件助手(PrivateChatMsg chatMsg) {
-        if (FILEHELPER.equals(chatMsg.getFromUser())) {
-            log.info("文件助手:{},", chatMsg.getContent());
-        }
+
     }
 
     @Override
