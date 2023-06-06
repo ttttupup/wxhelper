@@ -2,15 +2,13 @@ package com.example.wxhk.msg;
 
 import com.example.wxhk.constant.WxMsgType;
 import com.example.wxhk.model.PrivateChatMsg;
+import com.example.wxhk.model.dto.PayoutInformation;
+import com.example.wxhk.server.WxSmgServer;
 import com.example.wxhk.tcp.vertx.InitWeChat;
-import com.example.wxhk.util.HttpAsyncUtil;
-import com.example.wxhk.util.HttpSendUtil;
-import com.example.wxhk.util.HttpSyncUtil;
-import io.vertx.core.json.JsonObject;
 import jakarta.annotation.PostConstruct;
-import org.dromara.hutool.core.text.StrUtil;
 import org.dromara.hutool.core.util.XmlUtil;
 import org.dromara.hutool.log.Log;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -20,7 +18,6 @@ import org.w3c.dom.NodeList;
 import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -38,40 +35,36 @@ public class WxMsgHandle {
      */
     public static ConcurrentHashMap<String, String> collection_code_caching = new ConcurrentHashMap<>();
 
+
+    public static WxSmgServer wxSmgServer;
     /**
      * 看
      */
     public static final ReentrantReadWriteLock LOOK = new ReentrantReadWriteLock();
 
+    @Autowired
+    public void setWxSmgServer(WxSmgServer wxSmgServer) {
+        WxMsgHandle.wxSmgServer = wxSmgServer;
+    }
 
     @PostConstruct
     public void init() {
         add(chatMsg -> {
-            if (Objects.equals(chatMsg.getIsSendMsg(), 1) && Objects.equals(chatMsg.getIsSendByPhone(), 1)) {
-                log.info("手机端对:{}发出:{}", chatMsg.getFromUser(), chatMsg.getContent());
-                return 1;
-            }
-            return 1;
+            wxSmgServer.私聊(chatMsg);
+            return null;
         }, WxMsgType.私聊信息);
         add(chatMsg -> {
             if (FILEHELPER.equals(chatMsg.getFromUser())) {
-                log.info("文件助手:{},", chatMsg.getContent());
+                wxSmgServer.文件助手(chatMsg);
             }
             return 1;
         }, WxMsgType.收到转账之后或者文件助手等信息);
         add(chatMsg -> {
-            if (FILEHELPER.equals(chatMsg.getFromUser())) {
-                Document document = XmlUtil.parseXml(chatMsg.getContent());
-                Element documentElement = document.getDocumentElement();
-                String username = documentElement.getAttribute("username");
-                if (StrUtil.isNotBlank(username)) {
-                    HttpSendUtil.发送文本(username);
-                }
-            }
+            wxSmgServer.收到名片(chatMsg);
             return 1;
         }, WxMsgType.收到名片);
         add(chatMsg -> {
-            HttpSendUtil.通过好友请求(chatMsg);
+            wxSmgServer.收到好友请求(chatMsg);
             return 1;
         }, WxMsgType.好友请求);// 好友请求
         add(chatMsg -> {
@@ -148,7 +141,7 @@ public class WxMsgHandle {
                                 String substring = monery.substring(1);
                                 BigDecimal decimal = new BigDecimal(substring);
                                 log.info("扫码收款:{},付款人:{},付款备注:{}", decimal.stripTrailingZeros().toPlainString(), next.getValue(), remark);
-                                HttpSendUtil.发送文本(next.getValue(), StrUtil.format("扫码收款:{},备注:{}", decimal.stripTrailingZeros().toPlainString(), remark));
+                                wxSmgServer.扫码收款(new PayoutInformation(next.getValue(),decimal,remark));
                                 iterator.remove();
                                 return false;
                             }
@@ -174,18 +167,18 @@ public class WxMsgHandle {
                     String remark = documentElement.getElementsByTagName("pay_memo").item(0).getTextContent();
                     String monery = documentElement.getElementsByTagName("feedesc").item(0).getTextContent();
                     String receiver_username = documentElement.getElementsByTagName("receiver_username").item(0).getTextContent();
-                    if (InitWeChat.WXID_MAP.contains(receiver_username)) {
-                        // 如果是自己转出去的,则不需要解析了
-                        return false;
+                    // 如果是机器人发出的,则跳过解析
+                    if (InitWeChat.WXID_MAP.contains(receiver_username) ) {
+                       return false;
                     }
-
                     if (monery.startsWith("￥")) {
                         String substring = monery.substring(1);
                         BigDecimal decimal = new BigDecimal(substring);
-                        log.info("收款:{},付款人:{},付款备注:{}", decimal.stripTrailingZeros().toPlainString(), receiver_username, remark);
-                        HttpSendUtil.发送文本(receiver_username, StrUtil.format("收到款项:{},备注:{}", decimal.stripTrailingZeros().toPlainString(), remark));
+                        log.info("收款:{},付款人:{},付款备注:{}", decimal.stripTrailingZeros().toPlainString(), chatMsg.getFromUser(), remark);
+                        wxSmgServer.收款之后(new PayoutInformation(chatMsg.getFromUser(), decimal, remark));
                         return false;
-                    }
+                    };
+
                 }
             }
         } catch (Exception e) {
@@ -207,7 +200,7 @@ public class WxMsgHandle {
             String content = chatMsg.getContent();
             Document document = XmlUtil.parseXml(content);
             NodeList paysubtype1 = document.getElementsByTagName("paysubtype");
-            if(paysubtype1.getLength()==0){
+            if (paysubtype1.getLength() == 0) {
                 return true;
             }
             Node paysubtype = paysubtype1.item(0);
@@ -218,12 +211,18 @@ public class WxMsgHandle {
                     // 如果不是机器人收款,则认为不需要解析了,大概率是机器人自己发出去的
                     return false;
                 }
-                Node transcationid = document.getDocumentElement().getElementsByTagName("transcationid").item(0);
-                Node transferid = document.getDocumentElement().getElementsByTagName("transferid").item(0);
-                HttpSyncUtil.exec(HttpAsyncUtil.Type.确认收款, new JsonObject().put("wxid", chatMsg.getFromUser())
-                        .put("transcationId", transcationid.getTextContent())
-                        .put("transferId", transferid.getTextContent()));
-                return false;
+
+                String remark = document.getElementsByTagName("pay_memo").item(0).getTextContent();
+                String monery = document.getElementsByTagName("feedesc").item(0).getTextContent();
+                String receiver_username = document.getElementsByTagName("receiver_username").item(0).getTextContent();
+                if (monery.startsWith("￥")) {
+                    String substring = monery.substring(1);
+                    BigDecimal decimal = new BigDecimal(substring);
+                    Node transcationid = document.getDocumentElement().getElementsByTagName("transcationid").item(0);
+                    Node transferid = document.getDocumentElement().getElementsByTagName("transferid").item(0);
+                    wxSmgServer.接到收款(new PayoutInformation(chatMsg.getFromUser(), decimal, remark, transcationid.getTextContent(), transferid.getTextContent()));
+                    return false;
+                }
             }
 
         } catch (Exception e) {

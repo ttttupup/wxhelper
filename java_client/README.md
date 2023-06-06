@@ -11,6 +11,9 @@ com.example.wxhk.tcp.vertx.VertxTcp  这个是tcp服务端,接受信息
 com.example.wxhk.tcp.vertx.InitWeChat 微信环境初始化
 
 com.example.wxhk.tcp.vertx.ArrHandle 循环消息处理
+
+com.example.wxhk.server.WxSmgServer 为消息处理接口,实现其中的方法即可
+
 ![image](https://github.com/sglmsn/wxhelper/assets/36943585/59d49401-a492-46a9-8ed9-dab7fb1822b4)
 
 

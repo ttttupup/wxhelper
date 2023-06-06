@@ -32,6 +32,10 @@ class HttpSendUtilTest {
     void 开启hook() {
 
     }
+    @Test
+    void 关闭ook() {
+        HttpSendUtil.关闭hook();
+    }
 
     @Test
     void 获取群成员() {

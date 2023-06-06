@@ -117,6 +117,11 @@ public class HttpSendUtil {
     }
 
 
+    public static JsonObject 确认收款(ConfirmThePayment payment){
+        return HttpSyncUtil.exec(HttpAsyncUtil.Type.确认收款, payment.toJson());
+    }
+
+
     @Deprecated
     public static com.example.wxhk.infe.SendMsg of(HttpAsyncUtil.Type type) {
         switch (type) {
