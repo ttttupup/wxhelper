@@ -131,13 +131,17 @@ int ContactMgr::AddFriendByWxid(wchar_t *wxid,wchar_t* msg) {
   WeChatString w_msg(msg);
   DWORD instance =0;
   Unkown null_obj={0,0,0,0,0,0xF};
+  //    EDI,0xE  ESI,0   all
+  //    EDI,0xE  ESI,8   only chat
+  //    EDI,0xE  ESI,1   no let look 
+  //    EDI,0xE  ESI,2   no look 
  __asm{
         PUSHAD
         PUSHFD
         CALL       contact_mgr_addr     
         MOV        dword ptr [instance],EAX     
-        MOV        EDI,0x6
-        MOV        ESI,0
+        MOV        EDI,0xE
+        MOV        ESI,0x8
         MOV        EAX,0x2  
         SUB        ESP,0x18                                         
         MOV        EAX,ESP
@@ -150,8 +154,8 @@ int ContactMgr::AddFriendByWxid(wchar_t *wxid,wchar_t* msg) {
         MOV        ECX,ESP
         PUSH       EAX                                               
         CALL       fn1_addr                                     
-        PUSH       0x0
-        PUSH       0x6
+        PUSH       ESI
+        PUSH       EDI
         MOV        EAX,w_msg       
 
         SUB        ESP,0x14
