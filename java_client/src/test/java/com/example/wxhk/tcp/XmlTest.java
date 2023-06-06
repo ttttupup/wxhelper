@@ -81,4 +81,12 @@ public class XmlTest {
         String alias = documentElement.getAttribute("alias");
         Console.log(alias,username);
     }
+
+    @Test
+    void 公众号(){
+        String con = "{\"content\":\"请问您指的是账单的什么问题呢？请回复数字选择：\\n1.如何导出微信账单记录\\n2.如何查看已删除账单\\n3.怎么删除交易记录\",\"fromGroup\":\"gh_3dfda90e39d6\",\"fromUser\":\"gh_3dfda90e39d6\",\"isSendMsg\":0,\"msgId\":9025889923001869810,\"pid\":9920,\"sign\":\"0a66d3dab6b64ca646f512cd278d5f3d\",\"signature\":\"<msgsource>\\n\\t<tips>3</tips>\\n\\t<bizmsg>\\n\\t\\t<bizmsgshowtype>3</bizmsgshowtype>\\n\\t\\t<bizmsgfromuser><![CDATA[gh_3dfda90e39d6]]></bizmsgfromuser>\\n\\t</bizmsg>\\n\\t<msg_cluster_type>1</msg_cluster_type>\\n\\t<service_type>1</service_type>\\n\\t<scene>13</scene>\\n\\t<signature>v1_iJNyfNLb</signature>\\n\\t<tmp_node>\\n\\t\\t<publisher-id>&lt;![CDATA[]]&gt;</publisher-id>\\n\\t</tmp_node>\\n</msgsource>\\n\",\"time\":\"2023-06-05 11:32:17\",\"timestamp\":1685935937,\"type\":1}";
+        PrivateChatMsg privateChatMsg = new JsonObject(con).mapTo(PrivateChatMsg.class);
+        Document document = XmlUtil.parseXml(privateChatMsg.getSignature());
+        Element documentElement = document.getDocumentElement();
+    }
 }
