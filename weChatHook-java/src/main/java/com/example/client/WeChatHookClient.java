@@ -606,4 +606,14 @@ public class WeChatHookClient {
         return JSON.parseObject(body);
     }
 
+    @SneakyThrows
+    public static JSONObject hook(String url, String json) {
+        String body = Jsoup.connect(url)
+                .data("msg",json)
+                .method(Connection.Method.POST)
+                .timeout(1000)
+                .execute().body();
+        return JSON.parseObject(body);
+    }
+
 }
