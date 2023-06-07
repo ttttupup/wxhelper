@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 
-#include "base_mgr.h"
 #include "wechat_function.h"
 #include "windows.h"
 #include "singleton.h"

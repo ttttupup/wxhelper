@@ -390,11 +390,11 @@ int ChatRoomMgr::InviteMemberToChatRoom(wchar_t* chat_room_id, wchar_t** wxids, 
   DWORD init_chat_msg_addr = base_addr_ + WX_INIT_CHAT_MSG_OFFSET;
   DWORD get_share_record_mgr_addr = base_addr_ + WX_SHARE_RECORD_MGR_OFFSET;
   
-  DWORD fn1 = base_addr_ + 0x7fa730;
-  DWORD fn2 = base_addr_ + 0x78d9a0;
-  DWORD fn3 = base_addr_ + 0x7fb6e0;
-  DWORD fn4 = base_addr_ + 0x755af0;
-  DWORD invite_addr = base_addr_ + 0xbd28a0;
+  DWORD fn1 = base_addr_ + 0x7f99d0;
+  DWORD fn2 = base_addr_ + 0x78cef0;
+  DWORD fn3 = base_addr_ + 0x7fa980;
+  DWORD fn4 = base_addr_ + 0x755060;
+  DWORD invite_addr = base_addr_ + 0xbd1a00;
 
   DWORD sys_addr =  (DWORD)GetModuleHandleA("win32u.dll") + 0x116C;
   DWORD addr[2] = {sys_addr,0};
