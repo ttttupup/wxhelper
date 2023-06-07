@@ -17,11 +17,11 @@ import io.netty.handler.codec.Delimiters;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.util.CharsetUtil;
+import io.netty.util.internal.StringUtil;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.InetSocketAddress;
+import java.util.*;
 
 /**
  * @PACKAGE_NAME: com.example.service
@@ -34,56 +34,125 @@ public class WeChatHookNettyServer {
 
     /**
      * 直接启动main方法
+     *
      * @param args
      */
     public static void main(String[] args) {
-        Integer hookPort = 19099;
+
+        Integer serverPort = 19077;
+
+        String hookApi = null;
+
+        for (String arg : args) {
+            System.out.println(arg);
+            if (arg.startsWith("--port")) {
+                serverPort = Integer.valueOf(arg.split("=")[1]);
+            }
+            if (arg.startsWith("--hookApi")) {
+                hookApi = arg.split("=")[1];
+            }
+        }
+
         //1、注入
         inject();
 
         //2、开启hook
         try {
-            JSONObject result = WeChatHookClient.hook_msg("127.0.0.1", hookPort.toString());
+            JSONObject result = WeChatHookClient.hook_msg("127.0.0.1", serverPort.toString());
         } catch (Exception e) {
             System.out.println("hook 失败，请检查微信是否登录");
             return;
         }
         //3、启动服务
-        start(hookPort);
+        start(serverPort, hookApi);
     }
 
     /**
      * 执行注入命令
      */
     public static void inject() {
-        ClassLoader classLoader = WeChatHookNettyServer.class.getClassLoader();
-        //获取ConsoleInject 文件路径
-        String ConsoleInject = classLoader.getResource("ConsoleInject.exe").getPath().replaceFirst("/", "");
-        //获取 wxhelper.dll 文件路径
-        String wxhelper = classLoader.getResource("wxhelper.dll").getPath().replaceFirst("/", "");
+        //
+        File consoleInjectTemp = null;
+        File wxhelperTemp = null;
+        try {
+            consoleInjectTemp = createTempFile("ConsoleInject", ".exe");
+            wxhelperTemp = createTempFile("wxhelper", ".dll");
 
-        //ConsoleInject.exe  -i WeChat.exe -p C:\Users\DELL\Desktop\injector\wxhelper.dll
-        String command = ConsoleInject + " -i WeChat.exe -p " + wxhelper;
+            String ConsoleInject = consoleInjectTemp.getAbsolutePath();
 
-        //重试3次
-        int retryCount = 3;
-        do {
-            retryCount--;
-            try {
-                //检查登录状态
-                JSONObject jsonObject = WeChatHookClient.check_login();
-                //如果已登录不需要注入
-                if (jsonObject.getInteger("code").equals(1)) {
-                    return;
+            String wxhelper = wxhelperTemp.getAbsolutePath();
+
+            //ConsoleInject.exe  -i WeChat.exe -p C:\Users\DELL\Desktop\injector\wxhelper.dll
+            String command = ConsoleInject + " -i WeChat.exe -p " + wxhelper;
+
+            //重试3次
+            int retryCount = 3;
+            do {
+                retryCount--;
+                try {
+                    //检查登录状态
+                    JSONObject jsonObject = WeChatHookClient.check_login();
+                    //如果已登录不需要注入
+                    if (jsonObject.getInteger("code").equals(1)) {
+                        return;
+                    }
+                } catch (Exception e) {
+                    System.out.println(e.getMessage() + "请确认微信已登录");
                 }
-            } catch (Exception e) {
-                System.out.println(e.getMessage() + "请确认微信已登录");
+                //执行注入命令
+                excuteShell(command);
 
+            } while (retryCount >= 0);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        } finally {
+            ////如果不为空删除临时文件
+            if (Objects.nonNull(consoleInjectTemp)) {
+                consoleInjectTemp.delete();
             }
-            //执行注入命令
-            excuteShell(command);
+            //如果不为空删除临时文件
+            if (Objects.nonNull(wxhelperTemp)) {
+                wxhelperTemp.delete();
+            }
+        }
 
-        } while (retryCount > 0);
+    }
+
+    /**
+     * 创建临时文件
+     *
+     * @param fileName
+     * @param suffix
+     * @return
+     */
+    private static File createTempFile(String fileName, String suffix) {
+        InputStream inputStream = WeChatHookNettyServer.class.getResourceAsStream("/" + fileName + suffix);
+
+        FileOutputStream outputStream = null;
+        try {
+            File tempFile = File.createTempFile(fileName, suffix);
+            outputStream = new FileOutputStream(tempFile);
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+            return tempFile;
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (Objects.nonNull(outputStream)) {
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+        return null;
     }
 
     /**
@@ -91,7 +160,7 @@ public class WeChatHookNettyServer {
      *
      * @param port
      */
-    public static void start(Integer port) {
+    public static void start(Integer port, String hookApi) {
         NioEventLoopGroup bossGroup = new NioEventLoopGroup();
         NioEventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
@@ -102,10 +171,10 @@ public class WeChatHookNettyServer {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) {
-                            ch.pipeline().addLast(new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
+                            ch.pipeline().addLast(new DelimiterBasedFrameDecoder(1024 * 100, Delimiters.lineDelimiter()));
                             ch.pipeline().addLast(new StringDecoder(CharsetUtil.UTF_8));
                             ch.pipeline().addLast(new StringEncoder(CharsetUtil.UTF_8));
-                            ch.pipeline().addLast(new ReceiveMsgHandler());
+                            ch.pipeline().addLast(new ReceiveMsgHandler(hookApi));
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG, 128)
@@ -124,12 +193,52 @@ public class WeChatHookNettyServer {
 
     private static class ReceiveMsgHandler extends SimpleChannelInboundHandler<String> {
 
+        private String hookApi;
+
+        public ReceiveMsgHandler(String hookApi) {
+            this.hookApi = hookApi;
+        }
+
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, String msg) {
-            JSON.parseObject(msg).forEach((k, v) -> {
+            JSONObject jsonObject = JSON.parseObject(msg);
+
+            jsonObject.forEach((k, v) -> {
                 System.out.println(k + " = " + v);
             });
-            System.out.println("----------end----------");
+
+            String fromGroup = jsonObject.getString("fromGroup");
+            String fromUser = jsonObject.getString("fromUser");
+            String from;
+            if (fromGroup.equals(fromUser)) {
+                JSONObject fromGroupJson = WeChatHookClient.query_nickname(jsonObject.getString("fromGroup"));
+                String groupNname = fromGroupJson.getString("name");
+                from = "消息来自：" + groupNname;
+                jsonObject.put("fromUserName", groupNname);
+            } else {
+                JSONObject fromGroupJson = WeChatHookClient.query_nickname(jsonObject.getString("fromGroup"));
+                String groupNname = fromGroupJson.getString("name");
+
+                JSONObject fromUserJson = WeChatHookClient.query_nickname(jsonObject.getString("fromUser"));
+                String fromUserName = fromUserJson.getString("name");
+                jsonObject.put("fromUserName", fromUserName);
+
+                from = "消息来自：" + groupNname + "->" + fromUserName;
+            }
+            System.out.println("----------" + from + "----------");
+            //消息转发
+            if (StringUtil.isNullOrEmpty(hookApi)) {
+                return;
+            }
+            //检查api接口是否是通的
+            //转发消息
+            try {
+                WeChatHookClient.hook(hookApi, msg);
+            } catch (Exception e) {
+                //请检查hookApi服务是否正常
+                System.err.println("--》消息转发失败，请检查hookApi服务是否正常");
+            }
+
         }
 
         @Override
@@ -160,5 +269,4 @@ public class WeChatHookNettyServer {
             e.printStackTrace();
         }
     }
-
 }
