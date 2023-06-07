@@ -285,4 +285,24 @@ int ContactMgr::AddFriendByWxid(wchar_t *wxid,wchar_t* msg) {
   success = 1;
   return success;
  }
+
+ int ContactMgr::ModifyContactRemark(wchar_t* wxid,wchar_t* remark){
+  int success = -1;
+  WeChatString contact(wxid);
+  WeChatString content(remark);
+  DWORD mod__addr = base_addr_ + WX_MOD_REMARK_OFFSET;
+  __asm{
+      PUSHAD
+      PUSHFD
+      LEA        EAX,content
+      PUSH       EAX
+      LEA        EAX,contact
+      PUSH       EAX
+      CALL       mod__addr   
+      POPFD
+      POPAD
+  }
+  success = 1;
+  return success;
+ }
 }  // namespace wxhelper

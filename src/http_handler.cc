@@ -677,6 +677,14 @@ string Dispatch(struct mg_connection *c, struct mg_http_message *hm) {
       ret = ret_data.dump();
       break;
     }
+    case WECHAT_MOD_CONTACT_REMARK:{
+      wstring wxid = GetWStringParam(j_param, "wxid");
+      wstring remark = GetWStringParam(j_param, "remark");
+      int success =g_context.contact_mgr->ModifyContactRemark(WS2LPWS(wxid), WS2LPWS(remark));
+      json ret_data = {{"code", success}, {"result", "OK"}};
+      ret = ret_data.dump();
+      break;
+    }
     default:
       json ret_data = {{"result", "ERROR"}, {"msg", "not support api"}};
       ret = ret_data.dump();
