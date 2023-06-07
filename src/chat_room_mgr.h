@@ -23,6 +23,8 @@ class ChatRoomMgr:public BaseMgr {
 
    std::wstring GetChatRoomMemberNickname(wchar_t* chat_room_id,
                                                 wchar_t* wxid);
+   int InviteMemberToChatRoom(wchar_t* chat_room_id, wchar_t** wxids,
+                                 int len);                               
 };
 }  // namespace wxhelper
 #endif

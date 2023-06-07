@@ -23,6 +23,8 @@ class DB :public Singleton<DB>{
 
   std::string GetVoiceBuffByMsgId(ULONG64 msgid);
 
+  std::string GetPublicMsgCompressContentByMsgId(ULONG64 msgid);
+
  private:
   int SelectDataInner(DWORD db, const char *sql,
                       std::vector<std::vector<SqlResult>> &data);

@@ -126,18 +126,22 @@ int ContactMgr::AddFriendByWxid(wchar_t *wxid,wchar_t* msg) {
   DWORD verify_msg_addr = base_addr_ + WX_VERIFY_MSG_OFFSET;
   DWORD set_value_addr = base_addr_ + WX_INIT_CHAT_MSG_OFFSET;
   DWORD do_verify_user_addr = base_addr_ + WX_DO_VERIFY_USER_OFFSET;
-  DWORD fn1_addr = base_addr_ + 0x758720;
+  DWORD fn1_addr = base_addr_ + 0x7591b0;
   WeChatString user_id(wxid);
   WeChatString w_msg(msg);
   DWORD instance =0;
   Unkown null_obj={0,0,0,0,0,0xF};
+  //    EDI,0xE  ESI,0   all
+  //    EDI,0xE  ESI,8   only chat
+  //    EDI,0xE  ESI,1   no let look 
+  //    EDI,0xE  ESI,2   no look 
  __asm{
         PUSHAD
         PUSHFD
         CALL       contact_mgr_addr     
         MOV        dword ptr [instance],EAX     
-        MOV        EDI,0x6
-        MOV        ESI,0
+        MOV        EDI,0xE
+        MOV        ESI,0x8
         MOV        EAX,0x2  
         SUB        ESP,0x18                                         
         MOV        EAX,ESP
@@ -150,8 +154,8 @@ int ContactMgr::AddFriendByWxid(wchar_t *wxid,wchar_t* msg) {
         MOV        ECX,ESP
         PUSH       EAX                                               
         CALL       fn1_addr                                     
-        PUSH       0x0
-        PUSH       0x6
+        PUSH       ESI
+        PUSH       EDI
         MOV        EAX,w_msg       
 
         SUB        ESP,0x14
@@ -215,6 +219,70 @@ int ContactMgr::AddFriendByWxid(wchar_t *wxid,wchar_t* msg) {
       POPFD         
       POPAD
   }
+  return success;
+ }
+
+ int ContactMgr::GetContactByWxid(wchar_t *wxid,ContactProfile& profile){
+  int success = -1;
+  char buff[0x440] = {0};
+  WeChatString pri(wxid);
+  DWORD contact_mgr_addr = base_addr_ + WX_CONTACT_MGR_OFFSET;
+  DWORD get_contact_addr = base_addr_ + WX_GET_CONTACT_OFFSET;
+  DWORD free_contact_addr = base_addr_ + WX_FREE_CONTACT_OFFSET;
+  __asm {
+      PUSHAD
+      PUSHFD
+      CALL       contact_mgr_addr                                   
+      LEA        ECX,buff
+      PUSH       ECX
+      LEA        ECX,pri
+      PUSH       ECX
+      MOV        ECX,EAX
+      CALL       get_contact_addr                            
+      POPFD
+      POPAD
+  }
+  success = 0;
+  profile.wxid = READ_WSTRING(buff, 0x10);
+  profile.account = READ_WSTRING(buff, 0x24);
+  profile.v3 = READ_WSTRING(buff, 0x38);
+  profile.nickname = READ_WSTRING(buff, 0x6C);
+  profile.head_image = READ_WSTRING(buff, 0x110);
+  __asm {
+      PUSHAD
+      PUSHFD
+      LEA        ECX,buff
+      CALL       free_contact_addr    
+      POPFD
+      POPAD
+  }
+  success = 1;
+  return success;
+ }
+
+ int ContactMgr::GetHeadImage(wchar_t* wxid,wchar_t* url){
+  int success = -1;
+  WeChatString contact(wxid);
+  WeChatString img_url(url);
+  DWORD head_image_mgr_addr = base_addr_ + WX_HEAD_IMAGE_MGR_OFFSET;
+  DWORD get_img_download_addr = base_addr_ + QUERY_THEN_DOWNLOAD_OFFSET;
+  char temp[0x8] ={0};
+  __asm{
+      PUSHAD
+      PUSHFD
+      CALL       head_image_mgr_addr
+      LEA        ECX,img_url
+      PUSH       ECX
+      LEA        ECX,contact
+      PUSH       ECX
+      LEA        ECX,temp
+      PUSH       ECX
+      MOV        ECX,EAX
+      CALL       get_img_download_addr    
+      POPFD
+      POPAD
+  }
+  success = 1;
   return success;
  }
 }  // namespace wxhelper

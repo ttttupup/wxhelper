@@ -108,6 +108,7 @@ int ChatRoomMgr::DelMemberFromChatRoom(wchar_t* chat_room_id, wchar_t** wxids,
   DWORD init_chat_msg_addr = base_addr_ + WX_INIT_CHAT_MSG_OFFSET;
   __asm {
          PUSHAD
+         PUSHFD
          CALL       get_chat_room_mgr_addr                              
          SUB        ESP,0x14
          MOV        ESI,EAX
@@ -120,6 +121,7 @@ int ChatRoomMgr::DelMemberFromChatRoom(wchar_t* chat_room_id, wchar_t** wxids,
          PUSH       EAX
          CALL       del_member_addr   
          MOV        success,EAX        
+         POPFD
          POPAD
   }
   return success;
@@ -372,4 +374,65 @@ std::wstring ChatRoomMgr::GetChatRoomMemberNickname(wchar_t* chat_room_id,
   }
   return name;
 }
+
+int ChatRoomMgr::InviteMemberToChatRoom(wchar_t* chat_room_id, wchar_t** wxids, int len) {
+  int success = -1;
+  WeChatString chat_room(chat_room_id);
+  vector<WeChatString> members;
+  VectorInner* list = (VectorInner*)&members;
+  DWORD members_ptr = (DWORD)&list->start;
+  for (int i = 0; i < len; i++) {
+    WeChatString pwxid(wxids[i]);
+    members.push_back(pwxid);
+  }
+  DWORD get_chat_room_mgr_addr = base_addr_ + WX_CHAT_ROOM_MGR_OFFSET;
+  DWORD add_member_addr = base_addr_ + WX_ADD_MEMBER_TO_CHAT_ROOM_OFFSET;
+  DWORD init_chat_msg_addr = base_addr_ + WX_INIT_CHAT_MSG_OFFSET;
+  DWORD get_share_record_mgr_addr = base_addr_ + WX_SHARE_RECORD_MGR_OFFSET;
+  
+  DWORD fn1 = base_addr_ + 0x7fa730;
+  DWORD fn2 = base_addr_ + 0x78d9a0;
+  DWORD fn3 = base_addr_ + 0x7fb6e0;
+  DWORD fn4 = base_addr_ + 0x755af0;
+  DWORD invite_addr = base_addr_ + 0xbd28a0;
+
+  DWORD sys_addr =  (DWORD)GetModuleHandleA("win32u.dll") + 0x116C;
+  DWORD addr[2] = {sys_addr,0};
+  __asm {
+        PUSHAD
+        PUSHFD
+        CALL       get_share_record_mgr_addr                                
+        LEA        ECX,addr
+        PUSH       ECX
+        MOV        ECX,EAX
+        CALL       fn1                                     
+        CALL       get_chat_room_mgr_addr                                   
+        SUB        ESP,0x8
+        LEA        EAX,addr
+        MOV        ECX,ESP
+        PUSH       EAX
+        CALL       fn2                                     
+        SUB        ESP,0x14
+        MOV        ECX,ESP
+        LEA        EAX,chat_room
+        PUSH       EAX
+        CALL       init_chat_msg_addr                                  
+        MOV        EAX,dword ptr[members_ptr]
+        PUSH       EAX
+        CALL       invite_addr
+        CALL       get_share_record_mgr_addr                                
+        PUSH       0x0
+        PUSH       0x1
+        MOV        ECX,EAX
+        CALL       fn3                                     
+        LEA        ECX,addr
+        CALL       fn4
+        POPFD
+        POPAD
+  }
+  success = 1;
+  return success;
+
+}
+
 }  // namespace wxhelper

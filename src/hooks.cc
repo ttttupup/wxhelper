@@ -1,13 +1,14 @@
-﻿#include <Ws2tcpip.h>
+﻿#include "pch.h"
+#include <Ws2tcpip.h>
 #include <winsock2.h>
 
 #include <nlohmann/json.hpp>
-
-#include "easylogging++.h"
-#include "pch.h"
+#include "thread_pool.h"
 #include "wechat_function.h"
+#include "http_client.h"
 using namespace nlohmann;
 using namespace std;
+
 namespace wxhelper {
 namespace hooks {
 static int server_port_ = 0;
@@ -44,8 +45,13 @@ static DWORD user_info_next_addr_ = 0;
 
 UserInfo userinfo = {};
 
-void SendSocketMessage(InnerMessageStruct *msg) {
+static bool enable_http_ = false;
+
+VOID CALLBACK SendMsgCallback(PTP_CALLBACK_INSTANCE instance, PVOID context,
+                             PTP_WORK Work) {
+  InnerMessageStruct *msg = (InnerMessageStruct *)context;
   if (msg == NULL) {
+    SPDLOG_INFO("add work:msg is null");
     return;
   }
   unique_ptr<InnerMessageStruct> sms(msg);
@@ -57,12 +63,19 @@ void SendSocketMessage(InnerMessageStruct *msg) {
   string jstr = j_msg.dump() + "\n";
 
   if (server_port_ == 0) {
-    LOG(INFO) << "http server port error :" << server_port_;
+    SPDLOG_ERROR("http server port error :{}", server_port_);
     return;
   }
+  WSADATA was_data = {0};
+  int ret = WSAStartup(MAKEWORD(2, 2), &was_data);
+  if (ret != 0) {
+    SPDLOG_ERROR("WSAStartup failed:{}", ret);
+    return;
+  }
+
   SOCKET client_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
   if (client_socket < 0) {
-    LOG(INFO) << "socket init  fail";
+    SPDLOG_ERROR("socket init  fail");
     return;
   }
   BOOL status = false;
@@ -73,23 +86,49 @@ void SendSocketMessage(InnerMessageStruct *msg) {
   InetPtonA(AF_INET, server_ip_, &client_addr.sin_addr.s_addr);
   if (connect(client_socket, reinterpret_cast<sockaddr *>(&client_addr),
               sizeof(sockaddr)) < 0) {
-    LOG(INFO) << "socket connect  fail";
-    return;
+    SPDLOG_ERROR("socket connect  fail");
+    goto clean;
   }
   char recv_buf[1024] = {0};
-  int ret = send(client_socket, jstr.c_str(), jstr.size(), 0);
-  if (ret == -1 || ret == 0) {
-    LOG(INFO) << "socket send  fail ,ret:" << ret;
-    closesocket(client_socket);
+  ret = send(client_socket, jstr.c_str(), jstr.size(), 0);
+  if (ret < 0) {
+    SPDLOG_ERROR("socket send  fail ,ret:{}", ret);
+    goto clean;
+  }
+  ret = shutdown(client_socket, SD_SEND);
+  if (ret == SOCKET_ERROR) {
+    SPDLOG_ERROR("shutdown failed with erro:{}", ret);
+    goto clean;
+  }
+  ret = recv(client_socket, recv_buf, sizeof(recv_buf), 0);
+  if (ret < 0) {
+    SPDLOG_ERROR("socket recv  fail ,ret:{}", ret);
+    goto clean;
+  }
+clean:
+  closesocket(client_socket);
+  WSACleanup();
+  return;
+}
+
+VOID CALLBACK SendHttpMsgCallback(PTP_CALLBACK_INSTANCE instance, PVOID context,
+                                  PTP_WORK Work) {
+  InnerMessageStruct *msg = (InnerMessageStruct *)context;
+  if (msg == NULL) {
+    SPDLOG_INFO("http msg is null");
     return;
   }
-  memset(recv_buf, 0, sizeof(recv_buf));
-  ret = recv(client_socket, recv_buf, sizeof(recv_buf), 0);
-  closesocket(client_socket);
-  if (ret == -1 || ret == 0) {
-    LOG(INFO) << "socket recv  fail ,ret:" << ret;
+
+  unique_ptr<InnerMessageStruct> sms(msg);
+  json j_msg =
+      json::parse(msg->buffer, msg->buffer + msg->length, nullptr, false);
+  if (j_msg.is_discarded() == true) {
+    return;
   }
+  string jstr = j_msg.dump() + "\n";
+  HttpClient::GetInstance().SendRequest(jstr);
 }
+
 
 void __cdecl OnRecvMsg(DWORD msg_addr) {
   json j_msg;
@@ -138,12 +177,17 @@ void __cdecl OnRecvMsg(DWORD msg_addr) {
   inner_msg->buffer = new char[jstr.size() + 1];
   memcpy(inner_msg->buffer, jstr.c_str(), jstr.size() + 1);
   inner_msg->length = jstr.size();
-  HANDLE thread = CreateThread(
-      NULL, 0, (LPTHREAD_START_ROUTINE)SendSocketMessage, inner_msg, NULL, 0);
-  if (thread) {
-    CloseHandle(thread);
+  if(enable_http_){
+    bool add = ThreadPool::GetInstance().AddWork(SendHttpMsgCallback,inner_msg);
+    SPDLOG_INFO("add http msg work:{}",add);
+  }else{
+    bool add = ThreadPool::GetInstance().AddWork(SendMsgCallback,inner_msg);
+    SPDLOG_INFO("add msg work:{}",add);
   }
+
 }
+
+
 
 /// @brief  hook msg implement
 _declspec(naked) void HandleSyncMsg() {
@@ -187,10 +231,12 @@ void __cdecl OnSnsTimeLineMsg(DWORD msg_addr) {
   inner_msg->buffer = new char[jstr.size() + 1];
   memcpy(inner_msg->buffer, jstr.c_str(), jstr.size() + 1);
   inner_msg->length = jstr.size();
-  HANDLE thread = CreateThread(
-      NULL, 0, (LPTHREAD_START_ROUTINE)SendSocketMessage, inner_msg, NULL, 0);
-  if (thread) {
-    CloseHandle(thread);
+   if(enable_http_){
+    bool add = ThreadPool::GetInstance().AddWork(SendHttpMsgCallback,inner_msg);
+    SPDLOG_INFO("add http msg work:{}",add);
+  }else{
+    bool add = ThreadPool::GetInstance().AddWork(SendMsgCallback,inner_msg);
+    SPDLOG_INFO("add msg work:{}",add);
   }
 }
 
@@ -209,43 +255,46 @@ _declspec(naked) void HandleSNSMsg() {
   }
 }
 
-int HookRecvMsg(char *client_ip, int port) {
+int HookRecvMsg(char *client_ip, int port,char* url,uint64_t timeout,bool enable) {
+  
+  enable_http_ = enable;
+  if(enable_http_){
+    HttpClient::GetInstance().SetConfig(url,timeout);
+  }
   server_port_ = port;
   strcpy_s(server_ip_, client_ip);
   DWORD base = Utils::GetWeChatWinBase();
   if (!base) {
+    SPDLOG_INFO("base addr is null");
     return -1;
   }
 
   if (msg_hook_flag_) {
+    SPDLOG_INFO("recv msg hook already called");
     return 2;
   }
 
   DWORD hook_recv_msg_addr = base + WX_RECV_MSG_HOOK_OFFSET;
   msg_next_addr_ = base + WX_RECV_MSG_HOOK_NEXT_OFFSET;
-  msg_back_addr_ = hook_recv_msg_addr + 0x5;
-  LOG(INFO) << "base" << base;
-  LOG(INFO) << "msg_next_addr_" << msg_next_addr_;
-  LOG(INFO) << "msg_back_addr_" << msg_back_addr_;
+   msg_back_addr_ = hook_recv_msg_addr + 0x5;
   Utils::HookAnyAddress(hook_recv_msg_addr, (LPVOID)HandleSyncMsg,
                         msg_asm_code_);
 
   DWORD hook_sns_msg_addr = base + WX_SNS_HOOK_OFFSET;
   sns_next_addr_ = base + WX_SNS_HOOK_NEXT_OFFSET;
   sns_back_addr_ = hook_sns_msg_addr + 0x5;
-  LOG(INFO) << "base" << base;
-  LOG(INFO) << "sns_next_addr_" << sns_next_addr_;
-  LOG(INFO) << "sns_back_addr_" << sns_back_addr_;
   Utils::HookAnyAddress(hook_sns_msg_addr, (LPVOID)HandleSNSMsg, sns_asm_code_);
 
   msg_hook_flag_ = true;
+  SPDLOG_INFO("hook recv msg success");
   return 1;
 }
 
 int UnHookRecvMsg() {
   server_port_ = 0;
+  enable_http_ = false;
   if (!msg_hook_flag_) {
-    LOG(INFO) << "this port already hooked";
+    SPDLOG_INFO("recv msg hook already called");
     return 2;
   }
   DWORD base = Utils::GetWeChatWinBase();
@@ -271,9 +320,9 @@ void PrintLog(DWORD addr) {
   char *ansi_message = new char[size + 1];
   memset(ansi_message, 0, size + 1);
   WideCharToMultiByte(CP_ACP, 0, w_msg, -1, ansi_message, size, 0, 0);
+  spdlog::info("wechat log:{}", ansi_message);
   delete[] w_msg;
   w_msg = NULL;
-  LOG(INFO) << ansi_message;
   delete[] ansi_message;
   ansi_message = NULL;
 }
@@ -321,7 +370,7 @@ int UnHookLog() {
 void SetErrorCode(int code) { userinfo.error_code = code; }
 
 void SetUserInfoDetail(DWORD address) {
-  LOG(INFO) << "hook userinfo addr" <<&userinfo;
+  SPDLOG_INFO("hook userinfo addr = {}",address);
   DWORD length = *(DWORD *)(address + 0x8);
   userinfo.keyword = new wchar_t[length + 1];
   userinfo.keyword_len = length;
@@ -352,6 +401,36 @@ void SetUserInfoDetail(DWORD address) {
     ZeroMemory(userinfo.big_image, (length + 1) * sizeof(wchar_t));
   }
 
+  length = *(DWORD *)(address + 0x6C);
+  userinfo.V3 = new wchar_t[length + 1];
+  userinfo.V3_len = length;
+  if (length) {
+    memcpy(userinfo.V3, (wchar_t *)(*(DWORD *)(address + 0x68)),
+           (length + 1) * sizeof(wchar_t));
+  } else {
+    ZeroMemory(userinfo.V3, (length + 1) * sizeof(wchar_t));
+  }
+
+  length = *(DWORD *)(address + 0x80);
+  userinfo.account = new wchar_t[length + 1];
+  userinfo.account_len = length;
+  if (length) {
+    memcpy(userinfo.account, (wchar_t *)(*(DWORD *)(address + 0x7C)),
+           (length + 1) * sizeof(wchar_t));
+  } else {
+    ZeroMemory(userinfo.account, (length + 1) * sizeof(wchar_t));
+  }
+
+  // length = *(DWORD *)(address + 0x94);
+  // userinfo.friend_name = new wchar_t[length + 1];
+  // userinfo.friend_name_len = length;
+  // if (length) {
+  //   memcpy(userinfo.friend_name, (wchar_t *)(*(DWORD *)(address + 0x90)),
+  //          (length + 1) * sizeof(wchar_t));
+  // } else {
+  //   ZeroMemory(userinfo.friend_name, (length + 1) * sizeof(wchar_t));
+  // }
+
   length = *(DWORD *)(address + 0xC8);
   userinfo.nickname = new wchar_t[length + 1];
   userinfo.nickname_len = length;
@@ -362,15 +441,28 @@ void SetUserInfoDetail(DWORD address) {
     ZeroMemory(userinfo.nickname, (length + 1) * sizeof(wchar_t));
   }
 
-  length = *(DWORD *)(address + 0x108);
-  userinfo.v2 = new wchar_t[length + 1];
-  userinfo.v2_len = length;
-  if (length) {
-    memcpy(userinfo.v2, (wchar_t *)(*(DWORD *)(address + 0x104)),
-           (length + 1) * sizeof(wchar_t));
-  } else {
-    ZeroMemory(userinfo.v2, (length + 1) * sizeof(wchar_t));
-  }
+  // the results of calling and UI operations are different
+  //  
+  // length = *(DWORD *)(address + 0x108);
+  // userinfo.v2 = new wchar_t[length + 1];
+  // userinfo.v2_len = length;
+  // if (length) {
+  //   memcpy(userinfo.v2, (wchar_t *)(*(DWORD *)(address + 0x104)),
+  //          (length + 1) * sizeof(wchar_t));
+  // } else {
+  //   ZeroMemory(userinfo.v2, (length + 1) * sizeof(wchar_t));
+  // }
+
+  // length = *(DWORD *)(address + 0x11C);
+  // userinfo.py = new wchar_t[length + 1];
+  // userinfo.py_len = length;
+  // if (length) {
+  //   memcpy(userinfo.py, (wchar_t *)(*(DWORD *)(address + 0x118)),
+  //          (length + 1) * sizeof(wchar_t));
+  // } else {
+  //   ZeroMemory(userinfo.py, (length + 1) * sizeof(wchar_t));
+  // }
+
 
   length = *(DWORD *)(address + 0x16C);
   userinfo.small_image = new wchar_t[length + 1];
@@ -436,8 +528,20 @@ void DeleteUserInfoCache() {
   if (userinfo.v3) {
     delete userinfo.v3;
   }
+  if (userinfo.V3) {
+    delete userinfo.V3;
+  }
+  if (userinfo.account) {
+    delete userinfo.account;
+  }
+  if (userinfo.friend_name) {
+    delete userinfo.friend_name;
+  }
   if (userinfo.nickname) {
     delete userinfo.nickname;
+  }
+  if (userinfo.py) {
+    delete userinfo.py;
   }
   if (userinfo.nation) {
     delete userinfo.nation;
@@ -497,11 +601,11 @@ int HookSearchContact() {
   if (search_contact_flag_) {
     return 2;
   }
-  DWORD hook_error_code_addr = base + WX_SEARCH_CONTACT_ERROR_CODE_HOOK_OFFSET;
-  error_code_next_addr_ = base + WX_SEARCH_CONTACT_ERROR_CODE_HOOK_NEXT_OFFSET;
-  error_code_back_addr_ = hook_error_code_addr + 0x5;
-  Utils::HookAnyAddress(hook_error_code_addr, (LPVOID)HandleErrorCode,
-                        error_code_asm_code_);
+  // DWORD hook_error_code_addr = base + WX_SEARCH_CONTACT_ERROR_CODE_HOOK_OFFSET;
+  // error_code_next_addr_ = base + WX_SEARCH_CONTACT_ERROR_CODE_HOOK_NEXT_OFFSET;
+  // error_code_back_addr_ = hook_error_code_addr + 0x5;
+  // Utils::HookAnyAddress(hook_error_code_addr, (LPVOID)HandleErrorCode,
+  //                       error_code_asm_code_);
 
   DWORD hook_user_info_addr = base + WX_SEARCH_CONTACT_DETAIL_HOOK_OFFSET;
   user_info_next_addr_ = base + WX_SEARCH_CONTACT_DETAIL_HOOK_NEXT_OFFSET;

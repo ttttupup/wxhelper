@@ -1,25 +1,30 @@
 cmake_minimum_required(VERSION 3.0.0)
+# include(ExternalProject)
 project(wxhelper VERSION 1.0.0)
 
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D '_UNICODE' /D 'UNICODE' /D 'ELPP_THREAD_SAFE'")
-
-file(GLOB CPP_FILES  ${PROJECT_SOURCE_DIR}/src/*.cc  ${PROJECT_SOURCE_DIR}/src/*.cpp)
+set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D '_UNICODE' /D 'UNICODE' ")
 
-include_directories(${VCPKG_INSTALLED_DIR}/x86-windows/include)
+file(GLOB CPP_FILES  ${PROJECT_SOURCE_DIR}/src/*.cc  ${PROJECT_SOURCE_DIR}/src/*.cpp ${PROJECT_SOURCE_DIR}/src/*.c)
 
-# add_subdirectory(3rd)
-# add_subdirectory(source)
+
+
+include_directories(${VCPKG_INSTALLED_DIR}/x86-windows/include  ${PROJECT_SOURCE_DIR}/spdlog/include)
+
+
+
+add_subdirectory(spdlog)
+add_subdirectory(source)
 
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(unofficial-mongoose CONFIG REQUIRED)
 # find_package(spdlog CONFIG REQUIRED)
-# find_package(minhook CONFIG REQUIRED)
+
 
 
 add_library(wxhelper  SHARED ${CPP_FILES} )
@@ -29,7 +34,8 @@ add_library(wxhelper  SHARED ${CPP_FILES} )
 
 target_link_libraries(wxhelper PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(wxhelper PRIVATE unofficial::mongoose::mongoose)
-# target_link_libraries(wxhelper PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
+target_link_libraries(wxhelper PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
+
 # target_link_libraries(wxhelper PRIVATE minhook::minhook)
 
 SET_TARGET_PROPERTIES(wxhelper PROPERTIES LINKER_LANGUAGE C

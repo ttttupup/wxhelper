@@ -1,8 +1,8 @@
 ﻿#include "pch.h"
 #include "global_context.h"
 #include "http_server.h"
-#include "easylogging++.h"
 #include "hooks.h"
+#include "thread_pool.h"
 
 
 namespace wxhelper {
@@ -18,7 +18,7 @@ void GlobalContext::initialize(HMODULE module) {
   #ifndef _DEBUG
   hide_module->Hide(module_);
   #endif
-
+  ThreadPool::GetInstance().Create(2,8);
   HttpServer::GetInstance().Init(config->GetPort());
   HttpServer::GetInstance().HttpStart();
   DB::GetInstance().init(base);

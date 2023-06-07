@@ -7,7 +7,7 @@ namespace hooks {
 extern  UserInfo userinfo;
 extern bool user_info_flag_ ;
 
-int HookRecvMsg(char* client_ip, int port);
+int HookRecvMsg(char* client_ip, int port,char* url,uint64_t timeout,bool enable);
 
 int UnHookRecvMsg();
 

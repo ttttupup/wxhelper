@@ -9,7 +9,6 @@
 #include "chat_room_mgr.h"
 #include "contact_mgr.h"
 #include "db.h"
-#include "easylogging++.h"
 #include "hooks.h"
 #include "misc_mgr.h"
 #include "send_message_mgr.h"
@@ -71,9 +70,9 @@ string Dispatch(struct mg_connection *c, struct mg_http_message *hm) {
   if (mg_vcasecmp(&hm->method, "POST") == 0) {
     is_post = 1;
   }
-  el::Logger *defaultLogger = el::Loggers::getLogger("default");
-  defaultLogger->info("method: %v   body: %v", hm->method.ptr, hm->body.ptr);
-  LOG_IF(is_post != 1, INFO) << "request method is not post";
+  // el::Logger *defaultLogger = el::Loggers::getLogger("default");
+  // defaultLogger->info("method: %v   body: %v", hm->method.ptr, hm->body.ptr);
+  // LOG_IF(is_post != 1, INFO) << "request method is not post";
 
   if (is_post == 0) {
     json ret_data = {{"result", "ERROR"}, {"msg", "not support method"}};
@@ -172,12 +171,21 @@ string Dispatch(struct mg_connection *c, struct mg_http_message *hm) {
       break;
     }
     case WECHAT_MSG_START_HOOK: {
+     
       int port = GetIntParam(j_param, "port");
       wstring ip = GetWStringParam(j_param, "ip");
       string client_ip = Utils::WstringToUTF8(ip);
+      int enable = GetIntParam(j_param, "enableHttp");
+      string s_url ="";
+      int timeout = 0;
+      if(enable){
+        wstring url = GetWStringParam(j_param, "url");
+        timeout = GetIntParam(j_param, "timeout");
+        s_url = Utils::WstringToUTF8(url);
+      }
       char ip_cstr[16];
       strcpy_s(ip_cstr, client_ip.c_str());
-      int success = hooks::HookRecvMsg(ip_cstr, port);
+      int success = hooks::HookRecvMsg(ip_cstr, port,(char *)s_url.c_str(),timeout,enable);
       json ret_data = {{"code", success}, {"result", "OK"}};
       ret = ret_data.dump();
       break;
@@ -227,8 +235,12 @@ string Dispatch(struct mg_connection *c, struct mg_http_message *hm) {
             {"province",  Utils::WCharToUTF8(user->province)},
             {"sex", user->sex},
             {"signature",  Utils::WCharToUTF8(user->signature)},
-            {"v2",  Utils::WCharToUTF8(user->v2)},
+            // {"v2",  Utils::WCharToUTF8(user->v2)},
             {"v3",  Utils::WCharToUTF8(user->v3)},
+            {"V3",  Utils::WCharToUTF8(user->V3)},
+            {"account",  Utils::WCharToUTF8(user->account)},
+            // {"friendName",  Utils::WCharToUTF8(user->friend_name)},
+            // {"py",  Utils::WCharToUTF8(user->py)},
         };
         ret_data["userInfo"] = info;
       }
@@ -426,9 +438,9 @@ string Dispatch(struct mg_connection *c, struct mg_http_message *hm) {
       wstring wxid = GetWStringParam(j_param, "wxid");
       wstring transcationid = GetWStringParam(j_param, "transcationId");
       wstring transferid = GetWStringParam(j_param, "transferId");
-      BOOL response =g_context.misc_mgr->DoConfirmReceipt(
+      int success =g_context.misc_mgr->DoConfirmReceipt(
           WS2LPWS(wxid), WS2LPWS(transcationid), WS2LPWS(transferid));
-      json ret_data = {{"msg", response}, {"result", "OK"}};
+      json ret_data = {{"code", success}, {"result", "OK"}};
       ret = ret_data.dump();
       break;
     }
@@ -569,7 +581,105 @@ string Dispatch(struct mg_connection *c, struct mg_http_message *hm) {
       ret = ret_data.dump();
       break;
     }
+    case WECHAT_GET_QRCODE: {
+      string url = g_context.account_mgr->GetQRCodeUrl();
+      json ret_data = {{"code", 1}, {"result", "OK"},{"qrCodeUrl",url}};
+      ret = ret_data.dump();
+      break;
+    }
+    case WECHAT_INVITE_MEMBERS: {
+      wstring room_id = GetWStringParam(j_param, "chatRoomId");
+      vector<wstring> wxids = getArrayParam(j_param, "memberIds");
+      vector<wchar_t *> wxid_list;
+      for (unsigned int i = 0; i < wxids.size(); i++) {
+        wxid_list.push_back(WS2LPWS(wxids[i]));
+      }
+      int success = g_context.chat_room_mgr->InviteMemberToChatRoom(
+          WS2LPWS(room_id), wxid_list.data(), wxid_list.size());
+      json ret_data = {{"code", success}, {"result", "OK"}};
+      ret = ret_data.dump();
+      break;
+    }
+    case WECHAT_GET_MEMBER_PROFILE: {
+      wstring pri_id = GetWStringParam(j_param, "wxid");
+      ContactProfile profile;
+      int success =
+          g_context.contact_mgr->GetContactByWxid(WS2LPWS(pri_id),profile);
+      if(success==1){
+        json ret_data = {
+            {"code", success},
+            {"result", "OK"},
+            {"account", Utils::WstringToUTF8(profile.account)},
+            {"headImage", Utils::WstringToUTF8(profile.head_image)},
+            {"nickname", Utils::WstringToUTF8(profile.nickname)},
+            {"v3", Utils::WstringToUTF8(profile.v3)},
+            {"wxid", Utils::WstringToUTF8(profile.wxid)},
+        };
+        ret = ret_data.dump();
+      } else {
+        json ret_data = {{"result", "ok"}, {"code", success}};
+        ret = ret_data.dump();
+      }
+
+      break;
+    }
+    case WECHAT_REVOKE_MSG:{
+      ULONG64 msg_id = GetULong64Param(j_param, "msgId");
+      int success = g_context.misc_mgr->RevokeMsg(msg_id);
+      json ret_data = {{"code", success}, {"result", "OK"}};
+      ret = ret_data.dump();
+      break;
+    }
+    case WECHAT_FORWARD_PUBLIC_MSG:{
+      wstring wxid = GetWStringParam(j_param, "wxid");
+      wstring appname = GetWStringParam(j_param, "appname");
+      wstring username = GetWStringParam(j_param, "username");
+      wstring title = GetWStringParam(j_param, "title");
+      wstring url = GetWStringParam(j_param, "url");
+      wstring thumburl = GetWStringParam(j_param, "thumburl");
+      wstring digest = GetWStringParam(j_param, "digest");
+      int success = g_context.send_mgr->ForwardPublicMsg(WS2LPWS(wxid),  WS2LPWS(title), WS2LPWS(url) , WS2LPWS(thumburl) ,WS2LPWS(username),WS2LPWS(appname),WS2LPWS(digest));
+      json ret_data = {{"code", success}, {"result", "OK"}};
+      ret = ret_data.dump();
+      break;
+    }
+    case WECHAT_FORWARD_PUBLIC_MSG_BY_SVRID:{
+      wstring wxid = GetWStringParam(j_param, "wxid");
+      ULONG64 msg_id = GetULong64Param(j_param, "msgId");
+      int success= g_context.send_mgr->ForwardPublicMsgByMsgSvrId(WS2LPWS(wxid),msg_id);
+      json ret_data = {{"code", success}, {"result", "OK"}};
+      ret = ret_data.dump();
+      break;
+    }
+    case WECHAT_SEND_APP_MSG:{
+      wstring wxid = GetWStringParam(j_param, "wxid");
+      wstring applet = GetWStringParam(j_param, "appletId");
+      int success= g_context.send_mgr->SendAppletMsg(WS2LPWS(wxid),WS2LPWS(applet));
+      json ret_data = {{"code", success}, {"result", "OK"}};
+      ret = ret_data.dump();
+      break;
+    }
+    case WECHAT_REFUSE:{
+      wstring wxid = GetWStringParam(j_param, "wxid");
+      wstring transcationid = GetWStringParam(j_param, "transcationId");
+      wstring transferid = GetWStringParam(j_param, "transferId");
+      int success =g_context.misc_mgr->DoRefuseReceipt(
+          WS2LPWS(wxid), WS2LPWS(transcationid), WS2LPWS(transferid));
+      json ret_data = {{"code", success}, {"result", "OK"}};
+      ret = ret_data.dump();
+      break;
+    }
+    case WECHAT_GET_HEAD_IMG:{
+      wstring wxid = GetWStringParam(j_param, "wxid");
+      wstring url = GetWStringParam(j_param, "imageUrl");
+      int success =g_context.contact_mgr->GetHeadImage(WS2LPWS(wxid), WS2LPWS(url));
+      json ret_data = {{"code", success}, {"result", "OK"}};
+      ret = ret_data.dump();
+      break;
+    }
     default:
+      json ret_data = {{"result", "ERROR"}, {"msg", "not support api"}};
+      ret = ret_data.dump();
       break;
   }
 

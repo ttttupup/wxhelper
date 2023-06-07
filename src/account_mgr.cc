@@ -1,22 +1,16 @@
 ﻿#include "pch.h"
 #include "account_mgr.h"
-#include "easylogging++.h"
-
-
 #include "wechat_function.h"
 
 using namespace std;
 namespace wxhelper {
-    AccountMgr::AccountMgr(DWORD base):BaseMgr(base){
-
-    }
-     AccountMgr::~AccountMgr(){
-
-     }
+AccountMgr::AccountMgr(DWORD base) : BaseMgr(base) {}
+AccountMgr::~AccountMgr() {}
 int AccountMgr::GetSelfInfo(SelfInfoInner &out) {
   DWORD accout_service_addr = base_addr_ + WX_ACCOUNT_SERVICE_OFFSET;
   DWORD get_app_save_addr = base_addr_ + WX_GET_APP_DATA_SAVE_PATH_OFFSET;
-  DWORD get_current_data_path_addr = base_addr_ + WX_GET_CURRENT_DATA_PATH_OFFSET;
+  DWORD get_current_data_path_addr =
+      base_addr_ + WX_GET_CURRENT_DATA_PATH_OFFSET;
   DWORD service_addr = NULL;
   __asm {
       PUSHAD 
@@ -129,16 +123,16 @@ int AccountMgr::GetSelfInfo(SelfInfoInner &out) {
       }
     }
 
-    if (*(DWORD *)(service_addr + 0x304) == 0 ||
-        *(DWORD *)(service_addr + 0x304 + 0x10) == 0) {
+    if (*(DWORD *)(service_addr + 0x31C) == 0 ||
+        *(DWORD *)(service_addr + 0x31C + 0x10) == 0) {
       out.head_img = string();
     } else {
-      if (*(DWORD *)(service_addr + 0x304 + 0x14) == 0xF) {
-        out.head_img = string((char *)(service_addr + 0x304),
-                              *(DWORD *)(service_addr + 0x304 + 0x10));
+      if (*(DWORD *)(service_addr + 0x31C + 0x14) == 0xF) {
+        out.head_img = string((char *)(service_addr + 0x31C),
+                              *(DWORD *)(service_addr + 0x31C + 0x10));
       } else {
-        out.head_img = string(*(char **)(service_addr + 0x304),
-                              *(DWORD *)(service_addr + 0x304 + 0x10));
+        out.head_img = string(*(char **)(service_addr + 0x31C),
+                              *(DWORD *)(service_addr + 0x31C + 0x10));
       }
     }
 
@@ -197,7 +191,7 @@ int AccountMgr::CheckLogin() {
       POPAD
   }
   if (service_addr) {
-    success = *(DWORD *)(service_addr + 0x4C8);
+    success = *(DWORD *)(service_addr + 0x4E0);
   }
   return success;
 }
@@ -219,6 +213,37 @@ int AccountMgr::Logout() {
     POPAD
   }
   return success;
+}
+
+/// @brief 根据 502647092 提供的偏移 获取二维码url
+/// @return 
+std::string AccountMgr::GetQRCodeUrl() {
+  DWORD qr_code_login_addr = base_addr_ + WX_QR_CODE_LOGIN_MGR_OFFSET ;
+  DWORD get_qr_code_img_addr = base_addr_ + WX_GET_QR_CODE_IMAGE_OFFSET ;
+ 
+  DWORD temp;
+  __asm {
+    PUSHAD
+    PUSHFD
+    CALL       qr_code_login_addr    
+    MOV        temp,EAX
+    POPFD
+    POPAD
+  }
+  std::string pre("https://weixin.qq.com/x/");
+  DWORD ptr = temp + 0x8;
+  DWORD len = *(DWORD*)(ptr+0x10);
+  if (*(DWORD *)(ptr) == 0) {
+    return std::string();
+  } else {
+    if( *(DWORD*) (temp+0x1c) > 0xf){
+      std::string suff(*(char **)ptr,len);
+      return pre + suff;
+    }else{
+       std::string suff((char *)ptr,len);
+      return pre + suff;
+    }
+  }
 }
 
 }  // namespace wxhelper

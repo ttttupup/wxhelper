@@ -5,7 +5,6 @@
 #include "base64.h"
 #include "db.h"
 #include "hooks.h"
-#include "easylogging++.h"
 #define BUFSIZE 1024
 
 #define JPEG0 0xFF
@@ -136,6 +135,44 @@ int MiscMgr::DoConfirmReceipt(wchar_t *wxid, wchar_t *transcationid,
   return success;
 }
 
+int MiscMgr::DoRefuseReceipt(wchar_t *wxid, wchar_t *transcationid,
+                     wchar_t *transferid) {
+  int success = -1;
+  WeChatString recv_id(wxid);
+  WeChatString transcation_id(transcationid);
+  WeChatString transfer_id(transferid);
+  char pay_info[0x134] = {0};
+  DWORD new_pay_info_addr = base_addr_ + WX_NEW_WCPAYINFO_OFFSET;
+  DWORD free_pay_info_addr = base_addr_ + WX_FREE_WCPAYINFO_OFFSET;
+  DWORD do_confirm_addr = base_addr_ + WX_CONFIRM_RECEIPT_OFFSET;
+  __asm {
+    PUSHAD
+    LEA        ECX,pay_info
+    CALL       new_pay_info_addr
+    MOV        dword ptr [pay_info + 0x4], 0x1
+    MOV        dword ptr [pay_info + 0x4C], 0x1        
+    POPAD
+  }
+  memcpy(&pay_info[0x1c], &transcation_id, sizeof(transcation_id));
+  memcpy(&pay_info[0x38], &transfer_id, sizeof(transfer_id));
+
+  __asm {
+    PUSHAD
+    PUSH       0x0
+    SUB        ESP,0x8
+    LEA        EDX,recv_id
+    LEA        ECX,pay_info
+    CALL       do_confirm_addr  
+    MOV        success,EAX  
+    ADD        ESP,0xC
+    PUSH       0x0
+    LEA        ECX,pay_info
+    CALL       free_pay_info_addr 
+    POPAD
+  }
+  return success;
+}
+
 int MiscMgr::DoDownloadTask(ULONG64 msg_id) {
   int success = -1;
   int db_index = 0;
@@ -154,8 +191,8 @@ int MiscMgr::DoDownloadTask(ULONG64 msg_id) {
   DWORD get_current_data_path_addr = base_addr_ + WX_GET_CURRENT_DATA_PATH_OFFSET;
   DWORD free_app_msg_info_addr = base_addr_ + WX_FREE_APP_MSG_INFO_OFFSET;
   DWORD push_thumb_task_addr = base_addr_ + WX_PUSH_THUMB_TASK_OFFSET;
-  DWORD video_mgr_addr = base_addr_ + WX_VIDEO_MGR_OFFSET;
-  DWORD download_video_image_addr = base_addr_ + WX_VIDEO_MGR_OFFSET;
+
+
 
   WeChatString current_data_path;
 
@@ -256,23 +293,7 @@ int MiscMgr::DoDownloadTask(ULONG64 msg_id) {
   memcpy(&chat_msg[0x19C], &w_thumb_path, sizeof(w_thumb_path));
   memcpy(&chat_msg[0x1B0], &w_save_path, sizeof(w_save_path));
   memcpy(&chat_msg[0x29C], &temp, sizeof(temp));
-  // note： the image has been downloaded and will not be downloaded again
-  // use low-level method  
-  // this function does not work, need to modify chatmsg.
-  // if (type == 0x3E || type == 0x2B){
-  //   __asm{
-  //      PUSHAD
-  //      PUSHFD
-  //      CALL       video_mgr_addr
-  //      LEA        ECX,chat_msg
-  //      PUSH       ECX
-  //      MOV        ECX,EAX
-  //      CALL       download_video_image_addr
-  //      POPFD
-  //      POPAD
-  //   }
-  // }
-
+ 
   __asm {
     PUSHAD
     PUSHFD
@@ -402,8 +423,8 @@ int MiscMgr::GetImgByName(wchar_t* file_path,wchar_t* save_dir) {
 
 int MiscMgr::SearchContactNetScene(wchar_t *keyword,UserInfo ** user) {
   int success = -1;
-  hooks::HookSearchContact();
   hooks::DeleteUserInfoCache();
+  hooks::HookSearchContact();
   DWORD search_contact_mgr_addr = base_addr_ + WX_SEARCH_CONTACT_MGR_OFFSET;
   DWORD search_contact_addr = base_addr_ + WX_SEARCH_CONTACT_OFFSET;
   WeChatString key(keyword);
@@ -420,17 +441,57 @@ int MiscMgr::SearchContactNetScene(wchar_t *keyword,UserInfo ** user) {
 		popad;
   }
   success = 1;
-  while (hooks::userinfo.error_code == 1 && hooks::user_info_flag_) {
-    Sleep(20);
-  }
-  if (hooks::userinfo.error_code == 0) {
+  // while (hooks::userinfo.error_code == 1 && hooks::user_info_flag_) {
+  //   Sleep(20);
+  // }
+  // if (hooks::userinfo.error_code == 0) {
     while (hooks::userinfo.over == false && hooks::user_info_flag_) {
-      Sleep(20);
+      Sleep(2);
     }
-  }
+  // }
   *user= &hooks::userinfo;
-  LOG(INFO)<<"user:" <<user;
   return success;
 }
 
+int MiscMgr::RevokeMsg(ULONG64 msg_id){
+  int success = -1;
+  char chat_msg[0x2D8] = {0};
+  DWORD new_chat_msg_addr = base_addr_ + WX_NEW_CHAT_MSG_OFFSET;  
+  DWORD free_addr = base_addr_ + WX_FREE_CHAT_MSG_INSTANCE_COUNTER_OFFSET;
+  DWORD get_chat_mgr_addr = base_addr_ + WX_CHAT_MGR_OFFSET;
+  DWORD get_by_local_Id_addr = base_addr_ + WX_GET_MGR_BY_PREFIX_LOCAL_ID_OFFSET;
+  DWORD revoke_msg_addr = base_addr_ + WX_REVOKE_MSG_OFFSET;
+
+  int db_index = 0;
+  int local_id =  DB::GetInstance().GetLocalIdByMsgId(msg_id, db_index);
+  if (local_id < 1) {
+    return -2;
+  }
+  __asm{
+    PUSHAD
+    PUSHFD
+    LEA        ECX,chat_msg
+    CALL       new_chat_msg_addr
+    CALL       get_chat_mgr_addr                                       
+    PUSH       dword ptr [db_index]
+    LEA        ECX,chat_msg
+    PUSH       dword ptr [local_id]
+    CALL       get_by_local_Id_addr               
+    ADD        ESP,0x8
+    CALL       get_chat_mgr_addr 
+    LEA        ECX,chat_msg
+    PUSH       ECX
+    MOV        ECX,EAX
+    CALL       revoke_msg_addr
+    MOV        success,EAX
+    LEA        ECX,chat_msg
+    PUSH       0x0
+    CALL       free_addr
+    POPFD
+    POPAD
+  }
+
+  return success;
+
+}
 }  // namespace wxhelper
