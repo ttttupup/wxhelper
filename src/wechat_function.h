@@ -35,10 +35,18 @@ namespace function {
 typedef UINT64(*__GetAccountService)();
 typedef UINT64(*__GetDataSavePath)(UINT64);
 typedef UINT64(*__GetCurrentDataPath)(UINT64);
-typedef void(*__GetSendMessageMgr)();
+typedef UINT64(*__GetSendMessageMgr)();
 typedef UINT64 (*__SendTextMsg)(UINT64, UINT64, UINT64, UINT64, UINT64, UINT64,
                                 UINT64, UINT64);
-typedef void (*__FreeChatMsg)(UINT64);
+typedef UINT64 (*__FreeChatMsg)(UINT64);
+
+typedef UINT64 (*__SendImageMsg)(UINT64, UINT64, UINT64, UINT64, UINT64);
+typedef UINT64 (*__NewChatMsg)(UINT64);
+typedef UINT64 (*__SendFile)(UINT64, UINT64, UINT64, UINT64, UINT64,UINT64, UINT64, UINT64, UINT64, UINT64, UINT64, UINT64);
+typedef UINT64(*__GetAppMsgMgr)();
+typedef UINT64(*operator_new)(UINT64);
+
+typedef UINT64(*Free)();
 
 }  // namespace function
 namespace prototype {
@@ -57,7 +65,7 @@ struct WeChatString {
   WeChatString(const std::wstring &s) {
     ptr = (wchar_t *)(s.c_str());
     length = static_cast<DWORD>(s.length());
-    max_length = static_cast<DWORD>(s.length() * 2);
+    max_length = static_cast<DWORD>(s.length());
   }
   WeChatString(const wchar_t *pStr) { WeChatString((wchar_t *)pStr); }
   WeChatString(int tmp) {
@@ -68,7 +76,7 @@ struct WeChatString {
   WeChatString(wchar_t *pStr) {
     ptr = pStr;
     length = static_cast<DWORD>(wcslen(pStr));
-    max_length = static_cast<DWORD>(wcslen(pStr) * 2);
+    max_length = static_cast<DWORD>(wcslen(pStr));
   }
   void set_value(const wchar_t *pStr) {
     ptr = (wchar_t *)pStr;
@@ -89,6 +97,10 @@ const UINT64 kSendTextMsg = 0xfcd8d0;
 const UINT64 kFreeChatMsg = 0x8aaa00;
 
 const UINT64 kDoAddMsg = 0x1010d80;
+const UINT64 kSendImageMsg = 0xfc3d30;
+const UINT64 kChatMsgInstanceCounter = 0x8c7fd0;
+const UINT64 kSendFileMsg = 0xdd27f0;
+const UINT64 kGetAppMsgMgr = 0x8c33f0;
 
 }  // namespace offset
 }  // namespace V3_9_5_81

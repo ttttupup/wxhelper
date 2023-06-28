@@ -141,11 +141,27 @@ std::string HttpDispatch(struct mg_connection *c, struct mg_http_message *hm) {
        {"code", success}, {"data", {}}, {"msg", "success"}};
    ret = ret_data.dump();
    return ret;
+  } else if (mg_http_match_uri(hm, "/api/sendImagesMsg")) {
+   std::wstring wxid = GetWStringParam(j_param, "wxid");
+   std::wstring path = GetWStringParam(j_param, "imagePath");
+   INT64 success = wxhelper::GlobalContext::GetInstance().mgr->SendImageMsg(wxid, path);
+   nlohmann::json ret_data = {
+       {"code", success}, {"data", {}}, {"msg", "success"}};
+   ret = ret_data.dump();
+   return ret;
+   } else if (mg_http_match_uri(hm, "/api/sendFileMsg")) {
+   std::wstring wxid = GetWStringParam(j_param, "wxid");
+   std::wstring path = GetWStringParam(j_param, "filePath");
+   INT64 success = wxhelper::GlobalContext::GetInstance().mgr->SendFileMsg(wxid, path);
+   nlohmann::json ret_data = {
+       {"code", success}, {"data", {}}, {"msg", "success"}};
+   ret = ret_data.dump();
+   return ret;
   } else {
-      nlohmann::json ret_data = {
-        {"code", 200}, {"data", {}}, {"msg", "not support url"}};
-    ret = ret_data.dump();
-    return ret;
+   nlohmann::json ret_data = {
+       {"code", 200}, {"data", {}}, {"msg", "not support url"}};
+   ret = ret_data.dump();
+   return ret;
   }
   nlohmann::json ret_data = {
       {"code", 200}, {"data", {}}, {"msg", "unreachable code."}};

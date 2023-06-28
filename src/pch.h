@@ -21,6 +21,7 @@
 #include "spdlog/sinks/daily_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include <detours/detours.h>
+#include <heapapi.h>
 
 #endif // PCH_H
 

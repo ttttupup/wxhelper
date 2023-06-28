@@ -193,7 +193,6 @@ INT64 Manager::SendTextMsg(const std::wstring& wxid, const std::wstring& msg){
   INT64 success = -1;
   prototype::WeChatString to_user(wxid);
   prototype::WeChatString text_msg(msg);
-  wchar_t** msg_pptr = &text_msg.ptr;
   UINT64 send_message_mgr_addr = base_addr_ + offset::kGetSendMessageMgr;
   UINT64 send_text_msg_addr = base_addr_ + offset::kSendTextMsg;
   UINT64 free_chat_msg_addr = base_addr_ + offset::kFreeChatMsg;
@@ -213,6 +212,114 @@ INT64 Manager::SendTextMsg(const std::wstring& wxid, const std::wstring& msg){
   success = 1;
 
   return success;
+}
+
+INT64 Manager::SendImageMsg(const std::wstring& wxid, const std::wstring& image_path){
+  INT64 success = -1;
+  prototype::WeChatString to_user(wxid);
+  prototype::WeChatString image_full_path(image_path);
+  UINT64 send_message_mgr_addr = base_addr_ + offset::kGetSendMessageMgr;
+  UINT64 send_img_addr = base_addr_ + offset::kSendImageMsg;
+  UINT64 new_chat_msg_addr = base_addr_ + offset::kChatMsgInstanceCounter;
+  UINT64 free_chat_msg_addr = base_addr_ + offset::kFreeChatMsg;
+  func::__NewChatMsg new_chat_msg = (func::__NewChatMsg)new_chat_msg_addr;
+  func::__GetSendMessageMgr mgr =
+      (func::__GetSendMessageMgr)send_message_mgr_addr;
+  func::__SendImageMsg send_img = (func::__SendImageMsg)send_img_addr;
+  func::__FreeChatMsg free = (func::__FreeChatMsg)free_chat_msg_addr;
+
+  char chat_msg[0x460] = {0};
+  char chat_msg_temp[0x460] = {0};
+
+  UINT64 p_chat_msg_temp = new_chat_msg(reinterpret_cast<UINT64>(&chat_msg_temp));
+  UINT64 temp1 =0;
+  UINT64 temp2 =0;
+  UINT64* flag[10] = {};
+  flag[8] = &temp1;
+  flag[9] = &temp2;
+  flag[1] = reinterpret_cast<UINT64*>(p_chat_msg_temp);
+  
+  UINT64 p_chat_msg = new_chat_msg(reinterpret_cast<UINT64>(&chat_msg));
+  UINT64 send_mgr = mgr();
+  send_img(send_mgr, p_chat_msg,
+           reinterpret_cast<UINT64>(&to_user),
+           reinterpret_cast<UINT64>(&image_full_path),
+           reinterpret_cast<UINT64>(&flag));
+  free(p_chat_msg);
+  free(p_chat_msg_temp);
+  success = 1;
+  return success;
+}
+
+// todo  bug  9/10 
+INT64 Manager::SendFileMsg(const std::wstring& wxid, const std::wstring& file_path){
+  INT64 success = -1;
+  prototype::WeChatString* to_user= (prototype::WeChatString*)HeapAlloc(GetProcessHeap(),0,sizeof(prototype::WeChatString));
+  wchar_t * ptr_wxid = (wchar_t*)HeapAlloc(GetProcessHeap(),0,wxid.length()+1);
+  wmemcpy(ptr_wxid,wxid.c_str(),wxid.length()+1);
+  to_user->ptr = ptr_wxid;
+  to_user->length = static_cast<DWORD>(wxid.length());
+  to_user->max_length = static_cast<DWORD>(wxid.length());
+  to_user->c_len=0;
+  to_user->c_ptr=0;
+  prototype::WeChatString* image_full_path= (prototype::WeChatString*)HeapAlloc(GetProcessHeap(),0,sizeof(prototype::WeChatString));
+  wchar_t * ptr_path = (wchar_t*)HeapAlloc(GetProcessHeap(),0,file_path.length()+1);
+  wmemcpy(ptr_path,file_path.c_str(),file_path.length()+1);
+  image_full_path->ptr = ptr_path;
+  image_full_path->length = static_cast<DWORD>(file_path.length());
+  image_full_path->max_length = static_cast<DWORD>(file_path.length());
+  image_full_path->c_len = 0;
+  image_full_path->c_ptr = 0;
+
+  UINT64 get_app_msg_mgr_addr = base_addr_ + offset::kGetAppMsgMgr;
+  UINT64 send_file_addr = base_addr_ + offset::kSendFileMsg;
+  UINT64 new_chat_msg_addr = base_addr_ + offset::kChatMsgInstanceCounter;
+  UINT64 free_chat_msg_addr = base_addr_ + offset::kFreeChatMsg;
+  func::__NewChatMsg new_chat_msg = (func::__NewChatMsg)new_chat_msg_addr;
+  func::__GetAppMsgMgr get_app_mgr =
+      (func::__GetAppMsgMgr)get_app_msg_mgr_addr;
+  func::__SendFile send_file = (func::__SendFile)send_file_addr;
+  func::__FreeChatMsg free = (func::__FreeChatMsg)free_chat_msg_addr;
+
+ 
+  char* chat_msg= (char*)HeapAlloc(GetProcessHeap(),0,0x460);
+
+  UINT64* temp1 = (UINT64*)HeapAlloc(GetProcessHeap(),0,sizeof(UINT64)*4);
+  UINT64* temp2 = (UINT64*)HeapAlloc(GetProcessHeap(),0,sizeof(UINT64)*4);
+  UINT64* temp3 = (UINT64*)HeapAlloc(GetProcessHeap(),0,sizeof(UINT64)*4);
+  UINT64* temp4 = (UINT64*)HeapAlloc(GetProcessHeap(),0,sizeof(UINT64)*4);
+  ZeroMemory(temp1,sizeof(UINT64)*4);
+  ZeroMemory(temp2,sizeof(UINT64)*4);
+  ZeroMemory(temp3,sizeof(UINT64)*4);
+  ZeroMemory(temp4,sizeof(UINT64)*4);
+  *temp4=0x1F;
+  UINT64 temp5 = 0xC;
+
+
+
+  UINT64 app_mgr = get_app_mgr();
+  // UINT64 p_chat_msg = new_chat_msg(reinterpret_cast<UINT64>(chat_msg));
+  // send_file(app_mgr, p_chat_msg, reinterpret_cast<UINT64>(to_user),
+  //           reinterpret_cast<UINT64>(image_full_path), 1,
+  //           reinterpret_cast<UINT64>(temp1), 0x300,
+  //           reinterpret_cast<UINT64>(temp2), 0,
+  //           reinterpret_cast<UINT64>(temp3),
+  //           reinterpret_cast<UINT64>(temp4),
+  //           temp5);
+
+  send_file(app_mgr, reinterpret_cast<UINT64>(chat_msg),
+            reinterpret_cast<UINT64>(to_user),
+            reinterpret_cast<UINT64>(image_full_path), 1,
+            reinterpret_cast<UINT64>(temp1), 0, reinterpret_cast<UINT64>(temp2),
+            0, reinterpret_cast<UINT64>(temp3), 0, 0x0);
+  free(reinterpret_cast<UINT64>(chat_msg));  
+  HeapFree(GetProcessHeap(),0,temp1);
+  HeapFree(GetProcessHeap(),0,temp2);
+  HeapFree(GetProcessHeap(),0,temp3);
+  HeapFree(GetProcessHeap(),0,temp4);
+  success = 1;
+  return success;
+
 }
 
 }  // namespace wxhelper`
