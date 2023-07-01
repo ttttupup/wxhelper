@@ -29,6 +29,31 @@ struct SelfInfoInner {
   std::string db_key;
 };
 
+struct ContactInner {
+  std::string wxid;
+  std::string custom_account;
+  std::string encrypt_name;
+  std::string nickname;
+  std::string pinyin;
+  std::string pinyin_all;
+  DWORD type;
+  DWORD verify_flag;
+  DWORD reserved1;
+  DWORD reserved2;
+  ContactInner(){
+    wxid = "";
+    custom_account = "";
+    encrypt_name = "";
+    nickname ="";
+    pinyin ="";
+    pinyin_all ="";
+    type = -1;
+    verify_flag = -1;
+    reserved1 = -1;
+    reserved2 = -1;
+  }
+};
+
 }  // namespace common
 namespace V3_9_5_81 {
 namespace function {
@@ -44,9 +69,11 @@ typedef UINT64 (*__SendImageMsg)(UINT64, UINT64, UINT64, UINT64, UINT64);
 typedef UINT64 (*__NewChatMsg)(UINT64);
 typedef UINT64 (*__SendFile)(UINT64, UINT64, UINT64, UINT64, UINT64,UINT64, UINT64, UINT64, UINT64, UINT64, UINT64, UINT64);
 typedef UINT64(*__GetAppMsgMgr)();
-typedef UINT64(*operator_new)(UINT64);
+typedef UINT64(*__OperatorNew)(UINT64);
 
-typedef UINT64(*Free)();
+typedef UINT64(*__Free)();
+typedef UINT64 (*__GetContactMgr)();
+typedef UINT64 (*__GetContactList)(UINT64,UINT64);
 
 }  // namespace function
 namespace prototype {
@@ -101,6 +128,8 @@ const UINT64 kSendImageMsg = 0xfc3d30;
 const UINT64 kChatMsgInstanceCounter = 0x8c7fd0;
 const UINT64 kSendFileMsg = 0xdd27f0;
 const UINT64 kGetAppMsgMgr = 0x8c33f0;
+const UINT64 kGetContactMgr = 0x8ae3d0;
+const UINT64 kGetContactList = 0xeab270;
 
 }  // namespace offset
 }  // namespace V3_9_5_81

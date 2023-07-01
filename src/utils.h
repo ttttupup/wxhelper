@@ -56,7 +56,8 @@ class Utils {
   static std::string ReadWeChatStr(INT64 addr);
 
   static std::string ImageXor(std::string buf);
-
+  static std::wstring ReadWstring(INT64 addr);
+  static std::string ReadWstringThenConvert(INT64 addr);
   template <typename T1, typename T2>
  static std::vector<T1> split(T1 str, T2 letter) {
     std::vector<T1> arr;

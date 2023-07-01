@@ -12,6 +12,7 @@ class Manager {
   INT64 SendTextMsg(const std::wstring& wxid, const std::wstring& msg);
   INT64 SendImageMsg(const std::wstring& wxid, const std::wstring& image_path);
   INT64 SendFileMsg(const std::wstring& wxid, const std::wstring& file_path);
+  INT64 GetContacts(std::vector<common::ContactInner> &vec);
  private:
   UINT64 base_addr_;
 };

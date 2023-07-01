@@ -322,4 +322,35 @@ INT64 Manager::SendFileMsg(const std::wstring& wxid, const std::wstring& file_pa
 
 }
 
-}  // namespace wxhelper`
+INT64 Manager::GetContacts(std::vector<common::ContactInner> &vec) {
+  INT64 success = -1;
+  UINT64 get_contact_mgr_addr = base_addr_ + offset::kGetContactMgr;
+  UINT64 get_contact_list_addr = base_addr_ + offset::kGetContactList;
+  func::__GetContactMgr get_contact_mgr =
+      (func::__GetContactMgr)get_contact_mgr_addr;
+  func::__GetContactList get_contact_list =
+      (func::__GetContactList)get_contact_list_addr;
+  UINT64 mgr = get_contact_mgr();
+  UINT64 contact_vec[3] = {0, 0, 0};
+  success = get_contact_list(mgr, reinterpret_cast<UINT64>(&contact_vec));
+
+  UINT64 start = contact_vec[0];
+  UINT64 end = contact_vec[2];
+  while (start < end) {
+    common::ContactInner temp;
+    temp.wxid = Utils::ReadWstringThenConvert(start + 0x10);
+    temp.custom_account = Utils::ReadWstringThenConvert(start + 0x30);
+    temp.encrypt_name = Utils::ReadWstringThenConvert(start + 0x50);
+    temp.nickname = Utils::ReadWstringThenConvert(start + 0xA0);
+    temp.pinyin = Utils::ReadWstringThenConvert(start + 0x108);
+    temp.pinyin_all = Utils::ReadWstringThenConvert(start + 0x128);
+    temp.verify_flag = *(DWORD *)(start + 0x70);
+    temp.type = *(DWORD *)(start + 0x74);
+    temp.reserved1 = *(DWORD *)(start + 0x1F0);
+    temp.reserved2 = *(DWORD *)(start + 0x1F4);
+    vec.push_back(temp);
+    start += 0x698;
+  }
+  return success;
+}
+} // namespace wxhelper`

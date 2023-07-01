@@ -302,4 +302,21 @@ std::string Utils::ImageXor(std::string buf){
   }
   return std::string();
 }
+
+std::wstring Utils::ReadWstring(INT64 addr){
+  DWORD len = *(DWORD *)(addr + 0x8);
+  if (len == 0) {
+    return std::wstring();
+  }
+  wchar_t * str = *(wchar_t **)(addr);
+  if (str == NULL) {
+    return std::wstring();
+  }
+  return std::wstring(str, len);
+
+}
+std::string Utils::ReadWstringThenConvert(INT64 addr){
+  std::wstring wstr = ReadWstring(addr);
+  return WstringToUTF8(wstr);
+}
 }  // namespace wxhelper

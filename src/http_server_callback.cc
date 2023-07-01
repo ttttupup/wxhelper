@@ -157,12 +157,34 @@ std::string HttpDispatch(struct mg_connection *c, struct mg_http_message *hm) {
        {"code", success}, {"data", {}}, {"msg", "success"}};
    ret = ret_data.dump();
    return ret;
-  } else {
+   } else if (mg_http_match_uri(hm, "/api/getContactList")) {
+   std::vector<common::ContactInner> vec;
+   INT64 success = wxhelper::GlobalContext::GetInstance().mgr->GetContacts(vec);
+   nlohmann::json ret_data = {
+       {"code", success}, {"data", {}}, {"msg", "success"}};
+   for (unsigned int i = 0; i < vec.size(); i++) {
+      nlohmann::json item = {
+          {"customAccount", vec[i].custom_account},
+          {"encryptName", vec[i].encrypt_name},
+          {"type", vec[i].type},
+          {"verifyFlag", vec[i].verify_flag},
+          {"wxid", vec[i].wxid},
+          {"nickname", vec[i].nickname},
+          {"pinyin", vec[i].pinyin},
+          {"pinyinAll", vec[i].pinyin_all},
+          {"reserved1", vec[i].reserved1},
+          {"reserved2", vec[i].reserved2},
+      };
+      ret_data["data"].push_back(item);
+   }
+   ret = ret_data.dump();
+   return ret;
+   } else {
    nlohmann::json ret_data = {
        {"code", 200}, {"data", {}}, {"msg", "not support url"}};
    ret = ret_data.dump();
    return ret;
-  }
+   }
   nlohmann::json ret_data = {
       {"code", 200}, {"data", {}}, {"msg", "unreachable code."}};
   ret = ret_data.dump();
