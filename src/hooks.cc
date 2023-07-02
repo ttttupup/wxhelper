@@ -168,7 +168,9 @@ int HookSyncMsg(std::string client_ip, int port, std::string url,
   UINT64 do_add_msg_addr = base + offset::kDoAddMsg;
   DetourAttach(&(PVOID&)R_DoAddMsg, &HandleSyncMsg);
   LONG ret = DetourTransactionCommit();
-
+  if(ret == NO_ERROR){
+    kMsgHookFlag = true;
+  }
   return ret;
 }
 
