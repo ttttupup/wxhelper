@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "global_context.h"
 #include "thread_pool.h"
+#include "db.h"
 
 namespace wxhelper {
 
@@ -26,6 +27,7 @@ void GlobalContext::initialize(HMODULE module) {
   http_server->HttpStart();
   ThreadPool::GetInstance().Create(2, 8);
   mgr = std::unique_ptr<Manager>(new Manager(base));
+  DB::GetInstance().init(base);
   state =GlobalContextState::INITIALIZED;
 }
 

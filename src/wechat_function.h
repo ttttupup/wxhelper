@@ -3,6 +3,113 @@
 
 namespace wxhelper {
 namespace common {
+  /***************************sqlite3***************************************/
+#define SQLITE_OK 0 /* Successful result */
+/* beginning-of-error-codes */
+#define SQLITE_ERROR 1       /* Generic error */
+#define SQLITE_INTERNAL 2    /* Internal logic error in SQLite */
+#define SQLITE_PERM 3        /* Access permission denied */
+#define SQLITE_ABORT 4       /* Callback routine requested an abort */
+#define SQLITE_BUSY 5        /* The database file is locked */
+#define SQLITE_LOCKED 6      /* A table in the database is locked */
+#define SQLITE_NOMEM 7       /* A malloc() failed */
+#define SQLITE_READONLY 8    /* Attempt to write a readonly database */
+#define SQLITE_INTERRUPT 9   /* Operation terminated by sqlite3_interrupt()*/
+#define SQLITE_IOERR 10      /* Some kind of disk I/O error occurred */
+#define SQLITE_CORRUPT 11    /* The database disk image is malformed */
+#define SQLITE_NOTFOUND 12   /* Unknown opcode in sqlite3_file_control() */
+#define SQLITE_FULL 13       /* Insertion failed because database is full */
+#define SQLITE_CANTOPEN 14   /* Unable to open the database file */
+#define SQLITE_PROTOCOL 15   /* Database lock protocol error */
+#define SQLITE_EMPTY 16      /* Internal use only */
+#define SQLITE_SCHEMA 17     /* The database schema changed */
+#define SQLITE_TOOBIG 18     /* String or BLOB exceeds size limit */
+#define SQLITE_CONSTRAINT 19 /* Abort due to constraint violation */
+#define SQLITE_MISMATCH 20   /* Data type mismatch */
+#define SQLITE_MISUSE 21     /* Library used incorrectly */
+#define SQLITE_NOLFS 22      /* Uses OS features not supported on host */
+#define SQLITE_AUTH 23       /* Authorization denied */
+#define SQLITE_FORMAT 24     /* Not used */
+#define SQLITE_RANGE 25      /* 2nd parameter to sqlite3_bind out of range */
+#define SQLITE_NOTADB 26     /* File opened that is not a database file */
+#define SQLITE_NOTICE 27     /* Notifications from sqlite3_log() */
+#define SQLITE_WARNING 28    /* Warnings from sqlite3_log() */
+#define SQLITE_ROW 100       /* sqlite3_step() has another row ready */
+#define SQLITE_DONE 101      /* sqlite3_step() has finished executing */
+/* end-of-error-codes */
+
+#define SQLITE_INTEGER  1
+#define SQLITE_FLOAT    2
+#define SQLITE_BLOB     4
+#define SQLITE_NULL     5
+#define SQLITE_TEXT     3
+
+
+
+
+typedef int (*sqlite3_callback)(void*, int, char**, char**);
+
+typedef int(__cdecl* sqlite3_exec)(UINT64,            /* An open database */
+                                   const char* sql,  /* SQL to be evaluated */
+                                   sqlite3_callback, /* Callback function */
+                                   void*,        /* 1st argument to callback */
+                                   char** errmsg /* Error msg written here */
+);
+
+typedef int(__cdecl* sqlite3_prepare)(
+    UINT64 db,          /* Database handle */
+    const char* zSql,   /* SQL statement, UTF-8 encoded */
+    int nByte,          /* Maximum length of zSql in bytes. */
+    UINT64** ppStmt,     /* OUT: Statement handle */
+    const char** pzTail /* OUT: Pointer to unused portion of zSql */
+);
+typedef int(__cdecl* sqlite3_open)(const char* filename, UINT64** ppDb);
+
+typedef int(__cdecl* sqlite3_sleep)(int);
+typedef int(__cdecl* sqlite3_errcode)(UINT64* db);
+typedef int(__cdecl* sqlite3_close)(UINT64*);
+
+typedef int(__cdecl* sqlite3_step)(UINT64*);
+typedef int(__cdecl* sqlite3_column_count)(UINT64* pStmt);
+typedef const char*(__cdecl* sqlite3_column_name)(UINT64*, int N);
+typedef int(__cdecl* sqlite3_column_type)(UINT64*, int iCol);
+typedef const void*(__cdecl* sqlite3_column_blob)(UINT64*, int iCol);
+typedef int(__cdecl* sqlite3_column_bytes)(UINT64*, int iCol);
+typedef int(__cdecl* sqlite3_finalize)(UINT64* pStmt);
+
+
+/***************************sqlite3  end*************************************/
+
+struct TableInfo {
+  char *name;
+  INT64 name_len;
+  char *table_name;
+  INT64 table_name_len;
+  char *sql;
+  INT64 sql_len;
+  char *rootpage;
+  INT64 rootpage_len;
+};
+
+struct DatabaseInfo {
+  UINT64 handle = 0;
+  wchar_t *db_name = NULL;
+  INT64 db_name_len = 0;
+  std::vector<TableInfo> tables;
+  INT64 count = 0;
+  INT64 extrainfo = 0;
+};
+
+
+struct SqlResult {
+  char *column_name;
+  INT64 column_name_len;
+  char *content;
+  INT64 content_len;
+  BOOL is_blob;
+};
+
+
 struct InnerMessageStruct {
   char *buffer;
   int length;
@@ -57,6 +164,8 @@ struct ContactInner {
 }  // namespace common
 namespace V3_9_5_81 {
 namespace function {
+
+
 typedef UINT64(*__GetAccountService)();
 typedef UINT64(*__GetDataSavePath)(UINT64);
 typedef UINT64(*__GetCurrentDataPath)(UINT64);
@@ -130,6 +239,36 @@ const UINT64 kSendFileMsg = 0xdd27f0;
 const UINT64 kGetAppMsgMgr = 0x8c33f0;
 const UINT64 kGetContactMgr = 0x8ae3d0;
 const UINT64 kGetContactList = 0xeab270;
+
+const UINT64 k_sqlite3_exec = 0x252e340;
+const UINT64 k_sqlite3_prepare =  0x2535eb0;
+const UINT64 k_sqlite3_open = 0x256d6b0;
+const UINT64 k_sqlite3_backup_init= 0x24e8450;
+const UINT64 k_sqlite3_errcode = 0x256bfb0;
+const UINT64 k_sqlite3_close = 0x256a110;
+const UINT64 k_sqlite3_step =  0x24f2350;
+const UINT64 k_sqlite3_column_count =  0x1df3c80;
+const UINT64 k_sqlite3_column_name =  0x24f3570;
+const UINT64 k_sqlite3_column_type =  0x24f33c0;
+const UINT64 k_sqlite3_column_blob = 0x24f2ba0;
+const UINT64 k_sqlite3_column_bytes =  0x24f2c90;
+const UINT64 k_sqlite3_finalize =  0x24f1400;
+
+const UINT64 kGPInstance =  0x3a6f908;
+const UINT64 kMicroMsgDB=  0xb8;
+const UINT64 kChatMsgDB =  0x2c8;
+const UINT64 kMiscDB =  0x5f0;
+const UINT64 kEmotionDB =  0x838;
+const UINT64 kMediaDB =  0xef8;
+const UINT64 kBizchatMsgDB =  0x1a70;
+const UINT64 kFunctionMsgDB =  0x1b48;
+const UINT64 kDBName =  0x28;
+const UINT64 kStorageStart =  0x0;
+const UINT64 kStorageEnd=  0x0;
+const UINT64 kMultiDBMgr=  0x3acfb68;
+const UINT64 kPublicMsgMgr=  0x3acc268;
+const UINT64 kFavoriteStorageMgr=  0x3acf0d0;
+const UINT64 kFTSFavoriteMgr=  0x24f1400;
 
 }  // namespace offset
 }  // namespace V3_9_5_81

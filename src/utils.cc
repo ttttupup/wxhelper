@@ -23,7 +23,7 @@ std::string Utils::WstringToUTF8(const std::wstring &str) {
   return Utils::WstringToAnsi(str, CP_UTF8);
 }
 
-std::wstring Utils::AnsiToWstring(const std::string &input, DWORD locale) {
+std::wstring Utils::AnsiToWstring(const std::string &input, INT64 locale) {
   int wchar_len = MultiByteToWideChar(locale, 0, input.c_str(), -1, NULL, 0);
   if (wchar_len > 0) {
     std::vector<wchar_t> temp(wchar_len);
@@ -34,7 +34,7 @@ std::wstring Utils::AnsiToWstring(const std::string &input, DWORD locale) {
   return std::wstring();
 }
 
-std::string Utils::WstringToAnsi(const std::wstring &input, DWORD locale) {
+std::string Utils::WstringToAnsi(const std::wstring &input, INT64 locale) {
   int char_len = WideCharToMultiByte(locale, 0, input.c_str(), -1, 0, 0, 0, 0);
   if (char_len > 0) {
     std::vector<char> temp(char_len);
@@ -184,7 +184,7 @@ std::string Utils::WCharToUTF8(wchar_t *wstr) {
   return std::string();
 }
 
-bool Utils::IsTextUtf8(const char *str,int length) {
+bool Utils::IsTextUtf8(const char *str,INT64 length) {
   char endian = 1;
   bool littlen_endian = (*(char *)&endian == 1);
 

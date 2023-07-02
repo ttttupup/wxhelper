@@ -4,6 +4,7 @@
 #include "export.h"
 #include "global_context.h"
 #include "hooks.h"
+#include "db.h"
 namespace common = wxhelper::common;
 
 
@@ -177,6 +178,36 @@ std::string HttpDispatch(struct mg_connection *c, struct mg_http_message *hm) {
       };
       ret_data["data"].push_back(item);
    }
+   ret = ret_data.dump();
+   return ret;
+   } else if (mg_http_match_uri(hm, "/api/unhookSyncMsg")) {
+   INT64 success = wxhelper::hooks::UnHookSyncMsg();
+   nlohmann::json ret_data = {
+       {"code", success}, {"data", {}}, {"msg", "success"}};
+   ret = ret_data.dump();
+   return ret;
+   } else if (mg_http_match_uri(hm, "/api/getDBInfo")) {
+   std::vector<void *> v_ptr = wxhelper::DB::GetInstance().GetDbHandles();
+   nlohmann::json ret_data = {{"data", nlohmann::json::array()}};
+   for (unsigned int i = 0; i < v_ptr.size(); i++) {
+      nlohmann::json db_info;
+      db_info["tables"] = nlohmann::json::array();
+      common::DatabaseInfo *db =
+          reinterpret_cast<common::DatabaseInfo *>(v_ptr[i]);
+      db_info["handle"] = db->handle;
+      std::wstring dbname(db->db_name);
+      db_info["databaseName"] = wxhelper::Utils::WstringToUTF8(dbname);
+      for (auto table : db->tables) {
+        nlohmann::json table_info = {{"name", table.name},
+                                     {"tableName", table.table_name},
+                                     {"sql", table.sql},
+                                     {"rootpage", table.rootpage}};
+        db_info["tables"].push_back(table_info);
+      }
+      ret_data["data"].push_back(db_info);
+   }
+   ret_data["code"] = 1;
+   ret_data["msg"] = "success";
    ret = ret_data.dump();
    return ret;
    } else {

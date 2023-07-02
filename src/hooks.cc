@@ -172,7 +172,27 @@ int HookSyncMsg(std::string client_ip, int port, std::string url,
   return ret;
 }
 
-int UnHookSyncMsg() { return 1; }
+int UnHookSyncMsg() {
+  if (!kMsgHookFlag) {
+    kMsgHookFlag = false;
+    kEnableHttp = false;
+    strcpy_s(kServerIp, "127.0.0.1");
+    SPDLOG_INFO("hook sync msg reset");
+    return NO_ERROR;
+  }
+  UINT64 base = Utils::GetWeChatWinBase();
+  DetourTransactionBegin();
+  DetourUpdateThread(GetCurrentThread());
+  UINT64 do_add_msg_addr = base + offset::kDoAddMsg;
+  DetourDetach(&(PVOID&)R_DoAddMsg, &HandleSyncMsg);
+  LONG ret = DetourTransactionCommit();
+  if (ret == NO_ERROR) {
+    kMsgHookFlag = false;
+    kEnableHttp = false;
+    strcpy_s(kServerIp, "127.0.0.1");
+  }
+  return ret;
+ }
 
 }  // namespace hooks
 }  // namespace wxhelper

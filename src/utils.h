@@ -6,7 +6,6 @@
 #include <vector>
 #define STRING2INT(str) (Utils::IsDigit(str) ? stoi(str) : 0)
 #define WS2LPWS(wstr) (LPWSTR) wstr.c_str()
-#define READ_WSTRING(addr, offset) ((*(DWORD *)(addr + offset + 0x4) == 0) ? std::wstring(L"") : std::wstring((wchar_t *)(*(DWORD *)(addr + offset)), *(DWORD *)(addr + offset + 0x4)))
 
 
 namespace wxhelper {
@@ -18,10 +17,10 @@ class Utils {
   static std::string WstringToUTF8(const std::wstring &str);
 
   static std::wstring AnsiToWstring(const std::string &input,
-                                    DWORD locale = CP_ACP);
+                                    INT64 locale = CP_ACP);
 
   static std::string WstringToAnsi(const std::wstring &input,
-                                   DWORD locale = CP_ACP);
+                                   INT64 locale = CP_ACP);
 
   static UINT64 GetWeChatWinBase();
 
@@ -47,7 +46,7 @@ class Utils {
 
   static std::string WCharToUTF8(wchar_t *wstr);
 
-  static bool IsTextUtf8(const char * str,int length) ;
+  static bool IsTextUtf8(const char * str,INT64 length) ;
 
   static void Hide(HMODULE module); 
 
