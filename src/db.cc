@@ -40,7 +40,7 @@ void FreeResult(std::vector<std::vector<common::SqlResult>> &data) {
 int DB::SelectDataInner(UINT64 db, const char *sql,
                            std::vector<std::vector<common::SqlResult>> &data) {
  common::sqlite3_prepare p_sqlite3_prepare =
-      (common::sqlite3_prepare)(this->base_addr_ + offset::k_sqlite3_prepare);
+      (common::sqlite3_prepare)(base_addr_ + offset::k_sqlite3_prepare);
   common::sqlite3_step p_sqlite3_step =
       (common::sqlite3_step)(base_addr_ + offset::k_sqlite3_step);
  common::sqlite3_column_count p_sqlite3_column_count =

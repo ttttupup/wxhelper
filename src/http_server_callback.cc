@@ -5,8 +5,25 @@
 #include "global_context.h"
 #include "hooks.h"
 #include "db.h"
+
+#define STR2LL(str) (wxhelper::Utils::IsDigit(str) ? stoll(str) : 0)
 namespace common = wxhelper::common;
 
+
+
+INT64 GetINT64Param(nlohmann::json data, std::string key) {
+  INT64 result;
+  try {
+    result = data[key].get<INT64>();
+  } catch (nlohmann::json::exception) {
+    result = STR2LL(data[key].get<std::string>());
+  }
+  return result;
+}
+
+std::string GetStringParam(nlohmann::json data, std::string key) {
+  return data[key].get<std::string>();
+}
 
 std::wstring GetWStringParam(nlohmann::json data, std::string key) {
   return wxhelper::Utils::UTF8ToWstring(data[key].get<std::string>());
@@ -208,6 +225,27 @@ std::string HttpDispatch(struct mg_connection *c, struct mg_http_message *hm) {
    }
    ret_data["code"] = 1;
    ret_data["msg"] = "success";
+   ret = ret_data.dump();
+   return ret;
+   } else if (mg_http_match_uri(hm, "/api/execSql")) {
+   UINT64 db_handle = GetINT64Param(j_param, "dbHandle");
+   std::string sql = GetStringParam(j_param, "sql");
+   std::vector<std::vector<std::string>> items;
+   int success = wxhelper::DB::GetInstance().Select(db_handle, sql.c_str(), items);
+   nlohmann::json ret_data = {
+       {"data", nlohmann::json::array()}, {"code", success}, {"msg", "success"}};
+   if (success == 0) {
+      ret_data["msg"] = "no data";
+      ret = ret_data.dump();
+      return ret;
+   }
+   for (auto it : items) {
+      nlohmann::json temp_arr = nlohmann::json::array();
+      for (size_t i = 0; i < it.size(); i++) {
+        temp_arr.push_back(it[i]);
+      }
+      ret_data["data"].push_back(temp_arr);
+   }
    ret = ret_data.dump();
    return ret;
    } else {

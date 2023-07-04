@@ -247,7 +247,7 @@ const UINT64 k_sqlite3_backup_init= 0x24e8450;
 const UINT64 k_sqlite3_errcode = 0x256bfb0;
 const UINT64 k_sqlite3_close = 0x256a110;
 const UINT64 k_sqlite3_step =  0x24f2350;
-const UINT64 k_sqlite3_column_count =  0x1df3c80;
+const UINT64 k_sqlite3_column_count =  0x24f2b70;
 const UINT64 k_sqlite3_column_name =  0x24f3570;
 const UINT64 k_sqlite3_column_type =  0x24f33c0;
 const UINT64 k_sqlite3_column_blob = 0x24f2ba0;
@@ -268,7 +268,6 @@ const UINT64 kStorageEnd=  0x0;
 const UINT64 kMultiDBMgr=  0x3acfb68;
 const UINT64 kPublicMsgMgr=  0x3acc268;
 const UINT64 kFavoriteStorageMgr=  0x3acf0d0;
-const UINT64 kFTSFavoriteMgr=  0x24f1400;
 
 }  // namespace offset
 }  // namespace V3_9_5_81
