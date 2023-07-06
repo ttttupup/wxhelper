@@ -570,6 +570,38 @@ HMODULE GetDLLHandle(wchar_t* wDllName, DWORD dPid)
 	return result;
 }
 
+BOOL EnableDebugPrivilege() 
+{
+	HANDLE TokenHandle = NULL;
+	TOKEN_PRIVILEGES TokenPrivilege;
+
+	LUID uID;
+	if (OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &TokenHandle)) {
+		if (LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &uID)) {
+			TokenPrivilege.PrivilegeCount = 1;
+			TokenPrivilege.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+			TokenPrivilege.Privileges[0].Luid = uID;
+			if (AdjustTokenPrivileges(TokenHandle, FALSE, &TokenPrivilege, sizeof(TOKEN_PRIVILEGES), NULL, NULL)) {
+				CloseHandle(TokenHandle);
+				TokenHandle = INVALID_HANDLE_VALUE;
+				return TRUE;
+			}
+			else
+				goto fail;
+
+		}
+		else
+			goto fail;
+	}
+	else
+		goto fail;
+
+fail:
+	CloseHandle(TokenHandle);
+	TokenHandle = INVALID_HANDLE_VALUE;
+	return FALSE;
+}
+
 
 static unsigned char GetProcAddressAsmCode[] = {
 	0x55,                         // push ebp;
@@ -614,44 +646,12 @@ LPVOID FillAsmCode(HANDLE handle) {
 
 }
 
-BOOL RemoteLibraryFunction(HANDLE hProcess, LPCSTR lpModuleName, LPCSTR lpProcName, LPVOID lpParameters, SIZE_T dwParamSize, PVOID* ppReturn)
-{
-	LPVOID lpRemoteParams = NULL;
-
-	LPVOID lpFunctionAddress = GetProcAddress(GetModuleHandleA(lpModuleName), lpProcName);
-	if (!lpFunctionAddress) lpFunctionAddress = GetProcAddress(LoadLibraryA(lpModuleName), lpProcName);
-	if (!lpFunctionAddress) goto ErrorHandler;
-
-	if (lpParameters)
-	{
-		lpRemoteParams = VirtualAllocEx(hProcess, NULL, dwParamSize, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
-		if (!lpRemoteParams) goto ErrorHandler;
-
-		SIZE_T dwBytesWritten = 0;
-		BOOL result = WriteProcessMemory(hProcess, lpRemoteParams, lpParameters, dwParamSize, &dwBytesWritten);
-		if (!result || dwBytesWritten < 1) goto ErrorHandler;
-	}
-
-	HANDLE hThread = CreateRemoteThread(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)lpFunctionAddress, lpRemoteParams, NULL, NULL);
-	if (!hThread) goto ErrorHandler;
-
-	DWORD dwOut = 0;
-	while (GetExitCodeThread(hThread, &dwOut)) {
-		if (dwOut != STILL_ACTIVE) {
-			*ppReturn = (PVOID)dwOut;
-			break;
-		}
-	}
-
-	return TRUE;
-
-ErrorHandler:
-	if (lpRemoteParams) VirtualFreeEx(hProcess, lpRemoteParams, dwParamSize, MEM_RELEASE);
-	return FALSE;
-}
 
 int  InjectDllAndStartHttp(wchar_t* szPName, wchar_t* szDllPath, DWORD port)
 {
+	if(!EnableDebugPrivilege()){
+		return 0;
+	}
 	int result = 0;
 	HANDLE hRemoteThread = NULL;
 	LPTHREAD_START_ROUTINE lpSysLibAddr = NULL;
@@ -660,9 +660,9 @@ int  InjectDllAndStartHttp(wchar_t* szPName, wchar_t* szDllPath, DWORD port)
 	HANDLE hProcess;
 	unsigned int dwPid;
 	size_t ulDllLength;
-	wchar_t* dllName = L"wxhelper.dll";
+	wchar_t* dllName = (wchar_t*)L"wxhelper.dll";
 	size_t dllNameLen = wcslen(dllName) * 2 + 2;
-	char* funcName = "http_start";
+	char* funcName = (char* )"http_start";
 	size_t funcNameLen = strlen(funcName) + 1;
 
 	HANDLE  hStartHttp = NULL;
@@ -771,8 +771,133 @@ error:
 	return result;
 }
 
+int  InjectDllAndStartHttpByPid(unsigned int pid, wchar_t* szDllPath, DWORD port)
+{
+	if(!EnableDebugPrivilege()){
+		return 0;
+	}
+	int result = 0;
+	HANDLE hRemoteThread = NULL;
+	LPTHREAD_START_ROUTINE lpSysLibAddr = NULL;
+	HINSTANCE__* hKernelModule = NULL;
+	LPVOID lpRemoteDllBase = NULL;
+	HANDLE hProcess;
+	size_t ulDllLength;
+	wchar_t* dllName = (wchar_t*)L"wxhelper.dll";
+	size_t dllNameLen = wcslen(dllName) * 2 + 2;
+	char* funcName = (char* )"http_start";
+	size_t funcNameLen = strlen(funcName) + 1;
+
+	HANDLE  hStartHttp = NULL;
+	LPVOID portAddr = NULL;
+	HANDLE  getProcThread = NULL;
+
+	LPVOID paramsAddr = NULL;
+	LPVOID param1Addr = NULL;
+	LPVOID param2Addr = NULL;
+	LPVOID  GetProcFuncAddr = NULL;
+
+	DWORD params[2] = { 0 };
+
+	ulDllLength = (wcslen(szDllPath) + 1) * sizeof(wchar_t);
+	hProcess = OpenProcess(PROCESS_ALL_ACCESS, false, pid);
+	if (!hProcess) {
+		goto error;
+	}
+
+	lpRemoteDllBase = VirtualAllocEx(hProcess, NULL, ulDllLength, MEM_COMMIT, PAGE_READWRITE);
+	if (lpRemoteDllBase)
+	{
+		if (WriteProcessMemory(hProcess, lpRemoteDllBase, szDllPath, ulDllLength, NULL)
+			&& (hKernelModule = GetModuleHandleW(L"kernel32.dll")) != 0
+			&& (lpSysLibAddr = (LPTHREAD_START_ROUTINE)GetProcAddress(hKernelModule, "LoadLibraryW")) != 0
+			&& (hRemoteThread = CreateRemoteThread(hProcess, NULL, 0, lpSysLibAddr, lpRemoteDllBase, 0, NULL)) != 0)
+		{
+			WaitForSingleObject(hRemoteThread, INFINITE);
+			GetProcFuncAddr = FillAsmCode(hProcess);
+			param1Addr = VirtualAllocEx(hProcess, NULL, dllNameLen, MEM_COMMIT, PAGE_READWRITE);
+			if (param1Addr) {
+				SIZE_T dwWriteSize;
+				BOOL  bRet = WriteProcessMemory(hProcess, (LPVOID)param1Addr, dllName, dllNameLen, &dwWriteSize);
+				if (!bRet) {
+					goto error;
+				}
+			}
+			param2Addr = VirtualAllocEx(hProcess, NULL, funcNameLen, MEM_COMMIT, PAGE_READWRITE);
+			if (param2Addr) {
+				SIZE_T dwWriteSize;
+				BOOL  bRet = WriteProcessMemory(hProcess, (LPVOID)param2Addr, funcName, funcNameLen, &dwWriteSize);
+				if (!bRet) {
+					goto error;
+				}
+			}
+
+			params[0] = (DWORD)param1Addr;
+			params[1] = (DWORD)param2Addr;
+
+			paramsAddr = VirtualAllocEx(hProcess, NULL, sizeof(params), MEM_COMMIT, PAGE_READWRITE);
+			if (paramsAddr) {
+				SIZE_T dwWriteSize;
+				BOOL  bRet = WriteProcessMemory(hProcess, (LPVOID)paramsAddr, &params[0], sizeof(params), &dwWriteSize);
+				if (!bRet) {
+					goto error;
+				}
+			}
+
+			DWORD dwRet = 0;
+			getProcThread = CreateRemoteThread(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)GetProcFuncAddr, paramsAddr, 0, NULL);
+
+			if (getProcThread)
+			{
+				WaitForSingleObject(getProcThread, INFINITE);
+				GetExitCodeThread(getProcThread, &dwRet);
+				if (dwRet) {
+					hStartHttp = CreateRemoteThread(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)dwRet, (LPVOID)port, 0, NULL);
+					WaitForSingleObject(hStartHttp, INFINITE);
+					result = 1;
+				}
+			}
+		}
+	}
+error:
+	if (hRemoteThread) {
+		CloseHandle(hRemoteThread);
+	}
+	if (getProcThread) {
+		CloseHandle(getProcThread);
+	}
+	if (hStartHttp) {
+		CloseHandle(hStartHttp);
+	}
+
+	if (lpRemoteDllBase) {
+		VirtualFreeEx(hProcess, lpRemoteDllBase, ulDllLength, MEM_DECOMMIT | MEM_RELEASE);
+	}
+	if (param1Addr) {
+		VirtualFreeEx(hProcess, param1Addr, dllNameLen, MEM_DECOMMIT | MEM_RELEASE);
+	}
+
+	if (param2Addr) {
+		VirtualFreeEx(hProcess, param1Addr, funcNameLen, MEM_DECOMMIT | MEM_RELEASE);
+	}
+
+	if (paramsAddr) {
+		VirtualFreeEx(hProcess, param1Addr, sizeof(params), MEM_DECOMMIT | MEM_RELEASE);
+	}
+
+	if (GetProcFuncAddr) {
+		VirtualFreeEx(hProcess, GetProcFuncAddr, sizeof(GetProcAddressAsmCode), MEM_DECOMMIT | MEM_RELEASE);
+	}
+
+	CloseHandle(hProcess);
+	return result;
+}
+
 int  InjectDll(wchar_t* szPName, wchar_t* szDllPath)
 {
+	if(!EnableDebugPrivilege()){
+		return 0;
+	}
 	int result = 0;
 	HANDLE hRemoteThread;
 	LPTHREAD_START_ROUTINE lpSysLibAddr;
@@ -802,6 +927,61 @@ int  InjectDll(wchar_t* szPName, wchar_t* szDllPath)
 			CloseHandle(hRemoteThread);
 			CloseHandle(hProcess);
 			OutputDebugStringA("[DBG] dll inject success");
+			printf("dll inject success");
+			printf("dll path : %s ", szDllPath);
+			printf("dll path : %d ", dwPid);
+			result = 1;
+		}
+		else
+		{
+			VirtualFreeEx(hProcess, lpRemoteDllBase, ulDllLength, MEM_DECOMMIT | MEM_RELEASE);
+			CloseHandle(hProcess);
+			result = 0;
+		}
+	}
+	else
+	{
+		CloseHandle(hProcess);
+		result = 0;
+	}
+	return result;
+}
+
+int  InjectDllByPid(unsigned int pid, wchar_t* szDllPath)
+{
+	if(!EnableDebugPrivilege()){
+		return 0;
+	}
+	int result = 0;
+	HANDLE hRemoteThread;
+	LPTHREAD_START_ROUTINE lpSysLibAddr;
+	HINSTANCE__* hKernelModule;
+	LPVOID lpRemoteDllBase;
+	HANDLE hProcess;
+	size_t ulDllLength;
+
+	ulDllLength = (wcslen(szDllPath) + 1) * sizeof(wchar_t);
+	hProcess = OpenProcess(PROCESS_ALL_ACCESS, false, pid);
+	if (!hProcess) {
+		return 0;
+	}
+
+	lpRemoteDllBase = VirtualAllocEx(hProcess, NULL, ulDllLength, MEM_COMMIT, PAGE_READWRITE);
+	if (lpRemoteDllBase)
+	{
+		if (WriteProcessMemory(hProcess, lpRemoteDllBase, szDllPath, ulDllLength, NULL)
+			&& (hKernelModule = GetModuleHandleW(L"kernel32.dll")) != 0
+			&& (lpSysLibAddr = (LPTHREAD_START_ROUTINE)GetProcAddress(hKernelModule, "LoadLibraryW")) != 0
+			&& (hRemoteThread = CreateRemoteThread(hProcess, NULL, 0, lpSysLibAddr, lpRemoteDllBase, 0, NULL)) != 0)
+		{
+			WaitForSingleObject(hRemoteThread, INFINITE);
+			VirtualFreeEx(hProcess, lpRemoteDllBase, ulDllLength, MEM_DECOMMIT | MEM_RELEASE);
+			CloseHandle(hRemoteThread);
+			CloseHandle(hProcess);
+			OutputDebugStringA("[DBG] dll inject success");
+			printf("dll inject success");
+			printf("dll path : %s ", szDllPath);
+			printf("pid : %d ", pid);
 			result = 1;
 		}
 		else
@@ -872,8 +1052,9 @@ int main(int argc, char** argv)
 	int port = 0;
 
 	ULONG pid = 0;
+	unsigned int injectPid =0;
 
-	while ((param = getopt(argc, argv, "i:p:u:d:m:P:h")) != -1)
+	while ((param = getopt(argc, argv, "i:p:u:d:m:P:I:h")) != -1)
 	{
 		switch (param)
 		{
@@ -910,6 +1091,9 @@ int main(int argc, char** argv)
 		case 'P':
 			port = std::atoi(optarg);
 			break;
+		case 'I':
+			injectPid = std::atoi(optarg);
+			break;
 		default:
 			abort();
 			break;
@@ -917,8 +1101,26 @@ int main(int argc, char** argv)
 	}
 
 	if (pid) {
-		FindHandles(pid, "_WeChat_App_Instance_Identity_Mutex_Name", TRUE, TRUE);
+		FindHandles(pid, (LPSTR)"_WeChat_App_Instance_Identity_Mutex_Name", TRUE, TRUE);
 	}
+	if (injectPid != 0 && cDllPath[0] != 0)
+	{
+		if(cDllPath[0] != '\0')
+		{
+			if (port == 0) {
+				std::wstring wsPath = Utf8ToUnicode(cDllPath);
+				int ret = InjectDllByPid(injectPid, (wchar_t*)wsPath.c_str());
+				printf(" 注入结果：%i \n", ret);
+			}
+			else
+			{
+				std::wstring wsPath = Utf8ToUnicode(cDllPath);
+				int ret = InjectDllAndStartHttpByPid(injectPid, (wchar_t*)wsPath.c_str(), port);
+				printf(" 注入结果：%i \n", ret);
+			}
+		}
+	}
+	
 
 	if (cInjectprogram[0] != 0 && cDllPath[0] != 0)
 	{

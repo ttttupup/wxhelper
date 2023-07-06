@@ -1,5 +1,5 @@
 # wxhelper
-wechat hook 。PC端微信逆向学习。支持3.8.0.41，3.8.1.26, 3.9.0.28, 3.9.2.23版本。
+wechat hook 。PC端微信逆向学习。支持3.8.0.41，3.8.1.26, 3.9.0.28, 3.9.2.23,3.9.2.26版本。
 #### 免责声明:
 本仓库发布的内容，仅用于学习研究，请勿用于非法用途和商业用途！如因此产生任何法律纠纷，均与作者无关！
 
@@ -19,13 +19,13 @@ dll在注入成功时，创建了一个默认端口为19088的http服务端，�
 
 ```
 #### 使用说明：
-支持的版本3.8.0.41，3.8.1.26,3.9.0.28。  
+支持的版本3.8.0.41、3.8.1.26、3.9.0.28、3.9.2.23、3.9.2.26 。  
 源码和主要实现在相应的分支内。  
 src:主要的dll代码  
 tool：简单的注入工具，一个是控制台，一个是图形界面。  
-python: tcpserver.py: 简单的服务器，用以接收消息内容。decrpty.py: 微信数据库解密工具。      
+python: tcpserver.py: 简单的服务器，用以接收消息内容。decrpty.py: 微信数据库解密工具。   http_server.py：http server端。     
 source: 简单的命令行远程注入源码。   
-
+其他目录：热心作者提供的一些客户端。
 
 #### 0.首先安装对应的版本的微信，分支名称即代表的是微信对应的版本。dll的前缀都会带有微信版本。
 #### 1.使用注入工具注入wxhelper.dll,注入成功后，即可通过postman直接调用对应的接口。
@@ -49,7 +49,7 @@ source: 简单的命令行远程注入源码。
 个人常用的方法，请参考https://github.com/ttttupup/wxhelper/wiki    
 使用上的问题，可查询https://github.com/ttttupup/wxhelper/discussions    
 数据库解密，请参考https://github.com/ttttupup/wxhelper/wiki      
- 
+个人精力有限，只维护最新版本，旧版本的bug会在新版本中修复，不维护旧版本。   
 
 
 #### 编译环境
@@ -63,6 +63,21 @@ cmake
 vcpkg
 #### 编译构建
 先准备好编译环境。   
+```
+cd wxhelper  
+mkdir build  
+cd build  
+cmake -DCMAKE_C_COMPILER=cl.exe  \
+-DCMAKE_CXX_COMPILER=cl.exe \
+-DCMAKE_BUILD_TYPE=Debug \
+-DCMAKE_INSTALL_PREFIX=C:/other/codeSource/windows/wxhelper/out/install/x86-debug \
+-DCMAKE_TOOLCHAIN_FILE:FILEPATH=C:/vcpkg/scripts/buildsystems/vcpkg.cmake \
+-SC:/wxhelper \
+-BC:/wxhelper/build/x86-debug\
+-G Ninja
+
+cmake --build ..  
+```
 
 以下是在vscode中操作，vs中的操作类似。  
 1.安装vcpkg，cmake，vscode  
@@ -100,7 +115,7 @@ vcpkg
           
         }
 ```
-4.vscode中右键configure all  projects,在Terminal中点击Run Task，如没有先配置build任务，然后运行即可   
+4.执行cmake build vscode中右键configure all  projects,在Terminal中点击Run Task，如没有先配置build任务，然后运行即可   
 
 5.命令行注入工具，注入命令 
 ``` javascript
@@ -108,6 +123,7 @@ vcpkg
     // -u 卸载程序名   -d 卸载dll名称
     // -m pid  关闭微信互斥体，多开微信
     // -P port 指定http端口，需要使用 specify-port 分支的生成的dll
+    // -I 注入程序的pid
     //注入  
     ConsoleInject.exe  -i demo.exe -p E:\testInject.dll
     //卸载 
@@ -115,7 +131,17 @@ vcpkg
     //多开
     ConsoleInject.exe  -m 1222
     // 注入并指定http端口
-    ConsoleInject.exe  -i demo.exe -p E:\testInject.dll  -P  18888
+    ConsoleInject.exe  -i demo.exe -p E:\testInject.dll  -P  18888   
+    // 注入指定pid并关闭多开限制
+    ConsoleInject.exe  -I 15048 -p E:\testInject.dll  -m 15048  
+  
+```
+
+6.如果想改变端口，可以在微信目录下创建config.ini配置文件,修改端口即可。不创建则默认端口19088。   
+``` shell
+[config]
+port=19099
+
 ```
 
 #### 更新说明
@@ -145,7 +171,13 @@ vcpkg
 
 2023-03-04 ： 新增消息附件下载      
 
-2023-03-21 ： 新增hook语音   
+2023-03-21 ： 新增hook语音     
+
+2023-03-30 ： 新增获取语音文件(推荐使用这个非hook接口)      
+
+2023-04-08 : 3.9.2.23版本功能更新   
+
+2023-06-05 ：3.9.2.26版本更新   
 
 #### 功能预览：
 0.检查是否登录    
@@ -162,7 +194,8 @@ vcpkg
 14.取消hook语音    
 17.删除好友    
 19.通过手机或qq查找微信  
-20.通过wxid添加好友  
+20.通过wxid添加好友    
+23.通过好友申请   
 25.获取群成员  
 26.获取群成员昵称  
 27.删除群成员  
@@ -186,9 +219,22 @@ vcpkg
 54.朋友圈下一页    
 55.获取联系人或者群名称    
 56.获取消息附件（图片，视频，文件）   
+57.获取语音文件(silk3格式)    
+58.登录二维码   
+59.邀请入群   
+60.获取群/群成员详情    
+61.撤回消息    
+62.发送公众号消息   
+63.转发公众号消息   
+64.发送小程序   
+65.退款    
+66.下载头像(勿用,没什么用)       
 #### 感谢
 https://github.com/ljc545w/ComWeChatRobot  
 
 https://github.com/NationalSecurityAgency/ghidra  
 
 https://github.com/x64dbg/x64dbg  
+
+#### 讨论组
+https://t.me/+LmvAauweyUpjYzJl  
