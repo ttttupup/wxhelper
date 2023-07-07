@@ -570,7 +570,7 @@ HMODULE GetDLLHandle(wchar_t* wDllName, DWORD dPid)
 	return result;
 }
 
-BOOL EnableDebugPrivilege() 
+BOOL EnableDebugPrivilege()
 {
 	HANDLE TokenHandle = NULL;
 	TOKEN_PRIVILEGES TokenPrivilege;
@@ -649,7 +649,7 @@ LPVOID FillAsmCode(HANDLE handle) {
 
 int  InjectDllAndStartHttp(wchar_t* szPName, wchar_t* szDllPath, DWORD port)
 {
-	if(!EnableDebugPrivilege()){
+	if (!EnableDebugPrivilege()) {
 		return 0;
 	}
 	int result = 0;
@@ -662,7 +662,7 @@ int  InjectDllAndStartHttp(wchar_t* szPName, wchar_t* szDllPath, DWORD port)
 	size_t ulDllLength;
 	wchar_t* dllName = (wchar_t*)L"wxhelper.dll";
 	size_t dllNameLen = wcslen(dllName) * 2 + 2;
-	char* funcName = (char* )"http_start";
+	char* funcName = (char*)"http_start";
 	size_t funcNameLen = strlen(funcName) + 1;
 
 	HANDLE  hStartHttp = NULL;
@@ -773,7 +773,7 @@ error:
 
 int  InjectDllAndStartHttpByPid(unsigned int pid, wchar_t* szDllPath, DWORD port)
 {
-	if(!EnableDebugPrivilege()){
+	if (!EnableDebugPrivilege()) {
 		return 0;
 	}
 	int result = 0;
@@ -785,7 +785,7 @@ int  InjectDllAndStartHttpByPid(unsigned int pid, wchar_t* szDllPath, DWORD port
 	size_t ulDllLength;
 	wchar_t* dllName = (wchar_t*)L"wxhelper.dll";
 	size_t dllNameLen = wcslen(dllName) * 2 + 2;
-	char* funcName = (char* )"http_start";
+	char* funcName = (char*)"http_start";
 	size_t funcNameLen = strlen(funcName) + 1;
 
 	HANDLE  hStartHttp = NULL;
@@ -895,7 +895,7 @@ error:
 
 int  InjectDll(wchar_t* szPName, wchar_t* szDllPath)
 {
-	if(!EnableDebugPrivilege()){
+	if (!EnableDebugPrivilege()) {
 		return 0;
 	}
 	int result = 0;
@@ -949,7 +949,7 @@ int  InjectDll(wchar_t* szPName, wchar_t* szDllPath)
 
 int  InjectDllByPid(unsigned int pid, wchar_t* szDllPath)
 {
-	if(!EnableDebugPrivilege()){
+	if (!EnableDebugPrivilege()) {
 		return 0;
 	}
 	int result = 0;
@@ -981,7 +981,7 @@ int  InjectDllByPid(unsigned int pid, wchar_t* szDllPath)
 			OutputDebugStringA("[DBG] dll inject success");
 			printf("dll inject success");
 			printf("dll path : %s ", szDllPath);
-			printf("pid : %d ", pid);
+			printf("dll path : %d ", pid);
 			result = 1;
 		}
 		else
@@ -1052,7 +1052,7 @@ int main(int argc, char** argv)
 	int port = 0;
 
 	ULONG pid = 0;
-	unsigned int injectPid =0;
+	unsigned int injectPid = 0;
 
 	while ((param = getopt(argc, argv, "i:p:u:d:m:P:I:h")) != -1)
 	{
@@ -1105,7 +1105,7 @@ int main(int argc, char** argv)
 	}
 	if (injectPid != 0 && cDllPath[0] != 0)
 	{
-		if(cDllPath[0] != '\0')
+		if (cDllPath[0] != '\0')
 		{
 			if (port == 0) {
 				std::wstring wsPath = Utf8ToUnicode(cDllPath);
@@ -1120,7 +1120,7 @@ int main(int argc, char** argv)
 			}
 		}
 	}
-	
+
 
 	if (cInjectprogram[0] != 0 && cDllPath[0] != 0)
 	{
