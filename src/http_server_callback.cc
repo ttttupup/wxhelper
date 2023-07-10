@@ -29,6 +29,14 @@ std::wstring GetWStringParam(nlohmann::json data, std::string key) {
   return wxhelper::Utils::UTF8ToWstring(data[key].get<std::string>());
 }
 
+std::vector<std::wstring> GetArrayParam(nlohmann::json data,  std::string key) {
+  std::vector<std::wstring> result;
+  std::wstring param = GetWStringParam(data, key);
+  result = wxhelper::Utils::split(param, L',');
+  return result;
+}
+
+
 void StartHttpServer(wxhelper::HttpServer *server) {
   int port = server->GetPort();
   std::string lsten_addr = "http://0.0.0.0:" + std::to_string(port);
@@ -123,7 +131,8 @@ std::string HttpDispatch(struct mg_connection *c, struct mg_http_message *hm) {
     return ret;
   } else if (mg_http_match_uri(hm, "/api/userInfo")) {
     common::SelfInfoInner self_info;
-    INT64 success = wxhelper::GlobalContext::GetInstance().mgr->GetSelfInfo(self_info);
+    INT64 success =
+        wxhelper::GlobalContext::GetInstance().mgr->GetSelfInfo(self_info);
     nlohmann::json ret_data = {
         {"code", success}, {"data", {}}, {"msg", "success"}};
     if (success) {
@@ -148,39 +157,44 @@ std::string HttpDispatch(struct mg_connection *c, struct mg_http_message *hm) {
   } else if (mg_http_match_uri(hm, "/api/sendTextMsg")) {
     std::wstring wxid = GetWStringParam(j_param, "wxid");
     std::wstring msg = GetWStringParam(j_param, "msg");
-    INT64 success = wxhelper::GlobalContext::GetInstance().mgr->SendTextMsg(wxid, msg);
+    INT64 success =
+        wxhelper::GlobalContext::GetInstance().mgr->SendTextMsg(wxid, msg);
     nlohmann::json ret_data = {
         {"code", success}, {"data", {}}, {"msg", "success"}};
     ret = ret_data.dump();
     return ret;
   } else if (mg_http_match_uri(hm, "/api/hookSyncMsg")) {
-   INT64 success =  wxhelper::hooks::HookSyncMsg("127.0.0.1",19099,"",3000,false);
-   nlohmann::json ret_data = {
-       {"code", success}, {"data", {}}, {"msg", "success"}};
-   ret = ret_data.dump();
-   return ret;
+    INT64 success =
+        wxhelper::hooks::HookSyncMsg("127.0.0.1", 19099, "", 3000, false);
+    nlohmann::json ret_data = {
+        {"code", success}, {"data", {}}, {"msg", "success"}};
+    ret = ret_data.dump();
+    return ret;
   } else if (mg_http_match_uri(hm, "/api/sendImagesMsg")) {
-   std::wstring wxid = GetWStringParam(j_param, "wxid");
-   std::wstring path = GetWStringParam(j_param, "imagePath");
-   INT64 success = wxhelper::GlobalContext::GetInstance().mgr->SendImageMsg(wxid, path);
-   nlohmann::json ret_data = {
-       {"code", success}, {"data", {}}, {"msg", "success"}};
-   ret = ret_data.dump();
-   return ret;
-   } else if (mg_http_match_uri(hm, "/api/sendFileMsg")) {
-   std::wstring wxid = GetWStringParam(j_param, "wxid");
-   std::wstring path = GetWStringParam(j_param, "filePath");
-   INT64 success = wxhelper::GlobalContext::GetInstance().mgr->SendFileMsg(wxid, path);
-   nlohmann::json ret_data = {
-       {"code", success}, {"data", {}}, {"msg", "success"}};
-   ret = ret_data.dump();
-   return ret;
-   } else if (mg_http_match_uri(hm, "/api/getContactList")) {
-   std::vector<common::ContactInner> vec;
-   INT64 success = wxhelper::GlobalContext::GetInstance().mgr->GetContacts(vec);
-   nlohmann::json ret_data = {
-       {"code", success}, {"data", {}}, {"msg", "success"}};
-   for (unsigned int i = 0; i < vec.size(); i++) {
+    std::wstring wxid = GetWStringParam(j_param, "wxid");
+    std::wstring path = GetWStringParam(j_param, "imagePath");
+    INT64 success =
+        wxhelper::GlobalContext::GetInstance().mgr->SendImageMsg(wxid, path);
+    nlohmann::json ret_data = {
+        {"code", success}, {"data", {}}, {"msg", "success"}};
+    ret = ret_data.dump();
+    return ret;
+  } else if (mg_http_match_uri(hm, "/api/sendFileMsg")) {
+    std::wstring wxid = GetWStringParam(j_param, "wxid");
+    std::wstring path = GetWStringParam(j_param, "filePath");
+    INT64 success =
+        wxhelper::GlobalContext::GetInstance().mgr->SendFileMsg(wxid, path);
+    nlohmann::json ret_data = {
+        {"code", success}, {"data", {}}, {"msg", "success"}};
+    ret = ret_data.dump();
+    return ret;
+  } else if (mg_http_match_uri(hm, "/api/getContactList")) {
+    std::vector<common::ContactInner> vec;
+    INT64 success =
+        wxhelper::GlobalContext::GetInstance().mgr->GetContacts(vec);
+    nlohmann::json ret_data = {
+        {"code", success}, {"data", {}}, {"msg", "success"}};
+    for (unsigned int i = 0; i < vec.size(); i++) {
       nlohmann::json item = {
           {"customAccount", vec[i].custom_account},
           {"encryptName", vec[i].encrypt_name},
@@ -194,19 +208,19 @@ std::string HttpDispatch(struct mg_connection *c, struct mg_http_message *hm) {
           {"reserved2", vec[i].reserved2},
       };
       ret_data["data"].push_back(item);
-   }
-   ret = ret_data.dump();
-   return ret;
-   } else if (mg_http_match_uri(hm, "/api/unhookSyncMsg")) {
-   INT64 success = wxhelper::hooks::UnHookSyncMsg();
-   nlohmann::json ret_data = {
-       {"code", success}, {"data", {}}, {"msg", "success"}};
-   ret = ret_data.dump();
-   return ret;
-   } else if (mg_http_match_uri(hm, "/api/getDBInfo")) {
-   std::vector<void *> v_ptr = wxhelper::DB::GetInstance().GetDbHandles();
-   nlohmann::json ret_data = {{"data", nlohmann::json::array()}};
-   for (unsigned int i = 0; i < v_ptr.size(); i++) {
+    }
+    ret = ret_data.dump();
+    return ret;
+  } else if (mg_http_match_uri(hm, "/api/unhookSyncMsg")) {
+    INT64 success = wxhelper::hooks::UnHookSyncMsg();
+    nlohmann::json ret_data = {
+        {"code", success}, {"data", {}}, {"msg", "success"}};
+    ret = ret_data.dump();
+    return ret;
+  } else if (mg_http_match_uri(hm, "/api/getDBInfo")) {
+    std::vector<void *> v_ptr = wxhelper::DB::GetInstance().GetDbHandles();
+    nlohmann::json ret_data = {{"data", nlohmann::json::array()}};
+    for (unsigned int i = 0; i < v_ptr.size(); i++) {
       nlohmann::json db_info;
       db_info["tables"] = nlohmann::json::array();
       common::DatabaseInfo *db =
@@ -222,38 +236,83 @@ std::string HttpDispatch(struct mg_connection *c, struct mg_http_message *hm) {
         db_info["tables"].push_back(table_info);
       }
       ret_data["data"].push_back(db_info);
-   }
-   ret_data["code"] = 1;
-   ret_data["msg"] = "success";
-   ret = ret_data.dump();
-   return ret;
-   } else if (mg_http_match_uri(hm, "/api/execSql")) {
-   UINT64 db_handle = GetINT64Param(j_param, "dbHandle");
-   std::string sql = GetStringParam(j_param, "sql");
-   std::vector<std::vector<std::string>> items;
-   int success = wxhelper::DB::GetInstance().Select(db_handle, sql.c_str(), items);
-   nlohmann::json ret_data = {
-       {"data", nlohmann::json::array()}, {"code", success}, {"msg", "success"}};
-   if (success == 0) {
+    }
+    ret_data["code"] = 1;
+    ret_data["msg"] = "success";
+    ret = ret_data.dump();
+    return ret;
+  } else if (mg_http_match_uri(hm, "/api/execSql")) {
+    UINT64 db_handle = GetINT64Param(j_param, "dbHandle");
+    std::string sql = GetStringParam(j_param, "sql");
+    std::vector<std::vector<std::string>> items;
+    int success =
+        wxhelper::DB::GetInstance().Select(db_handle, sql.c_str(), items);
+    nlohmann::json ret_data = {{"data", nlohmann::json::array()},
+                               {"code", success},
+                               {"msg", "success"}};
+    if (success == 0) {
       ret_data["msg"] = "no data";
       ret = ret_data.dump();
       return ret;
-   }
-   for (auto it : items) {
+    }
+    for (auto it : items) {
       nlohmann::json temp_arr = nlohmann::json::array();
       for (size_t i = 0; i < it.size(); i++) {
         temp_arr.push_back(it[i]);
       }
       ret_data["data"].push_back(temp_arr);
-   }
-   ret = ret_data.dump();
-   return ret;
-   } else {
-   nlohmann::json ret_data = {
-       {"code", 200}, {"data", {}}, {"msg", "not support url"}};
-   ret = ret_data.dump();
-   return ret;
-   }
+    }
+    ret = ret_data.dump();
+    return ret;
+  } else if (mg_http_match_uri(hm, "/api/getChatRoomDetailInfo")) {
+    std::wstring chat_room_id = GetWStringParam(j_param, "chatRoomId");
+    common::ChatRoomInfoInner chat_room_detail;
+    INT64 success =
+        wxhelper::GlobalContext::GetInstance().mgr->GetChatRoomDetailInfo(
+            chat_room_id, chat_room_detail);
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+
+    nlohmann::json detail = {
+        {"chatRoomId", chat_room_detail.chat_room_id},
+        {"notice", chat_room_detail.notice},
+        {"admin", chat_room_detail.admin},
+        {"xml", chat_room_detail.xml},
+    };
+    ret_data["data"] = detail;
+    ret = ret_data.dump();
+    return ret;
+   } else if (mg_http_match_uri(hm, "/api/addMemberToChatRoom")) {
+    std::wstring room_id = GetWStringParam(j_param, "chatRoomId");
+    std::vector<std::wstring> wxids = GetArrayParam(j_param, "memberIds");
+    std::vector<std::wstring> wxid_list;
+    for (unsigned int i = 0; i < wxids.size(); i++) {
+      wxid_list.push_back(wxids[i]);
+    }
+    INT64 success =
+        wxhelper::GlobalContext::GetInstance().mgr->AddMemberToChatRoom(
+            room_id, wxid_list);
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+    ret = ret_data.dump();
+    return ret;
+  } else if (mg_http_match_uri(hm, "/api/modifyNickname")) {
+    std::wstring room_id = GetWStringParam(j_param, "chatRoomId");
+    std::wstring wxid = GetWStringParam(j_param, "wxid");
+    std::wstring nickName = GetWStringParam(j_param, "nickName");
+    INT64 success =
+        wxhelper::GlobalContext::GetInstance().mgr->ModChatRoomMemberNickName(
+            room_id, wxid, nickName);
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+    ret = ret_data.dump();
+    return ret;
+  } else {
+    nlohmann::json ret_data = {
+        {"code", 200}, {"data", {}}, {"msg", "not support url"}};
+    ret = ret_data.dump();
+    return ret;
+  }
   nlohmann::json ret_data = {
       {"code", 200}, {"data", {}}, {"msg", "unreachable code."}};
   ret = ret_data.dump();
