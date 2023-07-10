@@ -10,6 +10,20 @@ namespace func = wxhelper::V3_9_5_81::function;
 
 
 namespace wxhelper {
+
+prototype::WeChatString * BuildWechatString(const std::wstring &ws){
+  prototype::WeChatString *p = Utils::WxHeapAlloc<prototype::WeChatString>(
+      sizeof(prototype::WeChatString));
+  wchar_t *p_chat_room_id = Utils::WxHeapAlloc<wchar_t>((ws.size() + 1) * 2);
+  wmemcpy(p_chat_room_id, ws.c_str(), ws.size() + 1);
+  p->ptr = p_chat_room_id;
+  p->length = static_cast<DWORD>(ws.size());
+  p->max_length = static_cast<DWORD>(ws.size());
+  p->c_len = 0;
+  p->c_ptr = 0;
+  return p;
+}
+
 Manager::Manager(UINT64 base) : base_addr_(base) {}
 Manager::~Manager() {}
 INT64 Manager::CheckLogin() {
@@ -340,6 +354,94 @@ INT64 Manager::GetContacts(std::vector<common::ContactInner> &vec) {
     vec.push_back(temp);
     start += 0x698;
   }
+  return success;
+}
+
+INT64 Manager::GetChatRoomDetailInfo(const std::wstring &room_id,
+                                     common::ChatRoomInfoInner &room_info) {
+  INT64 success = -1;
+  UINT64 get_chat_room_mgr_addr = base_addr_ + offset::kChatRoomMgr;
+  UINT64 get_chat_room_detail_addr =
+      base_addr_ + offset::kGetChatRoomDetailInfo;
+  UINT64 new_chat_room_info_addr = base_addr_ + offset::kNewChatRoomInfo;
+  UINT64 free_chat_room_info_addr = base_addr_ + offset::kFreeChatRoomInfo;
+  func::__GetChatRoomMgr get_chat_room_mgr =
+      (func::__GetChatRoomMgr)get_chat_room_mgr_addr;
+  func::__GetChatRoomDetailInfo get_chat_room_detail =
+      (func::__GetChatRoomDetailInfo)get_chat_room_detail_addr;
+  func::__NewChatRoomInfo new_chat_room_info =
+      (func::__NewChatRoomInfo)new_chat_room_info_addr;
+  func::__FreeChatRoomInfo free_chat_room_info =
+      (func::__FreeChatRoomInfo)free_chat_room_info_addr;
+
+  prototype::WeChatString chat_room_id(room_id);
+  char chat_room_info[0x148] = {0};
+  UINT64 p_chat_room_info =
+      new_chat_room_info(reinterpret_cast<UINT64>(&chat_room_info));
+  UINT64 mgr = get_chat_room_mgr();
+  success = get_chat_room_detail(mgr, reinterpret_cast<UINT64>(&chat_room_id),
+                                 p_chat_room_info, 1);
+  room_info.admin = Utils::ReadWstringThenConvert(p_chat_room_info + 0x48);
+  room_info.chat_room_id =
+      Utils::ReadWstringThenConvert(p_chat_room_info + 0x8);
+  room_info.notice = Utils::ReadWstringThenConvert(p_chat_room_info + 0x28);
+  room_info.xml = Utils::ReadWstringThenConvert(p_chat_room_info + 0x78);
+  free_chat_room_info(p_chat_room_info);
+  return success;
+}
+
+INT64 Manager::AddMemberToChatRoom(const std::wstring &room_id,
+                                   const std::vector<std::wstring> &members) {
+  INT64 success = -1;
+  UINT64 get_chat_room_mgr_addr = base_addr_ + offset::kChatRoomMgr;
+  UINT64 add_members_addr = base_addr_ + offset::kDoAddMemberToChatRoom;
+  func::__GetChatRoomMgr get_chat_room_mgr =
+      (func::__GetChatRoomMgr)get_chat_room_mgr_addr;
+  func::__DoAddMemberToChatRoom add_members =
+      (func::__DoAddMemberToChatRoom)add_members_addr;
+
+  prototype::WeChatString *chat_room_id = (prototype::WeChatString *)HeapAlloc(
+      GetProcessHeap(), 0, sizeof(prototype::WeChatString));
+  wchar_t *p_chat_room_id =
+      (wchar_t *)HeapAlloc(GetProcessHeap(), 0, (room_id.size() + 1) * 2);
+  wmemcpy(p_chat_room_id, room_id.c_str(), room_id.size() + 1);
+  chat_room_id->ptr = p_chat_room_id;
+  chat_room_id->length = static_cast<DWORD>(room_id.size());
+  chat_room_id->max_length = static_cast<DWORD>(room_id.size());
+  chat_room_id->c_len = 0;
+  chat_room_id->c_ptr = 0;
+
+  std::vector<prototype::WeChatString> member_list;
+  UINT64 temp[2] = {0};
+  common::VectorInner *list = (common::VectorInner *)&member_list;
+  INT64 members_ptr = (INT64)&list->start;
+  for (int i = 0; i < members.size(); i++) {
+    prototype::WeChatString member(members[i]);
+    member_list.push_back(member);
+  }
+  UINT64 mgr = get_chat_room_mgr();
+  success =
+      add_members(mgr, members_ptr, reinterpret_cast<UINT64>(chat_room_id),
+                  reinterpret_cast<UINT64>(&temp));
+  return success;
+}
+
+
+
+INT64 Manager::ModChatRoomMemberNickName(const std::wstring &room_id,
+                                         const std::wstring &wxid,
+                                         const std::wstring &nickname) {
+  INT64 success = -1;
+  UINT64 mod_addr = base_addr_ + offset::kDoModChatRoomMemberNickName;
+  func::__DoModChatRoomMemberNickName modify =
+      (func::__DoModChatRoomMemberNickName)mod_addr;
+  const wchar_t *p = room_id.c_str();
+  prototype::WeChatString *chat_room_id = BuildWechatString(room_id);
+  prototype::WeChatString *self_id = BuildWechatString(wxid);
+  prototype::WeChatString *name = BuildWechatString(nickname);
+  success = modify(
+      reinterpret_cast<UINT64>(p), reinterpret_cast<UINT64>(chat_room_id),
+      reinterpret_cast<UINT64>(self_id), reinterpret_cast<UINT64>(name));
   return success;
 }
 } // namespace wxhelper`

@@ -46,9 +46,9 @@ class Utils {
 
   static std::string WCharToUTF8(wchar_t *wstr);
 
-  static bool IsTextUtf8(const char * str,INT64 length) ;
+  static bool IsTextUtf8(const char *str, INT64 length);
 
-  static void Hide(HMODULE module); 
+  static void Hide(HMODULE module);
 
   static std::string ReadSKBuiltinString(INT64 addr);
   static std::string ReadSKBuiltinBuffer(INT64 addr);
@@ -57,8 +57,9 @@ class Utils {
   static std::string ImageXor(std::string buf);
   static std::wstring ReadWstring(INT64 addr);
   static std::string ReadWstringThenConvert(INT64 addr);
+  
   template <typename T1, typename T2>
- static std::vector<T1> split(T1 str, T2 letter) {
+  static std::vector<T1> split(T1 str, T2 letter) {
     std::vector<T1> arr;
     size_t pos;
     while ((pos = str.find_first_of(letter)) != T1::npos) {
@@ -71,7 +72,7 @@ class Utils {
   }
 
   template <typename T1, typename T2>
- static T1 replace(T1 source, T2 replaced, T1 replaceto) {
+  static T1 replace(T1 source, T2 replaced, T1 replaceto) {
     std::vector<T1> v_arr = split(source, replaced);
     if (v_arr.size() < 2) return source;
     T1 temp;
@@ -82,6 +83,12 @@ class Utils {
     temp += v_arr[v_arr.size() - 1];
     return temp;
   }
+
+  template <typename T>
+  static T *WxHeapAlloc(size_t n) {
+    return (T *)HeapAlloc(GetProcessHeap(), 0, n);
+  }
 };
+
 }  // namespace wxhelper
 #endif

@@ -161,6 +161,29 @@ struct ContactInner {
   }
 };
 
+struct ChatRoomInfoInner {
+  std::string chat_room_id;
+  std::string notice;
+  std::string admin;
+  std::string xml;
+  ChatRoomInfoInner(){
+    chat_room_id = "";
+    notice = "";
+    admin = "";
+    xml = "";
+  }
+
+};
+
+struct VectorInner {
+#ifdef _DEBUG
+  INT64 head;
+#endif
+  INT64 start;
+  INT64 finsh;
+  INT64 end;
+};
+
 }  // namespace common
 namespace V3_9_5_81 {
 namespace function {
@@ -183,6 +206,15 @@ typedef UINT64(*__OperatorNew)(UINT64);
 typedef UINT64(*__Free)();
 typedef UINT64 (*__GetContactMgr)();
 typedef UINT64 (*__GetContactList)(UINT64,UINT64);
+
+typedef UINT64 (*__GetChatRoomMgr)();
+typedef UINT64 (*__NewChatRoomInfo)(UINT64);
+typedef UINT64 (*__FreeChatRoomInfo)(UINT64);
+typedef UINT64 (*__GetChatRoomDetailInfo)(UINT64,UINT64,UINT64,UINT64);
+typedef UINT64 (*__DoAddMemberToChatRoom)(UINT64,UINT64,UINT64,UINT64);
+
+typedef UINT64 (*__DoModChatRoomMemberNickName)(UINT64,UINT64,UINT64,UINT64);
+
 
 }  // namespace function
 namespace prototype {
@@ -254,21 +286,27 @@ const UINT64 k_sqlite3_column_blob = 0x24f2ba0;
 const UINT64 k_sqlite3_column_bytes =  0x24f2c90;
 const UINT64 k_sqlite3_finalize =  0x24f1400;
 
-const UINT64 kGPInstance =  0x3a6f908;
-const UINT64 kMicroMsgDB=  0xb8;
-const UINT64 kChatMsgDB =  0x2c8;
-const UINT64 kMiscDB =  0x5f0;
-const UINT64 kEmotionDB =  0x838;
-const UINT64 kMediaDB =  0xef8;
-const UINT64 kBizchatMsgDB =  0x1a70;
-const UINT64 kFunctionMsgDB =  0x1b48;
-const UINT64 kDBName =  0x28;
-const UINT64 kStorageStart =  0x0;
-const UINT64 kStorageEnd=  0x0;
-const UINT64 kMultiDBMgr=  0x3acfb68;
-const UINT64 kPublicMsgMgr=  0x3acc268;
-const UINT64 kFavoriteStorageMgr=  0x3acf0d0;
+const UINT64 kGPInstance = 0x3a6f908;
+const UINT64 kMicroMsgDB = 0xb8;
+const UINT64 kChatMsgDB = 0x2c8;
+const UINT64 kMiscDB = 0x5f0;
+const UINT64 kEmotionDB = 0x838;
+const UINT64 kMediaDB = 0xef8;
+const UINT64 kBizchatMsgDB = 0x1a70;
+const UINT64 kFunctionMsgDB = 0x1b48;
+const UINT64 kDBName = 0x28;
+const UINT64 kStorageStart = 0x0;
+const UINT64 kStorageEnd = 0x0;
+const UINT64 kMultiDBMgr = 0x3acfb68;
+const UINT64 kPublicMsgMgr = 0x3acc268;
+const UINT64 kFavoriteStorageMgr = 0x3acf0d0;
 
+const UINT64 kChatRoomMgr = 0x8e9d30;
+const UINT64 kGetChatRoomDetailInfo = 0xe73590;
+const UINT64 kNewChatRoomInfo = 0x12006b0;
+const UINT64 kFreeChatRoomInfo = 0x1200890;
+const UINT64 kDoAddMemberToChatRoom = 0xe63c70;
+const UINT64 kDoModChatRoomMemberNickName = 0xe6db00;
 }  // namespace offset
 }  // namespace V3_9_5_81
 
