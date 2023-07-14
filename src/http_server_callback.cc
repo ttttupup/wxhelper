@@ -307,6 +307,40 @@ std::string HttpDispatch(struct mg_connection *c, struct mg_http_message *hm) {
         {"code", success}, {"msg", "success"}, {"data", {}}};
     ret = ret_data.dump();
     return ret;
+  } else if (mg_http_match_uri(hm, "/api/delMemberFromChatRoom")) {
+    std::wstring room_id = GetWStringParam(j_param, "chatRoomId");
+    std::vector<std::wstring> wxids = GetArrayParam(j_param, "memberIds");
+    std::vector<std::wstring> wxid_list;
+    for (unsigned int i = 0; i < wxids.size(); i++) {
+      wxid_list.push_back(wxids[i]);
+    }
+    INT64 success =
+        wxhelper::GlobalContext::GetInstance().mgr->DelMemberFromChatRoom(
+            room_id, wxid_list);
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+    ret = ret_data.dump();
+    return ret;
+  } else if (mg_http_match_uri(hm, "/api/getMemberFromChatRoom")) {
+    std::wstring room_id = GetWStringParam(j_param, "chatRoomId");
+    common::ChatRoomMemberInner member;
+    INT64 success =
+        wxhelper::GlobalContext::GetInstance().mgr->GetMemberFromChatRoom(
+            room_id, member);
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+    if (success >= 0) {
+      nlohmann::json member_info = {
+          {"admin", member.admin},
+          {"chatRoomId", member.chat_room_id},
+          {"members", member.member},
+          {"adminNickname", member.admin_nickname},
+          {"memberNickname", member.member_nickname},
+      };
+      ret_data["data"] = member_info;
+    }
+    ret = ret_data.dump();
+    return ret;
   } else {
     nlohmann::json ret_data = {
         {"code", 200}, {"data", {}}, {"msg", "not support url"}};

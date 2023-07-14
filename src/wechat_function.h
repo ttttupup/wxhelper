@@ -184,6 +184,20 @@ struct VectorInner {
   INT64 end;
 };
 
+struct ChatRoomMemberInner {
+  std::string chat_room_id;
+  std::string admin;
+  std::string admin_nickname;
+  std::string member_nickname;
+  std::string member;
+  ChatRoomMemberInner()
+      : chat_room_id(""),
+        admin(""),
+        admin_nickname(""),
+        member_nickname(""),
+        member("") {}
+};
+
 }  // namespace common
 namespace V3_9_5_81 {
 namespace function {
@@ -214,6 +228,10 @@ typedef UINT64 (*__GetChatRoomDetailInfo)(UINT64,UINT64,UINT64,UINT64);
 typedef UINT64 (*__DoAddMemberToChatRoom)(UINT64,UINT64,UINT64,UINT64);
 
 typedef UINT64 (*__DoModChatRoomMemberNickName)(UINT64,UINT64,UINT64,UINT64);
+typedef UINT64 (*__DoDelMemberFromChatRoom)(UINT64,UINT64,UINT64);
+typedef UINT64 (*__GetMemberFromChatRoom)(UINT64,UINT64,UINT64);
+typedef UINT64 (*__NewChatRoom)(UINT64);
+typedef UINT64 (*__FreeChatRoom)(UINT64);
 
 
 }  // namespace function
@@ -307,6 +325,10 @@ const UINT64 kNewChatRoomInfo = 0x12006b0;
 const UINT64 kFreeChatRoomInfo = 0x1200890;
 const UINT64 kDoAddMemberToChatRoom = 0xe63c70;
 const UINT64 kDoModChatRoomMemberNickName = 0xe6db00;
+const UINT64 kDelMemberFromChatRoom = 0xe64290;
+const UINT64 kGetMemberFromChatRoom = 0xe74de0;
+const UINT64 kNewChatRoom = 0x11fde50;
+const UINT64 kFreeChatRoom = 0x11fe030;
 }  // namespace offset
 }  // namespace V3_9_5_81
 

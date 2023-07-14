@@ -101,7 +101,7 @@ VOID CALLBACK SendHttpMsgCallback(PTP_CALLBACK_INSTANCE instance, PVOID context,
     return;
   }
   std::string jstr = j_msg.dump() + "\n";
-  // HttpClient::GetInstance().SendRequest(jstr);
+  HttpClient::GetInstance().SendRequest(jstr);
 }
 
 void HandleSyncMsg(INT64 param1, INT64 param2, INT64 param3) {
