@@ -444,4 +444,60 @@ INT64 Manager::ModChatRoomMemberNickName(const std::wstring &room_id,
       reinterpret_cast<UINT64>(self_id), reinterpret_cast<UINT64>(name));
   return success;
 }
-} // namespace wxhelper`
+
+INT64 Manager::DelMemberFromChatRoom(const std::wstring &room_id,
+                                     const std::vector<std::wstring> &members) {
+  INT64 success = -1;
+  UINT64 get_chat_room_mgr_addr = base_addr_ + offset::kChatRoomMgr;
+  UINT64 del_members_addr = base_addr_ + offset::kDelMemberFromChatRoom;
+  func::__GetChatRoomMgr get_chat_room_mgr =
+      (func::__GetChatRoomMgr)get_chat_room_mgr_addr;
+  func::__DoDelMemberFromChatRoom del_members =
+      (func::__DoDelMemberFromChatRoom)del_members_addr;
+
+  prototype::WeChatString *chat_room_id = BuildWechatString(room_id);
+  std::vector<prototype::WeChatString> member_list;
+  UINT64 temp[2] = {0};
+  common::VectorInner *list = (common::VectorInner *)&member_list;
+  INT64 members_ptr = (INT64)&list->start;
+  for (int i = 0; i < members.size(); i++) {
+    prototype::WeChatString member(members[i]);
+    member_list.push_back(member);
+  }
+  UINT64 mgr = get_chat_room_mgr();
+  success =
+      del_members(mgr, members_ptr, reinterpret_cast<UINT64>(chat_room_id));
+  return success;
+}
+
+INT64 Manager::GetMemberFromChatRoom(const std::wstring &room_id,
+                                     common::ChatRoomMemberInner &member) {
+  INT64 success = -1;
+  UINT64 get_chat_room_mgr_addr = base_addr_ + offset::kChatRoomMgr;
+  UINT64 get_members_addr = base_addr_ + offset::kGetMemberFromChatRoom;
+  UINT64 new_chat_room_addr = base_addr_ + offset::kNewChatRoom;
+  UINT64 free_chat_room_addr = base_addr_ + offset::kFreeChatRoom;
+  func::__GetChatRoomMgr get_chat_room_mgr =
+      (func::__GetChatRoomMgr)get_chat_room_mgr_addr;
+  func::__GetMemberFromChatRoom get_members =
+      (func::__GetMemberFromChatRoom)get_members_addr;
+  func::__NewChatRoom new_chat_room = (func::__NewChatRoom)new_chat_room_addr;
+  func::__FreeChatRoom free_chat_room =
+      (func::__FreeChatRoom)free_chat_room_addr;
+
+  prototype::WeChatString chat_room_id(room_id);
+  char chat_room_info[0x2E0] = {0};
+  UINT64 addr = reinterpret_cast<UINT64>(&chat_room_info);
+  new_chat_room(addr);
+
+  UINT64 mgr = get_chat_room_mgr();
+  success = get_members(mgr, reinterpret_cast<UINT64>(&chat_room_id), addr);
+  member.chat_room_id = Utils::ReadWstringThenConvert(addr + 0x10);        
+  member.admin = Utils::ReadWstringThenConvert(addr + 0x78);        
+  member.member_nickname = Utils::ReadWstringThenConvert(addr + 0x50);        
+  member.admin_nickname = Utils::ReadWstringThenConvert(addr + 0xA0);        
+  member.member = Utils::ReadWeChatStr(addr + 0x30);   
+  free_chat_room(addr);
+  return success;     
+}
+} // namespace wxhelper

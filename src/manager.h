@@ -21,6 +21,10 @@ class Manager {
   INT64 ModChatRoomMemberNickName(const std::wstring& room_id,
                                   const std::wstring& wxid,
                                   const std::wstring& nickname);
+  INT64 DelMemberFromChatRoom(const std::wstring& room_id,
+                              const std::vector<std::wstring>& members);
+  INT64 GetMemberFromChatRoom(const std::wstring& room_id,
+                              common::ChatRoomMemberInner& member);
 
  private:
   UINT64 base_addr_;
