@@ -344,6 +344,7 @@ std::vector<void *> DB::GetDbHandles() {
       msg0_db.db_name = (wchar_t *)(*(UINT64 *)(db_addr));
       msg0_db.db_name_len = *(DWORD *)(db_addr + 0x8);
       msg0_db.handle = msg0_db_addr;
+      msg0_db.extrainfo = *(UINT64 *)(*(UINT64 *)(db_addr + 0x28) + 0x1E8);
       ExecuteSQL(msg0_db_addr,
                  "select * from sqlite_master where type=\"table\";",
                  (UINT64)GetDbInfo, &msg0_db);
@@ -458,7 +459,7 @@ std::vector<std::string> DB::GetChatMsgByMsgId(ULONG64 msgid) {
   wchar_t dbname[20] = {0};
   for (int i = 0;; i++) {
     swprintf_s(dbname, L"MSG%d.db", i);
-    DWORD handle = GetDbHandleByDbName(dbname);
+    UINT64 handle = GetDbHandleByDbName(dbname);
     if (handle == 0) {
       // LOG(INFO) << "MSG db handle is null";
       return {};

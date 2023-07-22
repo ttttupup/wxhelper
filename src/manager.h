@@ -25,6 +25,8 @@ class Manager {
                               const std::vector<std::wstring>& members);
   INT64 GetMemberFromChatRoom(const std::wstring& room_id,
                               common::ChatRoomMemberInner& member);
+  INT64 SetTopMsg(ULONG64 msg_id);
+  INT64 RemoveTopMsg(const std::wstring& room_id,ULONG64 msg_id);
 
  private:
   UINT64 base_addr_;

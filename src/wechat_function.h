@@ -233,6 +233,8 @@ typedef UINT64 (*__GetMemberFromChatRoom)(UINT64,UINT64,UINT64);
 typedef UINT64 (*__NewChatRoom)(UINT64);
 typedef UINT64 (*__FreeChatRoom)(UINT64);
 
+typedef UINT64 (*__DoTopMsg)(UINT64,UINT64);
+typedef UINT64 (*__RemoveTopMsg)(UINT64,UINT64,UINT64);
 
 }  // namespace function
 namespace prototype {
@@ -329,6 +331,10 @@ const UINT64 kDelMemberFromChatRoom = 0xe64290;
 const UINT64 kGetMemberFromChatRoom = 0xe74de0;
 const UINT64 kNewChatRoom = 0x11fde50;
 const UINT64 kFreeChatRoom = 0x11fe030;
+
+const UINT64 kTopMsg = 0xa5e4f0;
+const UINT64 kRemoveTopMsg = 0xe787b0;
+
 }  // namespace offset
 }  // namespace V3_9_5_81
 
