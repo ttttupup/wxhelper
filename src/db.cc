@@ -459,7 +459,7 @@ std::vector<std::string> DB::GetChatMsgByMsgId(ULONG64 msgid) {
   wchar_t dbname[20] = {0};
   for (int i = 0;; i++) {
     swprintf_s(dbname, L"MSG%d.db", i);
-    DWORD handle = GetDbHandleByDbName(dbname);
+    UINT64 handle = GetDbHandleByDbName(dbname);
     if (handle == 0) {
       // LOG(INFO) << "MSG db handle is null";
       return {};
