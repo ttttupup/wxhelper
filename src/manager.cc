@@ -3,6 +3,7 @@
 
 #include "export.h"
 #include "wechat_function.h"
+#include "db.h"
 
 namespace offset = wxhelper::V3_9_5_81::offset;
 namespace prototype = wxhelper::V3_9_5_81::prototype;
@@ -499,5 +500,34 @@ INT64 Manager::GetMemberFromChatRoom(const std::wstring &room_id,
   member.member = Utils::ReadWeChatStr(addr + 0x30);   
   free_chat_room(addr);
   return success;     
+}
+INT64 Manager::SetTopMsg(ULONG64 msg_id) {
+  INT64 success = -1;
+  UINT64 top_addr = base_addr_ + offset::kTopMsg;
+  func::__DoTopMsg top_msg = (func::__DoTopMsg)top_addr;
+  INT64 index = 0;
+  INT64 local_id = DB::GetInstance().GetLocalIdByMsgId(msg_id, index);
+  if (local_id <= 0 || index >> 32 == 0) {
+    success = -2;
+    return success;
+  }
+  LARGE_INTEGER l;
+  l.HighPart = index >> 32;
+  l.LowPart = (DWORD)local_id;
+  UINT64 ptr = reinterpret_cast<UINT64>(&l);
+  success = top_msg(ptr, 1);
+
+  return success;
+}
+
+INT64 Manager::RemoveTopMsg(const std::wstring &room_id, ULONG64 msg_id) {
+  INT64 success = -1;
+  UINT64 remove_addr = base_addr_ + offset::kRemoveTopMsg;
+  func::__RemoveTopMsg remove_top_msg = (func::__RemoveTopMsg)remove_addr;
+  prototype::WeChatString *chat_room_id = BuildWechatString(room_id);
+  const wchar_t *w_room = room_id.c_str();
+  success = remove_top_msg(reinterpret_cast<UINT64>(w_room), msg_id,
+                           reinterpret_cast<UINT64>(chat_room_id));
+  return success;
 }
 } // namespace wxhelper

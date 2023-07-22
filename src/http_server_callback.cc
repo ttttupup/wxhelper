@@ -341,6 +341,23 @@ std::string HttpDispatch(struct mg_connection *c, struct mg_http_message *hm) {
     }
     ret = ret_data.dump();
     return ret;
+  } else if (mg_http_match_uri(hm, "/api/topMsg")) {
+    INT64 msg_id = GetINT64Param(j_param, "msgId");
+    INT64 success =
+        wxhelper::GlobalContext::GetInstance().mgr->SetTopMsg(msg_id);
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+    ret = ret_data.dump();
+    return ret;
+  } else if (mg_http_match_uri(hm, "/api/removeTopMsg")) {
+    std::wstring room_id = GetWStringParam(j_param, "chatRoomId");
+    INT64 msg_id = GetINT64Param(j_param, "msgId");
+    INT64 success =
+        wxhelper::GlobalContext::GetInstance().mgr->RemoveTopMsg(room_id,msg_id);
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+    ret = ret_data.dump();
+    return ret;
   } else {
     nlohmann::json ret_data = {
         {"code", 200}, {"data", {}}, {"msg", "not support url"}};
