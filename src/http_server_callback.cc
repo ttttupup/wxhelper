@@ -358,6 +358,28 @@ std::string HttpDispatch(struct mg_connection *c, struct mg_http_message *hm) {
         {"code", success}, {"msg", "success"}, {"data", {}}};
     ret = ret_data.dump();
     return ret;
+  } else if (mg_http_match_uri(hm, "/api/InviteMemberToChatRoom")) {
+    std::wstring room_id = GetWStringParam(j_param, "chatRoomId");
+    std::vector<std::wstring> wxids = GetArrayParam(j_param, "memberIds");
+    INT64 success =
+        wxhelper::GlobalContext::GetInstance().mgr->InviteMemberToChatRoom(
+            room_id, wxids);
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+    ret = ret_data.dump();
+    return ret;
+  } else if (mg_http_match_uri(hm, "/api/hookLog")) {
+    int success = wxhelper::hooks::HookLog();
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+    ret = ret_data.dump();
+    return ret;
+  } else if (mg_http_match_uri(hm, "/api/unhookLog")) {
+    int success = wxhelper::hooks::UnHookLog();
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+    ret = ret_data.dump();
+    return ret;
   } else {
     nlohmann::json ret_data = {
         {"code", 200}, {"data", {}}, {"msg", "not support url"}};
