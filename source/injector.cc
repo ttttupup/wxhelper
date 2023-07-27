@@ -933,7 +933,10 @@ int  InjectDll(wchar_t* szPName, wchar_t* szDllPath)
 			result = 1;
 		}
 		else
-		{
+		{	
+			DWORD dErrorCode = GetLastError();
+			printf("dll inject fail");
+			printf("error code : %d ", dErrorCode);
 			VirtualFreeEx(hProcess, lpRemoteDllBase, ulDllLength, MEM_DECOMMIT | MEM_RELEASE);
 			CloseHandle(hProcess);
 			result = 0;
@@ -941,6 +944,9 @@ int  InjectDll(wchar_t* szPName, wchar_t* szDllPath)
 	}
 	else
 	{
+		DWORD dErrorCode = GetLastError();
+		printf("dll inject fail.VirtualAllocEx method  fail.");
+		printf("error code : %d ", dErrorCode);
 		CloseHandle(hProcess);
 		result = 0;
 	}
@@ -986,6 +992,9 @@ int  InjectDllByPid(unsigned int pid, wchar_t* szDllPath)
 		}
 		else
 		{
+			DWORD dErrorCode = GetLastError();
+			printf("dll inject fail");
+			printf("error code : %d ", dErrorCode);
 			VirtualFreeEx(hProcess, lpRemoteDllBase, ulDllLength, MEM_DECOMMIT | MEM_RELEASE);
 			CloseHandle(hProcess);
 			result = 0;
@@ -993,6 +1002,9 @@ int  InjectDllByPid(unsigned int pid, wchar_t* szDllPath)
 	}
 	else
 	{
+		DWORD dErrorCode = GetLastError();
+		printf("dll inject fail.VirtualAllocEx method  fail.");
+		printf("error code : %d ", dErrorCode);
 		CloseHandle(hProcess);
 		result = 0;
 	}

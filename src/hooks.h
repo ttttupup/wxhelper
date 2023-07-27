@@ -10,6 +10,10 @@ int HookSyncMsg(std::string client_ip, int port, std::string url, uint64_t timeo
 
 int UnHookSyncMsg();
 
+int HookLog();
+
+int UnHookLog();
+
 }  // namespace hooks
 }  // namespace wxhelper
 #endif
