@@ -16,11 +16,18 @@ static int kServerPort = 19099;
 static bool kMsgHookFlag = false;
 static char kServerIp[16] = "127.0.0.1";
 static bool kEnableHttp = false;
+static bool kLogHookFlag = false;
 
 
 
 static UINT64 (*R_DoAddMsg)(UINT64, UINT64, UINT64) = (UINT64(*)(
     UINT64, UINT64, UINT64))(Utils::GetWeChatWinBase() + offset::kDoAddMsg);
+
+static UINT64 (*R_Log)(UINT64, UINT64, UINT64, UINT64, UINT64, UINT64, UINT64,
+                       UINT64, UINT64, UINT64, UINT64, UINT64) =
+    (UINT64(*)(UINT64, UINT64, UINT64, UINT64, UINT64, UINT64, UINT64, UINT64,
+               UINT64, UINT64, UINT64,
+               UINT64))(Utils::GetWeChatWinBase() + offset::kHookLog);
 
 VOID CALLBACK SendMsgCallback(PTP_CALLBACK_INSTANCE instance, PVOID context,
                              PTP_WORK Work) {
@@ -140,6 +147,26 @@ void HandleSyncMsg(INT64 param1, INT64 param2, INT64 param3) {
   R_DoAddMsg(param1,param2,param3);
 }
 
+UINT64 HandlePrintLog(UINT64 param1, UINT64 param2, UINT64 param3, UINT64 param4,
+                    UINT64 param5, UINT64 param6, UINT64 param7, UINT64 param8,
+                    UINT64 param9, UINT64 param10, UINT64 param11,
+                    UINT64 param12) {
+ UINT64 p = R_Log(param1, param2, param3, param4, param5, param6, param7, param8, param9,
+        param10, param11, param12);
+if(p== 0 || p == 1){
+  return p;
+}
+ char *msg = (char *)p;
+ if (msg != NULL) {
+  // INT64 size = *(INT64 *)(p - 0x8);
+  std::string str(msg);
+  std::wstring ws = Utils::UTF8ToWstring(str);
+  std::string out = Utils::WstringToAnsi(ws, CP_ACP);
+  spdlog::info("wechat log:{}", out);
+ }
+ return p;
+}
+
 int HookSyncMsg(std::string client_ip, int port, std::string url,
                 uint64_t timeout, bool enable) {
   if (kMsgHookFlag) {
@@ -192,6 +219,48 @@ int UnHookSyncMsg() {
     kMsgHookFlag = false;
     kEnableHttp = false;
     strcpy_s(kServerIp, "127.0.0.1");
+  }
+  return ret;
+ }
+
+ int HookLog() {
+  if (kLogHookFlag) {
+    SPDLOG_INFO("log hook already called");
+    return 2;
+  }
+ 
+  UINT64 base = Utils::GetWeChatWinBase();
+  if (!base) {
+    SPDLOG_INFO("base addr is null");
+    return -1;
+  }
+
+  DetourRestoreAfterWith();
+  DetourTransactionBegin();
+  DetourUpdateThread(GetCurrentThread());
+  UINT64 do_add_msg_addr = base + offset::kHookLog;
+  DetourAttach(&(PVOID &)R_Log, &HandlePrintLog);
+  LONG ret = DetourTransactionCommit();
+  if (ret == NO_ERROR) {
+    kMsgHookFlag = true;
+  }
+  return ret;
+ }
+
+ int UnHookLog() {
+  if (!kLogHookFlag) {
+    kLogHookFlag = false;
+    SPDLOG_INFO("hook log reset");
+    return NO_ERROR;
+  }
+  UINT64 base = Utils::GetWeChatWinBase();
+  DetourTransactionBegin();
+  DetourUpdateThread(GetCurrentThread());
+  UINT64 do_add_msg_addr = base + offset::kHookLog;
+  DetourDetach(&(PVOID &)R_Log, &HandlePrintLog);
+  LONG ret = DetourTransactionCommit();
+  if (ret == NO_ERROR) {
+    kLogHookFlag = false;
   }
   return ret;
  }

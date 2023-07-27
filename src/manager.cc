@@ -530,4 +530,26 @@ INT64 Manager::RemoveTopMsg(const std::wstring &room_id, ULONG64 msg_id) {
                            reinterpret_cast<UINT64>(chat_room_id));
   return success;
 }
+
+INT64 Manager::InviteMemberToChatRoom(const std::wstring &room_id,
+                                      const std::vector<std::wstring> &wxids) {
+  INT64 success = -1;
+  UINT64 invite_addr = base_addr_ + offset::kInviteMember;
+  func::__InviteMemberToChatRoom invite =
+      (func::__InviteMemberToChatRoom)invite_addr;
+  const wchar_t *w_room = room_id.c_str();
+  prototype::WeChatString *chat_room_id = BuildWechatString(room_id);
+  std::vector<prototype::WeChatString> wxid_list;
+  common::VectorInner *list = (common::VectorInner *)&wxid_list;
+  INT64 head = (INT64)&list->start;
+  for (int i = 0; i < wxids.size(); i++) {
+    prototype::WeChatString id(wxids[i]);
+    wxid_list.push_back(id);
+  }
+  UINT64 temp[2] = {0};
+  success = invite(reinterpret_cast<UINT64>(w_room), head,
+                   reinterpret_cast<UINT64>(chat_room_id),
+                   reinterpret_cast<UINT64>(&temp));
+  return success;
+}
 } // namespace wxhelper
