@@ -380,6 +380,14 @@ std::string HttpDispatch(struct mg_connection *c, struct mg_http_message *hm) {
         {"code", success}, {"msg", "success"}, {"data", {}}};
     ret = ret_data.dump();
     return ret;
+  } else if (mg_http_match_uri(hm, "/api/createChatRoom")) {
+    std::vector<std::wstring> wxids = GetArrayParam(j_param, "memberIds");
+    INT64 success =
+        wxhelper::GlobalContext::GetInstance().mgr->CreateChatRoom(wxids);
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+    ret = ret_data.dump();
+    return ret;
   } else {
     nlohmann::json ret_data = {
         {"code", 200}, {"data", {}}, {"msg", "not support url"}};
