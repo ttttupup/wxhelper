@@ -552,4 +552,25 @@ INT64 Manager::InviteMemberToChatRoom(const std::wstring &room_id,
                    reinterpret_cast<UINT64>(&temp));
   return success;
 }
+
+INT64 Manager::CreateChatRoom(const std::vector<std::wstring>& wxids){
+  INT64 success = -1;
+  UINT64 get_chat_room_mgr_addr = base_addr_ + offset::kChatRoomMgr;
+  UINT64 create_chat_room_addr = base_addr_ + offset::kCreateChatRoom;
+  func::__GetChatRoomMgr get_chat_room_mgr =
+      (func::__GetChatRoomMgr)get_chat_room_mgr_addr;
+  func::__CreateChatRoom create_chat_room =
+      (func::__CreateChatRoom)create_chat_room_addr;
+  std::vector<prototype::WeChatString> wxid_list;
+  common::VectorInner *list = (common::VectorInner *)&wxid_list;
+  INT64 head = (INT64)&list->start;
+  for (int i = 0; i < wxids.size(); i++) {
+    prototype::WeChatString id(wxids[i]);
+    wxid_list.push_back(id);
+  }
+  INT64 end = list->end;
+  UINT64 mgr = get_chat_room_mgr();
+  success = create_chat_room(mgr, head, end);
+  return success;
+}
 } // namespace wxhelper
