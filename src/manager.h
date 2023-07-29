@@ -29,6 +29,7 @@ class Manager {
   INT64 RemoveTopMsg(const std::wstring& room_id,ULONG64 msg_id);
   INT64 InviteMemberToChatRoom(const std::wstring& room_id,
                                const std::vector<std::wstring>& wxids);
+  INT64 CreateChatRoom(const std::vector<std::wstring>& wxids);
 
  private:
   UINT64 base_addr_;
