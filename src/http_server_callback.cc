@@ -7,9 +7,18 @@
 #include "db.h"
 
 #define STR2LL(str) (wxhelper::Utils::IsDigit(str) ? stoll(str) : 0)
+#define STR2I(str) (wxhelper::Utils::IsDigit(str) ? stoi(str) : 0)
 namespace common = wxhelper::common;
 
-
+int GetIntParam(nlohmann::json data, std::string key) {
+  int result;
+  try {
+    result = data[key].get<int>();
+  } catch (nlohmann::json::exception) {
+    result = STR2I(data[key].get<std::string>());
+  }
+  return result;
+}
 
 INT64 GetINT64Param(nlohmann::json data, std::string key) {
   INT64 result;
@@ -164,8 +173,17 @@ std::string HttpDispatch(struct mg_connection *c, struct mg_http_message *hm) {
     ret = ret_data.dump();
     return ret;
   } else if (mg_http_match_uri(hm, "/api/hookSyncMsg")) {
+    int port = GetIntParam(j_param, "port");
+    std::string ip = GetStringParam(j_param, "ip");
+    int enable = GetIntParam(j_param, "enableHttp");
+    std::string url = "";
+    int timeout = 0;
+    if (enable) {
+      url = GetStringParam(j_param, "url");
+      timeout = GetIntParam(j_param, "timeout");
+    }
     INT64 success =
-        wxhelper::hooks::HookSyncMsg("127.0.0.1", 19099, "", 3000, false);
+        wxhelper::hooks::HookSyncMsg(ip, port, url, timeout, false);
     nlohmann::json ret_data = {
         {"code", success}, {"data", {}}, {"msg", "success"}};
     ret = ret_data.dump();
