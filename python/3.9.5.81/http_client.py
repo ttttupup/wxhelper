@@ -274,6 +274,36 @@ def createChatRoom():
     response = requests.request("POST", url, headers=headers, data=payload)
     print(response.text)
 
+def quitChatRoom():
+    print("modify chatRoomId  ")
+    raise RuntimeError("modify chatRoomId then deleted me")
+    url = "127.0.0.1:19088/api/quitChatRoom"
+
+    payload = json.dumps({
+    "chatRoomId": "123@chatroom"
+    })
+    headers = {
+    'Content-Type': 'application/json'
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+    print(response.text)
+
+def forwardMsg():
+    print("modify msgId  ")
+    raise RuntimeError("modify msgId then deleted me")
+    url = "127.0.0.1:19088/api/forwardMsg"
+
+    payload = json.dumps({
+    "wxid": "filehelper",
+    "msgId": "12331"
+    })
+    headers = {
+    'Content-Type': 'application/json'
+    }
+    response = requests.request("POST", url, headers=headers, data=payload)
+    print(response.text)
+
 
 if __name__ == '__main__':
     checkLogin()
