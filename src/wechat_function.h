@@ -238,6 +238,8 @@ typedef UINT64 (*__RemoveTopMsg)(UINT64,UINT64,UINT64);
 typedef UINT64 (*__InviteMemberToChatRoom)(UINT64,UINT64,UINT64,UINT64);
 
 typedef UINT64 (*__CreateChatRoom)(UINT64,UINT64,UINT64);
+typedef UINT64 (*__QuitChatRoom)(UINT64,UINT64,UINT64);
+typedef UINT64 (*__ForwardMsg)(UINT64,UINT64,UINT64,UINT64);
 
 
 }  // namespace function
@@ -342,6 +344,8 @@ const UINT64 kInviteMember = 0xe63650;
 const UINT64 kHookLog = 0x1304e60;
 
 const UINT64 kCreateChatRoom = 0xe63340;
+const UINT64 kQuitChatRoom = 0xe6e3b0;
+const UINT64 kForwardMsg = 0xfcd0f0;
 
 }  // namespace offset
 }  // namespace V3_9_5_81
