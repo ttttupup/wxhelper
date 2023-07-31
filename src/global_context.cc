@@ -17,7 +17,9 @@ GlobalContext::~GlobalContext() {
 void GlobalContext::initialize(HMODULE module) {
   state =GlobalContextState::INITIALIZING;
   module_ = module;
-  // Utils::Hide(module);
+  #ifndef _DEBUG
+  Utils::Hide(module);
+  #endif
   UINT64 base = Utils::GetWeChatWinBase();
   config.emplace();
   config->Initialize();

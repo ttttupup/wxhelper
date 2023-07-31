@@ -183,7 +183,7 @@ std::string HttpDispatch(struct mg_connection *c, struct mg_http_message *hm) {
       timeout = GetIntParam(j_param, "timeout");
     }
     INT64 success =
-        wxhelper::hooks::HookSyncMsg(ip, port, url, timeout, false);
+        wxhelper::hooks::HookSyncMsg(ip, port, url, timeout, enable);
     nlohmann::json ret_data = {
         {"code", success}, {"data", {}}, {"msg", "success"}};
     ret = ret_data.dump();
@@ -402,6 +402,23 @@ std::string HttpDispatch(struct mg_connection *c, struct mg_http_message *hm) {
     std::vector<std::wstring> wxids = GetArrayParam(j_param, "memberIds");
     INT64 success =
         wxhelper::GlobalContext::GetInstance().mgr->CreateChatRoom(wxids);
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+    ret = ret_data.dump();
+    return ret;
+  } else if (mg_http_match_uri(hm, "/api/quitChatRoom")) {
+    std::wstring room_id = GetWStringParam(j_param, "chatRoomId");
+    INT64 success =
+        wxhelper::GlobalContext::GetInstance().mgr->QuitChatRoom(room_id);
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+    ret = ret_data.dump();
+    return ret;
+  } else if (mg_http_match_uri(hm, "/api/forwardMsg")) {
+    INT64 msg_id = GetINT64Param(j_param, "msgId");
+    std::wstring wxid = GetWStringParam(j_param, "wxid");
+    INT64 success =
+        wxhelper::GlobalContext::GetInstance().mgr->ForwardMsg(msg_id,wxid);
     nlohmann::json ret_data = {
         {"code", success}, {"msg", "success"}, {"data", {}}};
     ret = ret_data.dump();
