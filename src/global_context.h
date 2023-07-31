@@ -24,13 +24,6 @@ class GlobalContext : public Singleton<GlobalContext> {
   std::unique_ptr<HttpServer> http_server;
   std::unique_ptr<Manager> mgr;
 
-  // std::optional<ContactMgr> contact_mgr;
-  // std::optional<MiscMgr> misc_mgr;
-  // std::optional<SendMessageMgr> send_mgr;
-  // std::optional<AccountMgr> account_mgr;
-  // std::optional<ChatRoomMgr> chat_room_mgr;
-  // std::optional<SNSMgr> sns_mgr;
-
   GlobalContextState state = GlobalContextState::NOT_INITIALIZED;
 
  private:

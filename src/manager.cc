@@ -573,4 +573,34 @@ INT64 Manager::CreateChatRoom(const std::vector<std::wstring>& wxids){
   success = create_chat_room(mgr, head, end);
   return success;
 }
+INT64 Manager::QuitChatRoom(const std::wstring &room_id) {
+  INT64 success = -1;
+  UINT64 get_chat_room_mgr_addr = base_addr_ + offset::kChatRoomMgr;
+  UINT64 quit_chat_room_addr = base_addr_ + offset::kQuitChatRoom;
+  func::__GetChatRoomMgr get_chat_room_mgr =
+      (func::__GetChatRoomMgr)get_chat_room_mgr_addr;
+  func::__QuitChatRoom quit_chat_room =
+      (func::__QuitChatRoom)quit_chat_room_addr;
+  UINT64 mgr = get_chat_room_mgr();
+  prototype::WeChatString chat_room_id(room_id);
+  success = quit_chat_room(mgr, reinterpret_cast<UINT64>(&chat_room_id), 0);
+  return success;
+}
+INT64 Manager::ForwardMsg(UINT64 msg_id, const std::wstring &wxid) {
+  INT64 success = -1;
+  UINT64 forward_addr = base_addr_ + offset::kForwardMsg;
+  func::__ForwardMsg forward_msg = (func::__ForwardMsg)forward_addr;
+  INT64 index = 0;
+  INT64 local_id = DB::GetInstance().GetLocalIdByMsgId(msg_id, index);
+  if (local_id <= 0 || index >> 32 == 0) {
+    success = -2;
+    return success;
+  }
+  LARGE_INTEGER l;
+  l.HighPart = index >> 32;
+  l.LowPart = (DWORD)local_id;
+  prototype::WeChatString *recv = BuildWechatString(wxid);
+  success = forward_msg(reinterpret_cast<UINT64>(recv), l.QuadPart, 0x4, 0x0);
+  return success;
+}
 } // namespace wxhelper
