@@ -18,6 +18,8 @@ static char kServerIp[16] = "127.0.0.1";
 static bool kEnableHttp = false;
 static bool kLogHookFlag = false;
 
+static bool kSnsFinishHookFlag = false;
+
 
 
 static UINT64 (*R_DoAddMsg)(UINT64, UINT64, UINT64) = (UINT64(*)(
@@ -28,6 +30,10 @@ static UINT64 (*R_Log)(UINT64, UINT64, UINT64, UINT64, UINT64, UINT64, UINT64,
     (UINT64(*)(UINT64, UINT64, UINT64, UINT64, UINT64, UINT64, UINT64, UINT64,
                UINT64, UINT64, UINT64,
                UINT64))(Utils::GetWeChatWinBase() + offset::kHookLog);
+
+static UINT64 (*R_OnSnsTimeLineSceneFinish)(UINT64, UINT64, UINT64) =
+    (UINT64(*)(UINT64, UINT64, UINT64))(Utils::GetWeChatWinBase() +
+                                        offset::kOnSnsTimeLineSceneFinish);
 
 VOID CALLBACK SendMsgCallback(PTP_CALLBACK_INSTANCE instance, PVOID context,
                              PTP_WORK Work) {
@@ -167,6 +173,39 @@ if(p== 0 || p == 1){
  return p;
 }
 
+void HandleSNSMsg(INT64 param1, INT64 param2, INT64 param3) {
+ nlohmann::json j_sns;
+ INT64 begin_addr = *(INT64 *)(param2 + 0x30);
+ INT64 end_addr = *(INT64 *)(param2 + 0x38);
+ if (begin_addr == 0) {
+  j_sns = {{"data", nlohmann::json::array()}};
+ } else {
+  while (begin_addr < end_addr) {
+    nlohmann::json j_item;
+    j_item["snsId"] = *(UINT64 *)(begin_addr);
+    j_item["createTime"] = *(DWORD *)(begin_addr + 0x38);
+    j_item["senderId"] = Utils::ReadWstringThenConvert(begin_addr + 0x18);
+    j_item["content"] = Utils::ReadWstringThenConvert(begin_addr + 0x48);
+    j_item["xml"] = Utils::ReadWstringThenConvert(begin_addr + 0x580);
+    j_sns["data"].push_back(j_item);
+    begin_addr += 0x11E0;
+  }
+ }
+ std::string jstr = j_sns.dump() + '\n';
+ common::InnerMessageStruct *inner_msg = new common::InnerMessageStruct;
+ inner_msg->buffer = new char[jstr.size() + 1];
+ memcpy(inner_msg->buffer, jstr.c_str(), jstr.size() + 1);
+ inner_msg->length = jstr.size();
+ if (kEnableHttp) {
+  bool add = ThreadPool::GetInstance().AddWork(SendHttpMsgCallback, inner_msg);
+  SPDLOG_INFO("hook sns add http msg work:{}", add);
+ } else {
+  bool add = ThreadPool::GetInstance().AddWork(SendMsgCallback, inner_msg);
+  SPDLOG_INFO("hook sns add msg work:{}", add);
+ }
+ R_OnSnsTimeLineSceneFinish(param1, param2, param3);
+}
+
 int HookSyncMsg(std::string client_ip, int port, std::string url,
                 uint64_t timeout, bool enable) {
   if (kMsgHookFlag) {
@@ -189,15 +228,23 @@ int HookSyncMsg(std::string client_ip, int port, std::string url,
     return -1;
   }
 
-  DetourRestoreAfterWith();
+  // DetourRestoreAfterWith();
   DetourTransactionBegin();
   DetourUpdateThread(GetCurrentThread());
-  UINT64 do_add_msg_addr = base + offset::kDoAddMsg;
   DetourAttach(&(PVOID&)R_DoAddMsg, &HandleSyncMsg);
   LONG ret = DetourTransactionCommit();
   if(ret == NO_ERROR){
     kMsgHookFlag = true;
   }
+  SPDLOG_INFO("hook sync {}",ret);
+  DetourTransactionBegin();
+  DetourUpdateThread(GetCurrentThread());
+  DetourAttach(&(PVOID&)R_OnSnsTimeLineSceneFinish, &HandleSNSMsg);
+  ret = DetourTransactionCommit();
+  if(ret == NO_ERROR){
+    kSnsFinishHookFlag = true;
+  }
+  SPDLOG_INFO("hook sns {}",ret);
   return ret;
 }
 
@@ -212,7 +259,6 @@ int UnHookSyncMsg() {
   UINT64 base = Utils::GetWeChatWinBase();
   DetourTransactionBegin();
   DetourUpdateThread(GetCurrentThread());
-  UINT64 do_add_msg_addr = base + offset::kDoAddMsg;
   DetourDetach(&(PVOID&)R_DoAddMsg, &HandleSyncMsg);
   LONG ret = DetourTransactionCommit();
   if (ret == NO_ERROR) {
@@ -235,7 +281,7 @@ int UnHookSyncMsg() {
     return -1;
   }
 
-  DetourRestoreAfterWith();
+  // DetourRestoreAfterWith();
   DetourTransactionBegin();
   DetourUpdateThread(GetCurrentThread());
   UINT64 do_add_msg_addr = base + offset::kHookLog;

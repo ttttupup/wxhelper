@@ -603,4 +603,30 @@ INT64 Manager::ForwardMsg(UINT64 msg_id, const std::wstring &wxid) {
   success = forward_msg(reinterpret_cast<UINT64>(recv), l.QuadPart, 0x4, 0x0);
   return success;
 }
+
+INT64 Manager::GetSNSFirstPage() {
+  INT64 success = -1;
+  UINT64 sns_data_mgr_addr = base_addr_ + offset::kSNSDataMgr;
+  UINT64 sns_first_page_addr = base_addr_ + offset::kSNSGetFirstPage;
+  func::__GetSNSDataMgr sns_data_mgr = (func::__GetSNSDataMgr)sns_data_mgr_addr;
+  func::__GetSNSFirstPage sns_first_page =
+      (func::__GetSNSFirstPage)sns_first_page_addr;
+  UINT64 mgr = sns_data_mgr();
+  INT64 buff[16] = {0};
+  success = sns_first_page(mgr, reinterpret_cast<UINT64>(&buff), 1);
+  return success;
+}
+
+INT64 Manager::GetSNSNextPage(UINT64 sns_id) {
+  INT64 success = -1;
+  UINT64 time_line_mgr_addr = base_addr_ + offset::kSNSTimeLineMgr;
+  UINT64 sns_next_page_addr = base_addr_ + offset::kSNSGetNextPageScene;
+  func::__GetSnsTimeLineMgr time_line_mgr =
+      (func::__GetSnsTimeLineMgr)time_line_mgr_addr;
+  func::__GetSNSNextPageScene sns_next_page =
+      (func::__GetSNSNextPageScene)sns_next_page_addr;
+  UINT64 mgr = time_line_mgr();
+  success = sns_next_page(mgr, sns_id);
+  return success;
+}
 } // namespace wxhelper
