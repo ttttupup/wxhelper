@@ -304,6 +304,63 @@ def forwardMsg():
     response = requests.request("POST", url, headers=headers, data=payload)
     print(response.text)
 
+def getSNSFirstPage():
+    url = "127.0.0.1:19088/api/getSNSFirstPage"
+
+    payload = {}
+    headers = {}
+    response = requests.request("POST", url, headers=headers, data=payload)
+    print(response.text)
+
+def getSNSNextPage():
+    print("modify snsId  ")
+    raise RuntimeError("modify snsId then deleted me")
+    url = "127.0.0.1:19088/api/getSNSNextPage"
+
+    payload = json.dumps({
+    "snsId": ""
+    })
+    headers = {
+    'Content-Type': 'application/json'
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+
+    print(response.text)
+
+def addFavFromMsg():
+    print("modify msgId  ")
+    raise RuntimeError("modify msgId then deleted me")
+    url = "127.0.0.1:19088/api/addFavFromMsg"
+
+    payload = json.dumps({
+    "msgId": "1222222"
+    })
+    headers = {
+    'Content-Type': 'application/json'
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+
+    print(response.text)
+    
+def addFavFromImage():
+    print("modify wxid imagePath ")
+    raise RuntimeError("modify wxid  imagePath then deleted me")
+    url = "127.0.0.1:19088/api/addFavFromImage"
+
+    payload = json.dumps({
+    "wxid": "",
+    "imagePath": ""
+    })
+    headers = {
+    'Content-Type': 'application/json'
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+
+    print(response.text)
+
 
 if __name__ == '__main__':
     checkLogin()

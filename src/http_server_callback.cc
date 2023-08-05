@@ -450,6 +450,23 @@ std::string HttpDispatch(struct mg_connection *c, struct mg_http_message *hm) {
         {"code", success}, {"msg", "success"}, {"data", {}}};
     ret = ret_data.dump();
     return ret;
+  } else if (mg_http_match_uri(hm, "/api/addFavFromMsg")) {
+    UINT64 msg_id = GetUINT64Param(j_param, "msgId");
+    INT64 success =
+        wxhelper::GlobalContext::GetInstance().mgr->AddFavFromMsg(msg_id);
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+    ret = ret_data.dump();
+    return ret;
+  } else if (mg_http_match_uri(hm, "/api/addFavFromImage")) {
+    std::wstring wxid = GetWStringParam(j_param, "wxid");
+    std::wstring image_path = GetWStringParam(j_param, "imagePath");
+    INT64 success = wxhelper::GlobalContext::GetInstance().mgr->AddFavFromImage(
+        wxid, image_path);
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+    ret = ret_data.dump();
+    return ret;
   } else {
     nlohmann::json ret_data = {
         {"code", 200}, {"data", {}}, {"msg", "not support url"}};
