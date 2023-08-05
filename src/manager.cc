@@ -603,4 +603,84 @@ INT64 Manager::ForwardMsg(UINT64 msg_id, const std::wstring &wxid) {
   success = forward_msg(reinterpret_cast<UINT64>(recv), l.QuadPart, 0x4, 0x0);
   return success;
 }
+
+INT64 Manager::GetSNSFirstPage() {
+  INT64 success = -1;
+  UINT64 sns_data_mgr_addr = base_addr_ + offset::kSNSDataMgr;
+  UINT64 sns_first_page_addr = base_addr_ + offset::kSNSGetFirstPage;
+  func::__GetSNSDataMgr sns_data_mgr = (func::__GetSNSDataMgr)sns_data_mgr_addr;
+  func::__GetSNSFirstPage sns_first_page =
+      (func::__GetSNSFirstPage)sns_first_page_addr;
+  UINT64 mgr = sns_data_mgr();
+  INT64 buff[16] = {0};
+  success = sns_first_page(mgr, reinterpret_cast<UINT64>(&buff), 1);
+  return success;
+}
+
+INT64 Manager::GetSNSNextPage(UINT64 sns_id) {
+  INT64 success = -1;
+  UINT64 time_line_mgr_addr = base_addr_ + offset::kSNSTimeLineMgr;
+  UINT64 sns_next_page_addr = base_addr_ + offset::kSNSGetNextPageScene;
+  func::__GetSnsTimeLineMgr time_line_mgr =
+      (func::__GetSnsTimeLineMgr)time_line_mgr_addr;
+  func::__GetSNSNextPageScene sns_next_page =
+      (func::__GetSNSNextPageScene)sns_next_page_addr;
+  UINT64 mgr = time_line_mgr();
+  success = sns_next_page(mgr, sns_id);
+  return success;
+}
+
+INT64 Manager::AddFavFromMsg(UINT64 msg_id) {
+  INT64 success = -1;
+  UINT64 get_chat_mgr_addr = base_addr_ + offset::kGetChatMgr;
+  UINT64 get_by_local_id_addr = base_addr_ + offset::kGetMgrByPrefixLocalId;
+  UINT64 add_fav_addr = base_addr_ + offset::kAddFavFromMsg;
+  UINT64 get_favorite_mgr_addr = base_addr_ + offset::kGetFavoriteMgr;
+  UINT64 free_chat_msg_addr = base_addr_ + offset::kFreeChatMsg;
+  func::__GetMgrByPrefixLocalId get_by_local_id = (func::__GetMgrByPrefixLocalId)get_by_local_id_addr;
+  UINT64 new_chat_msg_addr = base_addr_ + offset::kChatMsgInstanceCounter;
+
+  func::__AddFavFromMsg add_fav = (func::__AddFavFromMsg)add_fav_addr;
+  func::__GetChatMgr get_chat_mgr = (func::__GetChatMgr)get_chat_mgr_addr;
+  func::__GetFavoriteMgr get_favorite_mgr = (func::__GetFavoriteMgr)get_favorite_mgr_addr;
+  func::__FreeChatMsg free_chat_msg = (func::__FreeChatMsg)free_chat_msg_addr;
+  func::__NewChatMsg new_chat_msg = (func::__NewChatMsg)new_chat_msg_addr;
+
+  INT64 index = 0;
+  INT64 local_id = DB::GetInstance().GetLocalIdByMsgId(msg_id, index);
+  if (local_id <= 0 || index >> 32 == 0) {
+    success = -2;
+    return success;
+  }
+  char chat_msg[0x460]= {0};
+  LARGE_INTEGER l;
+  l.HighPart = index >> 32;
+  l.LowPart = (DWORD)local_id;
+  UINT64 p_chat_msg = new_chat_msg(reinterpret_cast<UINT64>(&chat_msg));
+
+  get_chat_mgr();
+  get_by_local_id(l.QuadPart,p_chat_msg);
+  UINT64 mgr = get_favorite_mgr();
+  success = add_fav(mgr,p_chat_msg);
+  free_chat_msg(p_chat_msg);
+  return success;
+}
+
+INT64 Manager::AddFavFromImage(const std::wstring &wxid,
+                               const std::wstring &image_path) {
+  INT64 success = -1;
+  UINT64 get_favorite_mgr_addr = base_addr_ + offset::kGetFavoriteMgr;
+  UINT64 add_fav_from_image_addr = base_addr_ + offset::kAddFavFromImage;
+  prototype::WeChatString *send_id = BuildWechatString(wxid);
+  prototype::WeChatString *path = BuildWechatString(image_path);
+  func::__GetFavoriteMgr get_favorite_mgr =
+      (func::__GetFavoriteMgr)get_favorite_mgr_addr;
+  func::__AddFavFromImage add_fav_from_image =
+      (func::__AddFavFromImage)add_fav_from_image_addr;
+  UINT64 mgr = get_favorite_mgr();
+  success = add_fav_from_image(mgr, reinterpret_cast<UINT64>(path),
+                               reinterpret_cast<UINT64>(send_id));
+  return success;
+}
+
 } // namespace wxhelper

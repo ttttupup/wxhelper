@@ -241,6 +241,17 @@ typedef UINT64 (*__CreateChatRoom)(UINT64,UINT64,UINT64);
 typedef UINT64 (*__QuitChatRoom)(UINT64,UINT64,UINT64);
 typedef UINT64 (*__ForwardMsg)(UINT64,UINT64,UINT64,UINT64);
 
+typedef UINT64 (*__GetSNSFirstPage)(UINT64,UINT64,UINT64);
+typedef UINT64 (*__GetSNSNextPageScene)(UINT64,UINT64);
+
+typedef UINT64 (*__GetSNSDataMgr)();
+typedef UINT64 (*__GetSnsTimeLineMgr)();
+typedef UINT64 (*__GetMgrByPrefixLocalId)(UINT64,UINT64);
+typedef UINT64 (*__AddFavFromMsg)(UINT64,UINT64);
+typedef UINT64 (*__GetChatMgr)();
+typedef UINT64 (*__GetFavoriteMgr)();
+typedef UINT64 (*__AddFavFromImage)(UINT64,UINT64,UINT64);
+
 
 }  // namespace function
 namespace prototype {
@@ -346,6 +357,17 @@ const UINT64 kHookLog = 0x1304e60;
 const UINT64 kCreateChatRoom = 0xe63340;
 const UINT64 kQuitChatRoom = 0xe6e3b0;
 const UINT64 kForwardMsg = 0xfcd0f0;
+
+const UINT64 kOnSnsTimeLineSceneFinish = 0x1a73150;
+const UINT64 kSNSGetFirstPage = 0x1a51dd0;
+const UINT64 kSNSGetNextPageScene = 0x1a77240;
+const UINT64 kSNSDataMgr = 0xeebda0;
+const UINT64 kSNSTimeLineMgr = 0x19e83a0;
+const UINT64 kGetMgrByPrefixLocalId = 0xe4add0;
+const UINT64 kAddFavFromMsg = 0x1601520;
+const UINT64 kGetChatMgr = 0x8f0400;
+const UINT64 kGetFavoriteMgr = 0x8c69b0;
+const UINT64 kAddFavFromImage = 0x160b920;
 
 }  // namespace offset
 }  // namespace V3_9_5_81

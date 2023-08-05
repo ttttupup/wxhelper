@@ -32,6 +32,11 @@ class Manager {
   INT64 CreateChatRoom(const std::vector<std::wstring>& wxids);
   INT64 QuitChatRoom(const std::wstring& room_id);
   INT64 ForwardMsg(UINT64 msg_id, const std::wstring& wxid);
+  INT64 GetSNSFirstPage();
+  INT64 GetSNSNextPage(UINT64 sns_id);
+  INT64 AddFavFromMsg(UINT64 msg_id);
+  INT64 AddFavFromImage(const std::wstring& wxid,
+                        const std::wstring& image_path);
 
  private:
   UINT64 base_addr_;

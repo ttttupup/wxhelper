@@ -6,6 +6,8 @@
 #include "hooks.h"
 #include "db.h"
 
+
+#define STR2ULL(str) (wxhelper::Utils::IsDigit(str) ? stoull(str) : 0)
 #define STR2LL(str) (wxhelper::Utils::IsDigit(str) ? stoll(str) : 0)
 #define STR2I(str) (wxhelper::Utils::IsDigit(str) ? stoi(str) : 0)
 namespace common = wxhelper::common;
@@ -26,6 +28,16 @@ INT64 GetINT64Param(nlohmann::json data, std::string key) {
     result = data[key].get<INT64>();
   } catch (nlohmann::json::exception) {
     result = STR2LL(data[key].get<std::string>());
+  }
+  return result;
+}
+
+INT64 GetUINT64Param(nlohmann::json data, std::string key) {
+  UINT64 result;
+  try {
+    result = data[key].get<UINT64>();
+  } catch (nlohmann::json::exception) {
+    result = STR2ULL(data[key].get<std::string>());
   }
   return result;
 }
@@ -419,6 +431,38 @@ std::string HttpDispatch(struct mg_connection *c, struct mg_http_message *hm) {
     std::wstring wxid = GetWStringParam(j_param, "wxid");
     INT64 success =
         wxhelper::GlobalContext::GetInstance().mgr->ForwardMsg(msg_id,wxid);
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+    ret = ret_data.dump();
+    return ret;
+  } else if (mg_http_match_uri(hm, "/api/getSNSFirstPage")) {
+    INT64 success =
+        wxhelper::GlobalContext::GetInstance().mgr->GetSNSFirstPage();
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+    ret = ret_data.dump();
+    return ret;
+  } else if (mg_http_match_uri(hm, "/api/getSNSNextPage")) {
+    UINT64 snsid = GetUINT64Param(j_param, "snsId");
+    INT64 success =
+        wxhelper::GlobalContext::GetInstance().mgr->GetSNSNextPage(snsid);
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+    ret = ret_data.dump();
+    return ret;
+  } else if (mg_http_match_uri(hm, "/api/addFavFromMsg")) {
+    UINT64 msg_id = GetUINT64Param(j_param, "msgId");
+    INT64 success =
+        wxhelper::GlobalContext::GetInstance().mgr->AddFavFromMsg(msg_id);
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+    ret = ret_data.dump();
+    return ret;
+  } else if (mg_http_match_uri(hm, "/api/addFavFromImage")) {
+    std::wstring wxid = GetWStringParam(j_param, "wxid");
+    std::wstring image_path = GetWStringParam(j_param, "imagePath");
+    INT64 success = wxhelper::GlobalContext::GetInstance().mgr->AddFavFromImage(
+        wxid, image_path);
     nlohmann::json ret_data = {
         {"code", success}, {"msg", "success"}, {"data", {}}};
     ret = ret_data.dump();
