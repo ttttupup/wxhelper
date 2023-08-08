@@ -683,4 +683,104 @@ INT64 Manager::AddFavFromImage(const std::wstring &wxid,
   return success;
 }
 
+INT64 Manager::SendAtText(const std::wstring &room_id,
+                          const std::vector<std::wstring> &wxids,
+                          const std::wstring &msg) {
+  INT64 success = -1;
+  std::vector<prototype::WeChatString> wxid_list;
+  common::VectorInner *list = (common::VectorInner *)&wxid_list;
+  std::wstring at_msg = L"";
+  int number = 0;
+  for (unsigned int i = 0; i < wxids.size(); i++) {
+    std::wstring nickname;
+    std::wstring at_all = L"notify@all";
+    if (at_all.compare(wxids[i]) == 0 ) {
+      nickname = L"所有人";
+    } else {
+      nickname = GetContactOrChatRoomNickname(wxids[i]);
+    }
+    if (nickname.length() == 0) {
+      continue;
+    }
+    prototype::WeChatString id(wxids[i]);
+    wxid_list.push_back(id);
+    at_msg = at_msg + L"@" + nickname + L" ";
+    number++;
+  }
+  if (number < 1) {
+    return success;
+  }
+  at_msg += msg;
+
+  INT64 head = (INT64)&list->start;
+  prototype::WeChatString to_user(room_id);
+  prototype::WeChatString text_msg(at_msg);
+  UINT64 send_message_mgr_addr = base_addr_ + offset::kGetSendMessageMgr;
+  UINT64 send_text_msg_addr = base_addr_ + offset::kSendTextMsg;
+  UINT64 free_chat_msg_addr = base_addr_ + offset::kFreeChatMsg;
+  char chat_msg[0x460] = {0};
+  func::__GetSendMessageMgr mgr;
+  mgr = (func::__GetSendMessageMgr)send_message_mgr_addr;
+  func::__SendTextMsg send;
+  send = (func::__SendTextMsg)send_text_msg_addr;
+  func::__FreeChatMsg free;
+  free = (func::__FreeChatMsg)free_chat_msg_addr;
+  mgr();
+  success = send(reinterpret_cast<UINT64>(&chat_msg),
+                 reinterpret_cast<UINT64>(&to_user),
+                 reinterpret_cast<UINT64>(&text_msg), head, 1, 1, 0, 0);
+  free(reinterpret_cast<UINT64>(&chat_msg));
+  return success;
+}
+
+std::wstring Manager::GetContactOrChatRoomNickname(const std::wstring &wxid) {
+  prototype::WeChatString to_user(wxid);
+  UINT64 get_contact_mgr_addr = base_addr_ + offset::kGetContactMgr;
+  UINT64 new_contact_addr = base_addr_ + offset::kNewContact;
+  UINT64 get_contact_addr = base_addr_ + offset::kGetContact;
+  UINT64 free_contact_addr = base_addr_ + offset::kFreeContact;
+  func::__GetContactMgr get_contact_mgr =
+      (func::__GetContactMgr)get_contact_mgr_addr;
+  func::__GetContact get_contact = (func::__GetContact)get_contact_addr;
+  func::__NewContact new_contact = (func::__NewContact)new_contact_addr;
+  func::__FreeContact free_contact = (func::__FreeContact)free_contact_addr;
+  char buff[0x6A9] = {0};
+  UINT64 contact = new_contact(reinterpret_cast<UINT64>(&buff));
+  UINT64 mgr = get_contact_mgr();
+  INT64 success = get_contact(mgr, reinterpret_cast<UINT64>(&to_user), contact);
+  if (success == 1) {
+    std::wstring nickname = Utils::ReadWstring(contact + 0xA0);
+    free_contact(contact);
+    return nickname;
+  } else {
+    free_contact(contact);
+    return L"";
+  }
+}
+
+INT64 Manager::GetContactByWxid(const std::wstring &wxid,
+                                common::ContactProfileInner &profile) {
+  INT64 success = -1;
+  prototype::WeChatString to_user(wxid);
+  UINT64 get_contact_mgr_addr = base_addr_ + offset::kGetContactMgr;
+  UINT64 new_contact_addr = base_addr_ + offset::kNewContact;
+  UINT64 get_contact_addr = base_addr_ + offset::kGetContact;
+  UINT64 free_contact_addr = base_addr_ + offset::kFreeContact;
+  func::__GetContactMgr get_contact_mgr =
+      (func::__GetContactMgr)get_contact_mgr_addr;
+  func::__GetContact get_contact = (func::__GetContact)get_contact_addr;
+  func::__NewContact new_contact = (func::__NewContact)new_contact_addr;
+  func::__FreeContact free_contact = (func::__FreeContact)free_contact_addr;
+  char buff[0x6A9] = {0};
+  UINT64 contact = new_contact(reinterpret_cast<UINT64>(&buff));
+  UINT64 mgr = get_contact_mgr();
+  success = get_contact(mgr, reinterpret_cast<UINT64>(&to_user), contact);
+   profile.wxid =  Utils::ReadWstringThenConvert(contact + 0x10);
+  profile.account = Utils::ReadWstringThenConvert(contact + 0x30);
+  profile.v3 = Utils::ReadWstringThenConvert(contact + 0x50);
+  profile.nickname =  Utils::ReadWstringThenConvert(contact +  0xA0);
+  profile.head_image = Utils::ReadWstringThenConvert(contact +  0x188);
+  free_contact(contact);
+  return success;
+}
 } // namespace wxhelper
