@@ -484,7 +484,7 @@ std::string HttpDispatch(struct mg_connection *c, struct mg_http_message *hm) {
   } else if (mg_http_match_uri(hm, "/api/getContactProfile")) {
     std::wstring wxid = GetWStringParam(j_param, "wxid");
     common::ContactProfileInner profile;
-    int success = wxhelper::GlobalContext::GetInstance().mgr->GetContactByWxid(
+    INT64 success = wxhelper::GlobalContext::GetInstance().mgr->GetContactByWxid(
         wxid, profile);
     nlohmann::json ret_data = {
         {"code", success}, {"msg", "success"}, {"data", {}}};
