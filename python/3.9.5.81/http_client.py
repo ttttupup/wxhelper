@@ -361,6 +361,40 @@ def addFavFromImage():
 
     print(response.text)
 
+def getContactProfile():
+    print("modify wxid  ")
+    raise RuntimeError("modify wxid   then deleted me")
+    url = "127.0.0.1:19088/api/getContactProfile"
+
+    payload = json.dumps({
+    "wxid": ""
+    })
+    headers = {
+    'Content-Type': 'application/json'
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+    print(response.text)
+
+
+def sendAtText():
+        print("modify wxids  chatRoomId")
+    raise RuntimeError("modify wxids   chatRoomId then deleted me")
+    url = "127.0.0.1:19088/api/sendAtText"
+
+    payload = json.dumps({
+    "wxids": "notify@all",
+    "chatRoomId": "123@chatroom",
+    "msg": "你好啊"
+    })
+    headers = {
+    'Content-Type': 'application/json'
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+
+    print(response.text)
+
 
 if __name__ == '__main__':
     checkLogin()
