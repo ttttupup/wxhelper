@@ -37,6 +37,12 @@ class Manager {
   INT64 AddFavFromMsg(UINT64 msg_id);
   INT64 AddFavFromImage(const std::wstring& wxid,
                         const std::wstring& image_path);
+  INT64 SendAtText(const std::wstring& room_id,
+                   const std::vector<std::wstring>& wxids,
+                   const std::wstring& msg);
+  std::wstring GetContactOrChatRoomNickname(const std::wstring& wxid);
+  INT64 GetContactByWxid(const std::wstring& wxid,
+                         common::ContactProfileInner& profile);
 
  private:
   UINT64 base_addr_;
