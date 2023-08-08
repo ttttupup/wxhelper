@@ -198,6 +198,16 @@ struct ChatRoomMemberInner {
         member("") {}
 };
 
+struct ContactProfileInner {
+  std::string wxid;
+  std::string account;
+  std::string v3;
+  std::string nickname;
+  std::string head_image;
+  ContactProfileInner()
+      : wxid(""), account(""), v3(""), nickname(""), head_image("") {}
+};
+
 }  // namespace common
 namespace V3_9_5_81 {
 namespace function {
@@ -251,6 +261,9 @@ typedef UINT64 (*__AddFavFromMsg)(UINT64,UINT64);
 typedef UINT64 (*__GetChatMgr)();
 typedef UINT64 (*__GetFavoriteMgr)();
 typedef UINT64 (*__AddFavFromImage)(UINT64,UINT64,UINT64);
+typedef UINT64 (*__GetContact)(UINT64,UINT64,UINT64);
+typedef UINT64 (*__NewContact)(UINT64);
+typedef UINT64 (*__FreeContact)(UINT64);
 
 
 }  // namespace function
@@ -368,6 +381,9 @@ const UINT64 kAddFavFromMsg = 0x1601520;
 const UINT64 kGetChatMgr = 0x8f0400;
 const UINT64 kGetFavoriteMgr = 0x8c69b0;
 const UINT64 kAddFavFromImage = 0x160b920;
+const UINT64 kGetContact = 0xEA5F90;
+const UINT64 kNewContact = 0x1212e40;
+const UINT64 kFreeContact = 0x12134e0;
 
 }  // namespace offset
 }  // namespace V3_9_5_81
