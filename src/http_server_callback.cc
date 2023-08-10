@@ -484,8 +484,9 @@ std::string HttpDispatch(struct mg_connection *c, struct mg_http_message *hm) {
   } else if (mg_http_match_uri(hm, "/api/getContactProfile")) {
     std::wstring wxid = GetWStringParam(j_param, "wxid");
     common::ContactProfileInner profile;
-    INT64 success = wxhelper::GlobalContext::GetInstance().mgr->GetContactByWxid(
-        wxid, profile);
+    INT64 success =
+        wxhelper::GlobalContext::GetInstance().mgr->GetContactByWxid(wxid,
+                                                                     profile);
     nlohmann::json ret_data = {
         {"code", success}, {"msg", "success"}, {"data", {}}};
     if (success == 1) {
@@ -498,15 +499,75 @@ std::string HttpDispatch(struct mg_connection *c, struct mg_http_message *hm) {
     }
     ret = ret_data.dump();
     return ret;
-
-    } else {
-      nlohmann::json ret_data = {
-          {"code", 200}, {"data", {}}, {"msg", "not support url"}};
-      ret = ret_data.dump();
-      return ret;
-    }
-  nlohmann::json ret_data = {
-      {"code", 200}, {"data", {}}, {"msg", "unreachable code."}};
-  ret = ret_data.dump();
-  return ret;
+  } else if (mg_http_match_uri(hm, "/api/downloadAttach")) {
+    UINT64 msg_id = GetUINT64Param(j_param, "msgId");
+    INT64 success =
+        wxhelper::GlobalContext::GetInstance().mgr->DoDownloadTask(msg_id);
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+    ret = ret_data.dump();
+    return ret;
+ } else if (mg_http_match_uri(hm, "/api/forwardPublicMsg")) {
+    std::wstring wxid = GetWStringParam(j_param, "wxid");
+    std::wstring appname = GetWStringParam(j_param, "appName");
+    std::wstring username = GetWStringParam(j_param, "userName");
+    std::wstring title = GetWStringParam(j_param, "title");
+    std::wstring url = GetWStringParam(j_param, "url");
+    std::wstring thumburl = GetWStringParam(j_param, "thumbUrl");
+    std::wstring digest = GetWStringParam(j_param, "digest");
+    INT64 success =
+        wxhelper::GlobalContext::GetInstance().mgr->ForwardPublicMsg(
+            wxid, title, url, thumburl, username, appname, digest);
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+    ret = ret_data.dump();
+    return ret;
+ } else if (mg_http_match_uri(hm, "/api/forwardPublicMsgByMsgId")) {
+    std::wstring wxid = GetWStringParam(j_param, "wxid");
+    UINT64 msg_id = GetUINT64Param(j_param, "msgId");
+    INT64 success =
+        wxhelper::GlobalContext::GetInstance().mgr->ForwardPublicMsgByMsgId(
+            wxid, msg_id);
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+    ret = ret_data.dump();
+    return ret;
+ } else if (mg_http_match_uri(hm, "/api/decodeImage")) {
+    std::wstring file_path = GetWStringParam(j_param, "filePath");
+    std::wstring store_dir = GetWStringParam(j_param, "storeDir");
+    INT64 success = wxhelper::GlobalContext::GetInstance().mgr->DecodeImage(
+        file_path, store_dir);
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+    ret = ret_data.dump();
+    return ret;
+ } else if (mg_http_match_uri(hm, "/api/getVoiceByMsgId")) {
+    UINT64 msg_id = GetUINT64Param(j_param, "msgId");
+    std::wstring store_dir = GetWStringParam(j_param, "storeDir");
+    INT64 success = wxhelper::GlobalContext::GetInstance().mgr->GetVoiceByDB(
+        msg_id, store_dir);
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+    ret = ret_data.dump();
+    return ret;
+ } else if (mg_http_match_uri(hm, "/api/sendCustomEmotion")) {
+    std::wstring wxid = GetWStringParam(j_param, "wxid");
+    std::wstring file_path = GetWStringParam(j_param, "filePath");
+    INT64 success =
+        wxhelper::GlobalContext::GetInstance().mgr->SendCustomEmotion(file_path,
+                                                                      wxid);
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+    ret = ret_data.dump();
+    return ret;
+ } else {
+    nlohmann::json ret_data = {
+        {"code", 200}, {"data", {}}, {"msg", "not support url"}};
+    ret = ret_data.dump();
+    return ret;
+ }
+ nlohmann::json ret_data = {
+     {"code", 200}, {"data", {}}, {"msg", "unreachable code."}};
+ ret = ret_data.dump();
+ return ret;
 }
