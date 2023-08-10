@@ -112,7 +112,7 @@ struct SqlResult {
 
 struct InnerMessageStruct {
   char *buffer;
-  int length;
+  INT64 length;
   ~InnerMessageStruct() {
     if (this->buffer != NULL) {
       delete[] this->buffer;
@@ -264,6 +264,16 @@ typedef UINT64 (*__AddFavFromImage)(UINT64,UINT64,UINT64);
 typedef UINT64 (*__GetContact)(UINT64,UINT64,UINT64);
 typedef UINT64 (*__NewContact)(UINT64);
 typedef UINT64 (*__FreeContact)(UINT64);
+typedef UINT64 (*__NewMMReaderItem)(UINT64);
+typedef UINT64 (*__FreeMMReaderItem)(UINT64);
+typedef UINT64 (*__ForwordPublicMsg)(UINT64,UINT64,UINT64);
+typedef UINT64 (*__NewAppMsgInfo)(UINT64);
+typedef UINT64 (*__FreeAppMsgInfo)(UINT64);
+typedef UINT64 (*__ParseAppMsgXml)(UINT64,UINT64,UINT64);
+typedef UINT64 (*__GetPreDownLoadMgr)();
+typedef UINT64 (*__PushAttachTask)(UINT64,UINT64,UINT64,UINT64);
+typedef UINT64 (*__GetCustomSmileyMgr)();
+typedef UINT64 (*__SendCustomEmotion)(UINT64,UINT64,UINT64,UINT64,UINT64,UINT64,UINT64,UINT64);
 
 
 }  // namespace function
@@ -384,6 +394,16 @@ const UINT64 kAddFavFromImage = 0x160b920;
 const UINT64 kGetContact = 0xEA5F90;
 const UINT64 kNewContact = 0x1212e40;
 const UINT64 kFreeContact = 0x12134e0;
+const UINT64 kNewMMReaderItem = 0x8c79a0;
+const UINT64 kFreeMMReaderItem = 0x8c6da0;
+const UINT64 kForwordPublicMsg = 0xddc6c0;
+const UINT64 kParseAppMsgXml = 0x11b0a70;
+const UINT64 kNewAppMsgInfo = 0x91a550;
+const UINT64 kFreeAppMsgInfo = 0x8fd1a0;
+const UINT64 kGetPreDownLoadMgr = 0x9996f0;
+const UINT64 kPushAttachTask = 0x9c0080;
+const UINT64 kGetCustomSmileyMgr = 0x915c00;
+const UINT64 kSendCustomEmotion = 0xec0a40;
 
 }  // namespace offset
 }  // namespace V3_9_5_81

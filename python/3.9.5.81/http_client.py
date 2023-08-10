@@ -378,7 +378,7 @@ def getContactProfile():
 
 
 def sendAtText():
-        print("modify wxids  chatRoomId")
+    print("modify wxids  chatRoomId")
     raise RuntimeError("modify wxids   chatRoomId then deleted me")
     url = "127.0.0.1:19088/api/sendAtText"
 
@@ -395,6 +395,98 @@ def sendAtText():
 
     print(response.text)
 
+def forwardPublicMsg():
+    print("modify param ")
+    raise RuntimeError("modify param then deleted me")
+    url = "127.0.0.1:19088/api/forwardPublicMsg"
+
+    payload = json.dumps({
+    "appName": "",
+    "userName": "",
+    "title": "",
+    "url": "",
+    "thumbUrl": "",
+    "digest": "",
+    "wxid": "filehelper"
+    })
+    headers = {
+    'Content-Type': 'application/json'
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+
+    print(response.text)
+
+def forwardPublicMsgByMsgId():
+    print("modify param ")
+    raise RuntimeError("modify param then deleted me")
+    url = "127.0.0.1:19088/api/forwardPublicMsgByMsgId"
+
+    payload = json.dumps({
+    "msgId": 123,
+    "wxid": "filehelper"
+    })
+    headers = {
+    'Content-Type': 'application/json'
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+
+    print(response.text)
+
+def downloadAttach():
+    print("modify param ")
+    raise RuntimeError("modify param then deleted me")
+    url = "127.0.0.1:19088/api/downloadAttach"
+
+    payload = json.dumps({
+    "msgId": 123
+    })
+    headers = {
+    'Content-Type': 'application/json'
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+
+    print(response.text)
+
+
+def decodeImage():
+    print("modify param ")
+    raise RuntimeError("modify param then deleted me")
+    url = "127.0.0.1:19088/api/decodeImage"
+
+    payload = json.dumps({
+    "filePath": "C:\\66664816980131.dat",
+    "storeDir": "C:\\test"
+    })
+    headers = {
+    'Content-Type': 'application/json'
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+
+    print(response.text)
+
+
+def getVoiceByMsgId():
+    print("modify param ")
+    raise RuntimeError("modify param then deleted me")
+    url = "127.0.0.1:19088/api/getVoiceByMsgId"
+
+    payload = json.dumps({
+    "msgId": 7880439644200,
+    "storeDir": "c:\\test"
+    })
+    headers = {
+    'Content-Type': 'application/json'
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+
+    print(response.text)
+
+    
 
 if __name__ == '__main__':
     checkLogin()

@@ -319,4 +319,83 @@ std::string Utils::ReadWstringThenConvert(INT64 addr){
   std::wstring wstr = ReadWstring(addr);
   return WstringToUTF8(wstr);
 }
+
+INT64 Utils::DecodeImage(const wchar_t* file_path,const wchar_t* save_dir){
+  std::wstring save_path(save_dir);
+  std::wstring orign_file_path(file_path);
+  if (!Utils::FindOrCreateDirectoryW(save_path.c_str())) {
+    return 0;
+  }
+
+  INT64 pos_begin = orign_file_path.find_last_of(L"\\") + 1;
+  INT64 pos_end = orign_file_path.find_last_of(L".");
+  std::wstring file_name =
+      orign_file_path.substr(pos_begin, pos_end - pos_begin);
+  HANDLE h_origin_file =
+      CreateFileW(file_path, GENERIC_READ, 0, NULL, OPEN_EXISTING,
+                  FILE_ATTRIBUTE_NORMAL, NULL);
+  char buffer[BUFSIZE] = {0};
+  DWORD bytes_read = 0;
+  DWORD bytes_write = 0;
+  unsigned char magic_head[4] = {0};
+  std::wstring suffix;
+  short key = 0;
+  if (ReadFile(h_origin_file, buffer, BUFSIZE, &bytes_read, NULL)) {
+    memcpy(magic_head, buffer, 3);
+  } else {
+    CloseHandle(h_origin_file);
+    return 0;
+  }
+  if ((magic_head[0] ^ JPEG0) == (magic_head[1] ^ JPEG1)) {
+    key = magic_head[0] ^ JPEG0;
+    suffix = L".jpg";
+  } else if ((magic_head[0] ^ PNG1) == (magic_head[1] ^ PNG2)) {
+    key = magic_head[0] ^ PNG1;
+    suffix = L".png";
+  } else if ((magic_head[0] ^ GIF0) == (magic_head[1] ^ GIF1)) {
+    key = magic_head[0] ^ GIF0;
+    suffix = L".gif";
+  } else if ((magic_head[0] ^ BMP0) == (magic_head[1] ^ BMP1)) {
+    key = magic_head[0] ^ BMP0;
+    suffix = L".bmp";
+  } else {
+    key = -1;
+    suffix = L".dat";
+  }
+  std::wstring save_img_path = save_path + L"\\" + file_name + suffix;
+  HANDLE save_img = CreateFileW(save_img_path.c_str(), GENERIC_ALL, 0, NULL,
+                                CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+  if (save_img == INVALID_HANDLE_VALUE) {
+    return 0;
+  }
+  if (key > 0) {
+    for (unsigned int i = 0; i < bytes_read; i++) {
+      buffer[i] ^= key;
+    }
+  }
+  if (!WriteFile(save_img, (LPCVOID)buffer, bytes_read, &bytes_write, 0)) {
+    CloseHandle(h_origin_file);
+    CloseHandle(save_img);
+    return 0;
+  }
+
+  do {
+    if (ReadFile(h_origin_file, buffer, BUFSIZE, &bytes_read, NULL)) {
+      if (key > 0) {
+        for (unsigned int i = 0; i < bytes_read; i++) {
+          buffer[i] ^= key;
+        }
+      }
+      if (!WriteFile(save_img, (LPCVOID)buffer, bytes_read, &bytes_write, 0)) {
+        CloseHandle(h_origin_file);
+        CloseHandle(save_img);
+        return 0;
+      }
+    }
+  } while (bytes_read == BUFSIZE);
+  CloseHandle(h_origin_file);
+  CloseHandle(save_img);
+  return 1;
+}
+
 }  // namespace wxhelper
