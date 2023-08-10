@@ -4,6 +4,9 @@
 #include "export.h"
 #include "wechat_function.h"
 #include "db.h"
+#include "lz4.h"
+#include "base64.h"
+#include "tinyxml2.h"
 
 namespace offset = wxhelper::V3_9_5_81::offset;
 namespace prototype = wxhelper::V3_9_5_81::prototype;
@@ -781,6 +784,315 @@ INT64 Manager::GetContactByWxid(const std::wstring &wxid,
   profile.nickname =  Utils::ReadWstringThenConvert(contact +  0xA0);
   profile.head_image = Utils::ReadWstringThenConvert(contact +  0x188);
   free_contact(contact);
+  return success;
+}
+
+INT64 Manager::DoDownloadTask(UINT64 msg_id) {
+  INT64 success = -1;
+  UINT64 get_by_local_id_addr = base_addr_ + offset::kGetMgrByPrefixLocalId;
+  func::__GetMgrByPrefixLocalId get_by_local_id =
+      (func::__GetMgrByPrefixLocalId)get_by_local_id_addr;
+
+  UINT64 get_chat_mgr_addr = base_addr_ + offset::kGetChatMgr;
+  func::__GetChatMgr get_chat_mgr = (func::__GetChatMgr)get_chat_mgr_addr;
+
+  UINT64 free_chat_msg_addr = base_addr_ + offset::kFreeChatMsg;
+  func::__FreeChatMsg free_chat_msg = (func::__FreeChatMsg)free_chat_msg_addr;
+
+  UINT64 new_chat_msg_addr = base_addr_ + offset::kChatMsgInstanceCounter;
+  func::__NewChatMsg new_chat_msg = (func::__NewChatMsg)new_chat_msg_addr;
+
+  UINT64 get_current_data_path_addr = base_addr_ + offset::kGetCurrentDataPath;
+  func::__GetCurrentDataPath GetCurrentDataPath =
+      (func::__GetCurrentDataPath)get_current_data_path_addr;
+
+  UINT64 new_app_msg_info_addr = base_addr_ + offset::kNewAppMsgInfo;
+  func::__NewAppMsgInfo new_app_msg_info =
+      (func::__NewAppMsgInfo)new_app_msg_info_addr;
+
+  UINT64 free_app_msg_info_addr = base_addr_ + offset::kFreeAppMsgInfo;
+  func::__FreeAppMsgInfo free_app_msg_info =
+      (func::__NewAppMsgInfo)free_app_msg_info_addr;
+
+  UINT64 xml_to_app_info_addr = base_addr_ + offset::kParseAppMsgXml;
+  func::__ParseAppMsgXml xml_to_app_info =
+      (func::__ParseAppMsgXml)xml_to_app_info_addr;
+
+  UINT64 get_pre_download_mgr_addr = base_addr_ + offset::kGetPreDownLoadMgr;
+  func::__GetPreDownLoadMgr get_pre_download_mgr =
+      (func::__GetPreDownLoadMgr)get_pre_download_mgr_addr;
+
+  UINT64 push_attach_task_addr = base_addr_ + offset::kPushAttachTask;
+  func::__PushAttachTask push_attach_task =
+      (func::__PushAttachTask)push_attach_task_addr;
+
+  INT64 index = 0;
+  INT64 local_id = DB::GetInstance().GetLocalIdByMsgId(msg_id, index);
+  if (local_id <= 0 || index >> 32 == 0) {
+    success = -2;
+    return success;
+  }
+  char *chat_msg = Utils::WxHeapAlloc<char>(0x460);
+  LARGE_INTEGER l;
+  l.HighPart = index >> 32;
+  l.LowPart = (DWORD)local_id;
+  UINT64 p_chat_msg = new_chat_msg(reinterpret_cast<UINT64>(chat_msg));
+
+  get_chat_mgr();
+  get_by_local_id(l.QuadPart, p_chat_msg);
+
+  std::wstring save_path = L"";
+  std::wstring thumb_path = L"";
+
+  prototype::WeChatString current_data_path;
+  GetCurrentDataPath(reinterpret_cast<ULONG_PTR>(&current_data_path));
+
+  if (current_data_path.length > 0) {
+    save_path += current_data_path.ptr;
+    save_path += L"wxhelper";
+  } else {
+    return -1;
+  }
+
+  if (!Utils::FindOrCreateDirectoryW(save_path.c_str())) {
+    return -3;
+  }
+  INT64 type = *(INT64 *)(chat_msg + 0x38);
+  wchar_t *content = *(wchar_t **)(chat_msg + 0x88);
+  DWORD len = *(DWORD *)(chat_msg + 0x94);
+  std::wstring tmp_content(content, len);
+  prototype::WeChatString *we_content = BuildWechatString(tmp_content);
+
+  switch (type) {
+    case 0x3: {
+      save_path += L"\\image";
+      if (!Utils::FindOrCreateDirectoryW(save_path.c_str())) {
+        return -3;
+      }
+      thumb_path = save_path + L"\\" + std::to_wstring(msg_id) + L"_t.dat";
+      save_path = save_path + L"\\" + std::to_wstring(msg_id) + L".dat";
+      break;
+    }
+    case 0x3E:
+    case 0x2B: {
+      save_path += L"\\video";
+      if (!Utils::FindOrCreateDirectoryW(save_path.c_str())) {
+        return -3;
+      }
+      thumb_path = save_path + L"\\" + std::to_wstring(msg_id) + L".jpg";
+      save_path = save_path + L"\\" + std::to_wstring(msg_id) + L".mp4";
+
+      break;
+    }
+    case 0x31: {
+      save_path += L"\\file";
+      if (!Utils::FindOrCreateDirectoryW(save_path.c_str())) {
+        return -3;
+      }
+      char *p_xml_app_msg = Utils::WxHeapAlloc<char>(0x3000);
+      UINT64 xml_msg =
+          new_app_msg_info(reinterpret_cast<UINT64>(p_xml_app_msg));
+      UINT64 result =
+          xml_to_app_info(xml_msg, reinterpret_cast<UINT64>(we_content), 1);
+      if (result != 1) {
+        return -4;
+      }
+      std::wstring file_name = Utils::ReadWstring(xml_msg + 0x70);
+      save_path =
+          save_path + L"\\" + std::to_wstring(msg_id) + L"_" + file_name;
+      free_app_msg_info(xml_msg);
+      break;
+    }
+    default:
+      break;
+  }
+  prototype::WeChatString *we_save_path = BuildWechatString(save_path);
+  prototype::WeChatString *we_thumb_path = BuildWechatString(thumb_path);
+  int temp = 1;
+  memcpy(chat_msg + 0x280, we_thumb_path, sizeof(prototype::WeChatString));
+  memcpy(chat_msg + 0x2A0, we_save_path, sizeof(prototype::WeChatString));
+  memcpy(chat_msg + 0x40C, &temp, sizeof(temp));
+  UINT64 mgr = get_pre_download_mgr();
+  success = push_attach_task(mgr, p_chat_msg, 0, 1);
+  free_chat_msg(p_chat_msg);
+
+  return success;
+}
+
+INT64 Manager::ForwardPublicMsg(const std::wstring &wxid,
+                                const std::wstring &title,
+                                const std::wstring &url,
+                                const std::wstring &thumb_url,
+                                const std::wstring &sender_id,
+                                const std::wstring &sender_name,
+                                const std::wstring &digest) {
+  INT64 success = -1;
+  UINT64 new_item_addr = base_addr_ + offset::kNewMMReaderItem;
+  func::__NewMMReaderItem new_item = (func::__NewMMReaderItem)new_item_addr;
+
+  UINT64 free_item_addr = base_addr_ + offset::kFreeMMReaderItem;
+  func::__FreeMMReaderItem free_item = (func::__FreeMMReaderItem)free_item_addr;
+
+  UINT64 get_app_msg_mgr_addr = base_addr_ + offset::kGetAppMsgMgr;
+  func::__GetAppMsgMgr get_app_mgr = (func::__GetAppMsgMgr)get_app_msg_mgr_addr;
+
+  UINT64 forward_public_msg_addr = base_addr_ + offset::kForwordPublicMsg;
+  func::__ForwordPublicMsg forward_public_msg =
+      (func::__ForwordPublicMsg)forward_public_msg_addr;
+
+  char *p_item = Utils::WxHeapAlloc<char>(0x3E4);
+  new_item(reinterpret_cast<UINT64>(p_item));
+  prototype::WeChatString *to_user = BuildWechatString(wxid);
+  prototype::WeChatString *p_title = BuildWechatString(title);
+  prototype::WeChatString *p_url = BuildWechatString(url);
+  prototype::WeChatString *p_thumburl = BuildWechatString(thumb_url);
+  prototype::WeChatString *p_sender_id = BuildWechatString(sender_id);
+  prototype::WeChatString *p_name = BuildWechatString(sender_name);
+  prototype::WeChatString *p_digest = BuildWechatString(digest);
+
+  memcpy(p_item + 0x8, p_title, sizeof(prototype::WeChatString));
+  memcpy(p_item + 0x48, p_url, sizeof(prototype::WeChatString));
+  memcpy(p_item + 0xB0, p_thumburl, sizeof(prototype::WeChatString));
+  memcpy(p_item + 0xF0, p_digest, sizeof(prototype::WeChatString));
+  memcpy(p_item + 0x2A0, p_sender_id, sizeof(prototype::WeChatString));
+  memcpy(p_item + 0x2C0, p_name, sizeof(prototype::WeChatString));
+  memcpy(p_item + 0x2C0, p_name, sizeof(prototype::WeChatString));
+
+  UINT64 mgr = get_app_mgr();
+  success = forward_public_msg(mgr, reinterpret_cast<UINT64>(to_user),
+                               reinterpret_cast<UINT64>(p_item));
+  free_item(reinterpret_cast<UINT64>(p_item));
+  return success;
+}
+
+INT64 Manager::ForwardPublicMsgByMsgId(const std::wstring &wxid,
+                                       UINT64 msg_id) {
+  INT64 success = -1;
+  std::string compress_content =
+      DB::GetInstance().GetPublicMsgCompressContentByMsgId(msg_id);
+  if (compress_content.empty()) {
+    SPDLOG_INFO("Get compressContent is null from PublicMsg.db");
+    return -3;
+  }
+
+  std::string decode = base64_decode(compress_content);
+  size_t len = decode.size();
+  const char *src = decode.c_str();
+  size_t dst_len = (len << 8);
+  char *dst = new char[dst_len];
+
+  int decompress_len = LZ4_decompress_safe_partial(
+      src, dst, static_cast<int>(len), static_cast<int>(dst_len), static_cast<int>(dst_len));
+  if (decompress_len < 0) {
+    SPDLOG_INFO("decompress content size :{}", decompress_len);
+    return -1;
+  }
+  tinyxml2::XMLDocument doc;
+  if (doc.Parse(dst, decompress_len - 1) != 0) {
+    SPDLOG_INFO("tinyxml2 parse error");
+    return -2;
+  }
+  const char *title = doc.FirstChildElement("msg")
+                          ->FirstChildElement("appmsg")
+                          ->FirstChildElement("title")
+                          ->GetText();
+  const char *digest = doc.FirstChildElement("msg")
+                           ->FirstChildElement("appmsg")
+                           ->FirstChildElement("des")
+                           ->GetText();
+
+  const char *url = doc.FirstChildElement("msg")
+                        ->FirstChildElement("appmsg")
+                        ->FirstChildElement("mmreader")
+                        ->FirstChildElement("category")
+                        ->FirstChildElement("item")
+                        ->FirstChildElement("url")
+                        ->GetText();
+  const char *thumb_url = doc.FirstChildElement("msg")
+                              ->FirstChildElement("appmsg")
+                              ->FirstChildElement("thumburl")
+                              ->GetText();
+  const char *user_name = doc.FirstChildElement("msg")
+                              ->FirstChildElement("appmsg")
+                              ->FirstChildElement("mmreader")
+                              ->FirstChildElement("publisher")
+                              ->FirstChildElement("username")
+                              ->GetText();
+
+  const char *nickname = doc.FirstChildElement("msg")
+                             ->FirstChildElement("appmsg")
+                             ->FirstChildElement("mmreader")
+                             ->FirstChildElement("publisher")
+                             ->FirstChildElement("nickname")
+                             ->GetText();
+
+  std::string s_title(title);
+  std::string s_digest(digest);
+  std::string s_url(url);
+  std::string s_thumburl(thumb_url);
+  std::string s_user_name(user_name);
+  std::string s_nickname(nickname);
+
+  std::wstring ws_title = Utils::UTF8ToWstring(s_title);
+  std::wstring ws_digest = Utils::UTF8ToWstring(s_digest);
+  std::wstring ws_url = Utils::UTF8ToWstring(s_url);
+  std::wstring ws_thumb_url = Utils::UTF8ToWstring(s_thumburl);
+  std::wstring ws_user_name = Utils::UTF8ToWstring(s_user_name);
+  std::wstring ws_nickname = Utils::UTF8ToWstring(s_nickname);
+  success = ForwardPublicMsg(wxid, ws_title, ws_url, ws_thumb_url, ws_user_name,
+                             ws_nickname, ws_digest);
+  return success;
+}
+
+INT64 Manager::DecodeImage(const std::wstring &file_path, const std::wstring &save_dir) {
+  return Utils::DecodeImage(file_path.c_str(), save_dir.c_str());
+}
+
+INT64 Manager::GetVoiceByDB(ULONG64 msg_id, const std::wstring& dir) {
+  INT64 success = -1;
+  std::string buff = DB::GetInstance().GetVoiceBuffByMsgId(msg_id);
+  if (buff.size() == 0) {
+    success = 0;
+    return success;
+  }
+  std::wstring save_path = dir;
+  if (!Utils::FindOrCreateDirectoryW(save_path.c_str())) {
+    success = -2;
+    return success;
+  }
+  save_path = save_path + L"\\" + std::to_wstring(msg_id) + L".amr";
+  HANDLE file_handle = CreateFileW(save_path.c_str(), GENERIC_ALL, 0, NULL,
+                                   CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+  if (file_handle == INVALID_HANDLE_VALUE) {
+    SPDLOG_ERROR("GetVoiceByDB save path invalid");
+    return success;
+  }
+  DWORD bytes_write = 0;
+  std::string decode = base64_decode(buff);
+  WriteFile(file_handle, (LPCVOID)decode.c_str(), static_cast<DWORD>(decode.size()) , &bytes_write, 0);
+  CloseHandle(file_handle);
+  success = 1;
+  return success;
+}
+
+INT64 Manager::SendCustomEmotion(const std::wstring &file_path,
+                                 const std::wstring &wxid) {
+  INT64 success = -1;
+  UINT64 get_custom_smiley_mgr_addr = base_addr_ + offset::kGetCustomSmileyMgr;
+  func::__GetCustomSmileyMgr get_custom_smiley_mgr =
+      (func::__GetCustomSmileyMgr)get_custom_smiley_mgr_addr;
+  UINT64 send_custom_emotion_addr = base_addr_ + offset::kSendCustomEmotion;
+  func::__SendCustomEmotion send_custom_emotion =
+      (func::__SendCustomEmotion)send_custom_emotion_addr;
+  prototype::WeChatString *path = BuildWechatString(file_path);
+  prototype::WeChatString *recv = BuildWechatString(wxid);
+  INT64 *temp = Utils::WxHeapAlloc<INT64>(0x20);
+  memset(temp, 0, 0x20);
+  UINT64 mgr = get_custom_smiley_mgr();
+  success = send_custom_emotion(
+      mgr, reinterpret_cast<UINT64>(path), reinterpret_cast<UINT64>(temp),
+      reinterpret_cast<UINT64>(recv), 2, reinterpret_cast<UINT64>(temp), 0,
+      reinterpret_cast<UINT64>(temp));
   return success;
 }
 } // namespace wxhelper

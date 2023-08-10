@@ -78,7 +78,7 @@ VOID CALLBACK SendMsgCallback(PTP_CALLBACK_INSTANCE instance, PVOID context,
     goto clean;
   }
   char recv_buf[1024] = {0};
-  ret = send(client_socket, jstr.c_str(), jstr.size(), 0);
+  ret = send(client_socket, jstr.c_str(), static_cast<int>(jstr.size()) , 0);
   if (ret < 0) {
     SPDLOG_ERROR("socket send  fail ,ret:{}", ret);
     goto clean;
@@ -125,9 +125,10 @@ void HandleSyncMsg(INT64 param1, INT64 param2, INT64 param3) {
   msg["toUser"] = Utils::ReadSKBuiltinString(*(INT64 *)(param2 + 0x28));
   msg["content"] = Utils::ReadSKBuiltinString(*(INT64 *)(param2 + 0x30));
   msg["signature"] = Utils::ReadWeChatStr(*(INT64 *)(param2 + 0x48));
-  msg["msgId"] = *(INT64 *)(param2 + 0x58);
-  msg["msgSequence"] = *(DWORD *)(param2 + 0x20);
-  msg["fromUserName"] = Utils::ReadWeChatStr(*(INT64 *)(param2 + 0x50));
+  msg["msgId"] = *(INT64 *)(param2 + 0x60);
+  msg["msgSequence"] = *(DWORD *)(param2 + 0x5C);
+  msg["createTime"] = *(DWORD *)(param2 + 0x58);
+  msg["displayFullContent"] = Utils::ReadWeChatStr(*(INT64 *)(param2 + 0x50));
   DWORD type = *(DWORD *)(param2 + 0x24);
   msg["type"] = type;
   if (type == 3) {
@@ -195,7 +196,7 @@ void HandleSNSMsg(INT64 param1, INT64 param2, INT64 param3) {
  common::InnerMessageStruct *inner_msg = new common::InnerMessageStruct;
  inner_msg->buffer = new char[jstr.size() + 1];
  memcpy(inner_msg->buffer, jstr.c_str(), jstr.size() + 1);
- inner_msg->length = jstr.size();
+ inner_msg->length =  jstr.size();
  if (kEnableHttp) {
   bool add = ThreadPool::GetInstance().AddWork(SendHttpMsgCallback, inner_msg);
   SPDLOG_INFO("hook sns add http msg work:{}", add);
@@ -288,7 +289,7 @@ int UnHookSyncMsg() {
   DetourAttach(&(PVOID &)R_Log, &HandlePrintLog);
   LONG ret = DetourTransactionCommit();
   if (ret == NO_ERROR) {
-    kMsgHookFlag = true;
+    kLogHookFlag = true;
   }
   return ret;
  }

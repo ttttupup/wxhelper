@@ -34,7 +34,7 @@ namespace wxhelper {
     }
    
     // Send request
-    int content_length = data.post_data.size();
+    size_t content_length = data.post_data.size();
     mg_printf(c,
               "POST %s HTTP/1.0\r\n"
               "Host: %.*s\r\n"

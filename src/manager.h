@@ -43,6 +43,19 @@ class Manager {
   std::wstring GetContactOrChatRoomNickname(const std::wstring& wxid);
   INT64 GetContactByWxid(const std::wstring& wxid,
                          common::ContactProfileInner& profile);
+  INT64 DoDownloadTask(UINT64 msg_id);
+  INT64 ForwardPublicMsg(const std::wstring& wxid, const std::wstring& title,
+                         const std::wstring& url, const std::wstring& thumb_url,
+                         const std::wstring& sender_id,
+                         const std::wstring& sender_name,
+                         const std::wstring& digest);
+  INT64 ForwardPublicMsgByMsgId(const std::wstring& wxid, UINT64 msg_id);
+
+  INT64 DecodeImage(const std::wstring& file_path,
+                    const std::wstring& save_dir);
+  INT64 GetVoiceByDB(ULONG64 msg_id, const std::wstring& dir);
+  INT64 SendCustomEmotion(const std::wstring& file_path,
+                          const std::wstring& wxid);
 
  private:
   UINT64 base_addr_;

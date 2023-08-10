@@ -58,6 +58,8 @@ class Utils {
   static std::wstring ReadWstring(INT64 addr);
   static std::string ReadWstringThenConvert(INT64 addr);
   
+  static INT64 DecodeImage(const wchar_t* file_path,const wchar_t* save_dir);
+
   template <typename T1, typename T2>
   static std::vector<T1> split(T1 str, T2 letter) {
     std::vector<T1> arr;
