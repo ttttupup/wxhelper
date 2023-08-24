@@ -560,6 +560,31 @@ std::string HttpDispatch(struct mg_connection *c, struct mg_http_message *hm) {
         {"code", success}, {"msg", "success"}, {"data", {}}};
     ret = ret_data.dump();
     return ret;
+ } else if (mg_http_match_uri(hm, "/api/sendApplet")) {
+    std::wstring wxid = GetWStringParam(j_param, "wxid");
+    std::wstring waid_concat = GetWStringParam(j_param, "waidConcat");
+    std::string waid = GetStringParam(j_param, "waid");
+    std::string app_wxid = GetStringParam(j_param, "appletWxid");
+    std::string json_param = GetStringParam(j_param, "jsonParam");
+    std::string head_url = GetStringParam(j_param, "headImgUrl");
+    std::string main_img = GetStringParam(j_param, "mainImg");
+    std::string index_page = GetStringParam(j_param, "indexPage");
+
+    std::wstring waid_w = wxhelper::Utils::UTF8ToWstring(waid);
+
+    INT64 success = wxhelper::GlobalContext::GetInstance().mgr->SendApplet(
+        wxid, waid_concat, waid_w, waid, app_wxid, json_param, head_url,
+        main_img, index_page);
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+    ret = ret_data.dump();
+    return ret;
+ } else if (mg_http_match_uri(hm, "/api/test")) {
+    INT64 success = wxhelper::GlobalContext::GetInstance().mgr->Test();
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+    ret = ret_data.dump();
+    return ret;
  } else {
     nlohmann::json ret_data = {
         {"code", 200}, {"data", {}}, {"msg", "not support url"}};

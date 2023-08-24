@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "utils.h"
 #include <winternl.h>
+#include <Psapi.h>
 #define BUFSIZE 1024
 #define JPEG0 0xFF
 #define JPEG1 0xD8
@@ -398,4 +399,62 @@ INT64 Utils::DecodeImage(const wchar_t* file_path,const wchar_t* save_dir){
   return 1;
 }
 
+std::vector<INT64> Utils::QWordScan(INT64 value, int align,
+                                      const wchar_t *module) {
+  MODULEINFO module_info;
+  std::vector<INT64> result;
+  if (GetModuleInformation(GetCurrentProcess(), GetModuleHandleW(module),
+                           &module_info, sizeof(module_info))) {
+    auto start = static_cast<const char *>(module_info.lpBaseOfDll);
+    const auto end = start + module_info.SizeOfImage - 0x8;
+
+    auto current_addr = start;
+    while (current_addr < end) {
+      if (*(INT64*)current_addr == value) {
+        result.push_back(reinterpret_cast<INT64>(current_addr));
+      }
+      start += align;
+      current_addr = start;
+    }
+  }
+  return result;
+}
+
+std::vector<INT64> Utils::QWordScan(INT64 value, INT64 start,int align) {
+  SYSTEM_INFO sys_info;
+  GetSystemInfo(&sys_info);
+  std::vector<INT64> result;
+  INT64 min_addr =
+      reinterpret_cast<INT64>(sys_info.lpMinimumApplicationAddress);
+  INT64 max_addr =
+      reinterpret_cast<INT64>(sys_info.lpMaximumApplicationAddress);
+  const INT64 page_size = sys_info.dwPageSize;
+  min_addr = min_addr > start ? min_addr : start;
+
+  auto current_addr = min_addr;
+  MEMORY_BASIC_INFORMATION mem_info = {};
+  HANDLE handle = GetCurrentProcess();
+  while (current_addr < max_addr) {
+    VirtualQueryEx(handle, reinterpret_cast<LPVOID>(current_addr), &mem_info,
+                   sizeof(MEMORY_BASIC_INFORMATION));
+
+    if ((INT64)mem_info.RegionSize <= 0) {
+      break;
+    }
+    INT64 region_size = mem_info.RegionSize;
+    if ((mem_info.State & MEM_COMMIT) == MEM_COMMIT &&
+        (mem_info.Protect & PAGE_GUARD) != PAGE_GUARD &&
+        (mem_info.Protect & PAGE_NOACCESS) != PAGE_NOACCESS) {
+      for (INT64 i = 0; i < region_size; i += align) {
+        if (value == *(INT64 *)current_addr) {
+          result.push_back(current_addr);
+        }
+        current_addr += align;
+      }
+    } else {
+      current_addr += region_size;
+    }
+  }
+  return result;
+}
 }  // namespace wxhelper

@@ -274,6 +274,14 @@ typedef UINT64 (*__GetPreDownLoadMgr)();
 typedef UINT64 (*__PushAttachTask)(UINT64,UINT64,UINT64,UINT64);
 typedef UINT64 (*__GetCustomSmileyMgr)();
 typedef UINT64 (*__SendCustomEmotion)(UINT64,UINT64,UINT64,UINT64,UINT64,UINT64,UINT64,UINT64);
+typedef UINT64 (*__JsApiShareAppMessage)(UINT64);
+typedef UINT64 (*__InitJsConfig)(UINT64,UINT64);
+typedef UINT64 (*__SendApplet)(UINT64,UINT64,UINT64,UINT64);
+typedef UINT64 (*__SendAppletSecond)(UINT64,UINT64,UINT64,UINT64,UINT64,UINT64);
+typedef UINT64 (*__GetAppInfoByWaid)(UINT64,UINT64);
+typedef UINT64 (*__CopyShareAppMessageRequest)(UINT64,UINT64);
+typedef UINT64 (*__NewWAUpdatableMsgInfo)(UINT64);
+typedef UINT64 (*__FreeWAUpdatableMsgInfo)(UINT64);
 
 
 }  // namespace function
@@ -310,6 +318,26 @@ struct WeChatString {
     ptr = (wchar_t *)pStr;
     length = static_cast<DWORD>(wcslen(pStr));
     max_length = static_cast<DWORD>(wcslen(pStr) * 2);
+  }
+};
+
+struct WeChatStr{
+  char * ptr;
+  INT64  buf;
+  INT64  len;
+  INT64  maxlen;
+
+   WeChatStr(const char* p) {
+    ptr = (char *)p;
+    buf = 0;
+    len = strlen(p);
+    maxlen = len | 0xF;
+  }
+   WeChatStr() {
+    ptr = NULL;
+    buf = 0;
+    len = 0;
+    maxlen = 0xF;
   }
 };
 
@@ -404,6 +432,14 @@ const UINT64 kGetPreDownLoadMgr = 0x9996f0;
 const UINT64 kPushAttachTask = 0x9c0080;
 const UINT64 kGetCustomSmileyMgr = 0x915c00;
 const UINT64 kSendCustomEmotion = 0xec0a40;
+const UINT64 kNewJsApiShareAppMessage = 0x13be1a0;
+const UINT64 kInitJsConfig = 0x137bc00;
+const UINT64 kSendApplet = 0x13c0920;
+const UINT64 kSendAppletSecond = 0x13c1150;
+const UINT64 kGetAppInfoByWaid = 0x13c5790;
+const UINT64 kCopyShareAppMessageRequest = 0x13c0670;
+const UINT64 kNewWAUpdatableMsgInfo = 0x919ca0;
+const UINT64 kFreeWAUpdatableMsgInfo = 0x8fc230;
 
 }  // namespace offset
 }  // namespace V3_9_5_81
