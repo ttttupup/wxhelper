@@ -60,6 +60,10 @@ class Utils {
   
   static INT64 DecodeImage(const wchar_t* file_path,const wchar_t* save_dir);
 
+  static std::vector<INT64> QWordScan(INT64 value, int align,
+                                        const wchar_t *module);
+
+  static std::vector<INT64> QWordScan(INT64 value, INT64 start,int align);
   template <typename T1, typename T2>
   static std::vector<T1> split(T1 str, T2 letter) {
     std::vector<T1> arr;

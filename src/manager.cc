@@ -28,7 +28,19 @@ prototype::WeChatString * BuildWechatString(const std::wstring &ws){
   return p;
 }
 
-Manager::Manager(UINT64 base) : base_addr_(base) {}
+prototype::WeChatStr * BuildWechatStr(const std::string &str){
+  prototype::WeChatStr *p = Utils::WxHeapAlloc<prototype::WeChatStr>(
+      sizeof(prototype::WeChatStr));
+  char *p_chat_room_id = Utils::WxHeapAlloc<char>(str.size() + 1);
+  memcpy(p_chat_room_id, str.c_str(), str.size() + 1);
+  p->ptr = p_chat_room_id;
+  p->len = static_cast<DWORD>(str.size());
+  p->maxlen = static_cast<DWORD>(str.size());
+  p->buf = NULL;
+  return p;
+}
+
+Manager::Manager(UINT64 base) : base_addr_(base),js_api_addr_(0) {}
 Manager::~Manager() {}
 INT64 Manager::CheckLogin() {
   INT64 success = -1;
@@ -1094,5 +1106,125 @@ INT64 Manager::SendCustomEmotion(const std::wstring &file_path,
       reinterpret_cast<UINT64>(recv), 2, reinterpret_cast<UINT64>(temp), 0,
       reinterpret_cast<UINT64>(temp));
   return success;
+}
+
+INT64 Manager::SendApplet(const std::wstring &recv_wxid,
+                          const std::wstring &waid_suff,
+                          const std::wstring &waid_w, const std::string &waid_s,
+                          const std::string &wa_wxid,
+                          const std::string &json_param,
+                          const std::string &head_image,
+                          const std::string &big_image,
+                          const std::string &index_page) {
+  INT64 success = -1;
+  if (js_api_addr_ == 0) {
+    auto vec2 = Utils::QWordScan(base_addr_ + 0x32D1318, 0x1000, 0x8);
+    for (int i = 0; i < vec2.size(); i++) {
+      INT64 ptr = vec2.at(i);
+      if (*(INT64 *)ptr == base_addr_ + 0x32D1318) {
+        js_api_addr_ = ptr;
+        break;
+      }
+    }
+  }
+  if (js_api_addr_ == 0) {
+    success = -2;
+    return success;
+  }
+
+  UINT64 share_app_msg_addr = base_addr_ + offset::kNewJsApiShareAppMessage;
+  func::__JsApiShareAppMessage share_app_msg =
+      (func::__JsApiShareAppMessage)share_app_msg_addr;
+
+  UINT64 init_addr = base_addr_ + offset::kInitJsConfig;
+  func::__InitJsConfig init = (func::__InitJsConfig)init_addr;
+
+  UINT64 send_applet_addr = base_addr_ + offset::kSendApplet;
+  func::__SendApplet send_applet = (func::__SendApplet)send_applet_addr;
+
+  UINT64 get_by_waid_addr = base_addr_ + offset::kGetAppInfoByWaid;
+  func::__GetAppInfoByWaid get_app_info =
+      (func::__GetAppInfoByWaid)get_by_waid_addr;
+
+  UINT64 copy_app_req_addr = base_addr_ + offset::kCopyShareAppMessageRequest;
+  func::__CopyShareAppMessageRequest copy_app_req =
+      (func::__CopyShareAppMessageRequest)copy_app_req_addr;
+
+  UINT64 new_wa_msg_addr = base_addr_ + offset::kNewWAUpdatableMsgInfo;
+  func::__NewWAUpdatableMsgInfo new_wa_msg =
+      (func::__NewWAUpdatableMsgInfo)new_wa_msg_addr;
+
+  UINT64 free_wa_msg_addr = base_addr_ + offset::kFreeWAUpdatableMsgInfo;
+  func::__FreeWAUpdatableMsgInfo free_wa_msg =
+      (func::__FreeWAUpdatableMsgInfo)free_wa_msg_addr;
+
+  std::vector<prototype::WeChatString> *temp =
+      Utils::WxHeapAlloc<std::vector<prototype::WeChatString>>(0x20);
+  // std::vector<prototype::WeChatString>*  temp = new
+  // std::vector<prototype::WeChatString>();
+  common::VectorInner *list = (common::VectorInner *)temp;
+
+  prototype::WeChatString *member = BuildWechatString(recv_wxid);
+
+  list->head = reinterpret_cast<UINT64>(member);
+  list->start = reinterpret_cast<UINT64>(member);
+  list->finsh = reinterpret_cast<UINT64>(member) + 0x20;
+  list->end = reinterpret_cast<UINT64>(member) + 0x20;
+
+  INT64 head = reinterpret_cast<UINT64>(&(list->start));
+
+  prototype::WeChatString *waid_cat = BuildWechatString(waid_suff);
+  prototype::WeChatString *waid = BuildWechatString(waid_w);
+
+  prototype::WeChatString *waid_2 = BuildWechatString(waid_suff);
+
+  prototype::WeChatStr *waid_str = BuildWechatStr(waid_s);
+  prototype::WeChatStr *app_wxid = BuildWechatStr(wa_wxid);
+  prototype::WeChatStr *json_str = BuildWechatStr(json_param);
+  prototype::WeChatStr *head_image_url = BuildWechatStr(head_image);
+  prototype::WeChatStr *image = BuildWechatStr(big_image);
+  prototype::WeChatStr *index = BuildWechatStr(index_page);
+
+  UINT64 app_msg = js_api_addr_;
+
+  UINT64 data = *(UINT64 *)(app_msg + 0x8);
+  char *share_req = Utils::WxHeapAlloc<char>(0x2000);
+
+  char *mid_ptr = Utils::WxHeapAlloc<char>(0x18);
+  memcpy(mid_ptr, &share_req, sizeof(INT64));
+  memcpy(mid_ptr + 0x8, &share_req, sizeof(INT64));
+  memcpy(mid_ptr + 0x10, &share_req, sizeof(INT64));
+
+  memcpy((void *)data, mid_ptr, 0x18);
+
+  memcpy(share_req, (void *)(app_msg + 0x8), sizeof(UINT64));
+  memcpy(share_req + 0x8, (void *)(app_msg + 0x8), sizeof(UINT64));
+  memcpy(share_req + 0x10, (void *)(app_msg + 0x8), sizeof(UINT64));
+  memcpy(share_req + 0x20, waid_2, sizeof(prototype::WeChatString));
+  memcpy(share_req + 0x48, waid_str, sizeof(prototype::WeChatStr));
+  memcpy(share_req + 0x98, app_wxid, sizeof(prototype::WeChatStr));
+  memcpy(share_req + 0xF8, json_str, sizeof(prototype::WeChatStr));
+  memcpy(share_req + 0x178, head_image_url, sizeof(prototype::WeChatStr));
+  memcpy(share_req + 0x198, image, sizeof(prototype::WeChatStr));
+  memcpy(share_req + 0x1c0, index, sizeof(prototype::WeChatStr));
+
+  success = send_applet(app_msg, reinterpret_cast<UINT64>(waid_cat), head, 0);
+
+  return success;
+}
+
+INT64 Manager::Test() {
+  auto vec = Utils::QWordScan(base_addr_ + 0x32D1318, 0x1, L"WeChatWin.dll");
+  for (int i = 0; i < vec.size(); i++) {
+    INT64 re = vec.at(i);
+    SPDLOG_INFO("scan result :{},{}", i, re);
+  }
+
+  auto vec2 = Utils::QWordScan(base_addr_ + 0x32D1318, 0x1000, 0x8);
+  for (int i = 0; i < vec2.size(); i++) {
+    INT64 re = vec2.at(i);
+    SPDLOG_INFO("scan2 result :{},{}", i, re);
+  }
+  return 1;
 }
 } // namespace wxhelper
