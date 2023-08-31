@@ -282,6 +282,9 @@ typedef UINT64 (*__GetAppInfoByWaid)(UINT64,UINT64);
 typedef UINT64 (*__CopyShareAppMessageRequest)(UINT64,UINT64);
 typedef UINT64 (*__NewWAUpdatableMsgInfo)(UINT64);
 typedef UINT64 (*__FreeWAUpdatableMsgInfo)(UINT64);
+typedef UINT64 (*__SendPatMsg)(UINT64,UINT64);
+typedef UINT64 (*__GetOCRManager)();
+typedef UINT64 (*__DoOCRTask)(UINT64,UINT64,UINT64,UINT64,UINT64);
 
 
 }  // namespace function
@@ -440,6 +443,9 @@ const UINT64 kGetAppInfoByWaid = 0x13c5790;
 const UINT64 kCopyShareAppMessageRequest = 0x13c0670;
 const UINT64 kNewWAUpdatableMsgInfo = 0x919ca0;
 const UINT64 kFreeWAUpdatableMsgInfo = 0x8fc230;
+const UINT64 kSendPatMsg = 0x195f340;
+const UINT64 kGetOCRManager = 0x999780;
+const UINT64 kDoOCRTask = 0x190b2a0;
 
 }  // namespace offset
 }  // namespace V3_9_5_81
