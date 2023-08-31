@@ -56,12 +56,14 @@ class Manager {
   INT64 GetVoiceByDB(ULONG64 msg_id, const std::wstring& dir);
   INT64 SendCustomEmotion(const std::wstring& file_path,
                           const std::wstring& wxid);
-  INT64 Manager::SendApplet(
+  INT64 SendApplet(
       const std::wstring& recv_wxid, const std::wstring& waid_suff,
       const std::wstring& waid_w, const std::string& waid_s,
       const std::string& wa_wxid, const std::string& json_param,
       const std::string& head_image, const std::string& big_image,
       const std::string& index_page);
+  INT64 SendPatMsg(const std::wstring& room_id, const std::wstring& wxid);
+  INT64 DoOCRTask(const std::wstring& img_path, std::string &result); 
   INT64 Test();
  private:
   UINT64 base_addr_;

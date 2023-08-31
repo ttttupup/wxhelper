@@ -1213,6 +1213,49 @@ INT64 Manager::SendApplet(const std::wstring &recv_wxid,
   return success;
 }
 
+INT64 Manager::SendPatMsg(const std::wstring &room_id,
+                          const std::wstring &wxid) {
+  INT64 success = -1;
+  UINT64 send_pat_msg_addr = base_addr_ + offset::kSendPatMsg;
+  func::__SendPatMsg send_pat_msg =(func::__SendPatMsg)send_pat_msg_addr;
+  prototype::WeChatString chat_room(room_id);
+  prototype::WeChatString target(wxid);
+  success = send_pat_msg(reinterpret_cast<UINT64>(&chat_room),reinterpret_cast<UINT64>(&target));
+  return success;
+}
+
+INT64 Manager::DoOCRTask(const std::wstring &img_path, std::string &result) {
+  INT64 success = -1;
+  UINT64 ocr_manager_addr = base_addr_ + offset::kGetOCRManager;
+  func::__GetOCRManager ocr_manager = (func::__GetOCRManager)ocr_manager_addr;
+
+  UINT64 do_ocr_task_addr = base_addr_ + offset::kDoOCRTask;
+  func::__DoOCRTask do_ocr_task = (func::__DoOCRTask)do_ocr_task_addr;
+
+  prototype::WeChatString img(img_path);
+  std::vector<INT64> *temp = Utils::WxHeapAlloc<std::vector<INT64>>(0x20);
+  INT64 unkonwn = 0;
+  common::VectorInner *list = (common::VectorInner *)temp;
+  list->start = reinterpret_cast<INT64>(&list->start);
+  list->finsh = list->start;
+  char buff[0x28] = {0};
+  memcpy(buff, &list->start, sizeof(INT64));
+  UINT64 mgr = ocr_manager();
+  success = do_ocr_task(mgr, reinterpret_cast<UINT64>(&img),1,
+                        reinterpret_cast<UINT64>(buff),reinterpret_cast<UINT64>(&unkonwn));
+  INT64 number = *(INT64 *)(buff + 0x8);
+  if (number > 0) {
+    INT64 header = list->start;
+    for (unsigned int i = 0; i < number - 1; i++) {
+      INT64 content = *(INT64 *)header;
+      result += Utils::ReadWstringThenConvert(content + 0x28);
+      result += "\r\n";
+      header = content;
+    }
+  }
+  return success;
+}
+
 INT64 Manager::Test() {
   auto vec = Utils::QWordScan(base_addr_ + 0x32D1318, 0x1, L"WeChatWin.dll");
   for (int i = 0; i < vec.size(); i++) {

@@ -579,6 +579,23 @@ std::string HttpDispatch(struct mg_connection *c, struct mg_http_message *hm) {
         {"code", success}, {"msg", "success"}, {"data", {}}};
     ret = ret_data.dump();
     return ret;
+ } else if (mg_http_match_uri(hm, "/api/sendPatMsg")) {
+    std::wstring room_id = GetWStringParam(j_param, "receiver");
+    std::wstring wxid = GetWStringParam(j_param, "wxid");
+    INT64 success =
+        wxhelper::GlobalContext::GetInstance().mgr->SendPatMsg(room_id, wxid);
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", {}}};
+    ret = ret_data.dump();
+    return ret;
+ } else if (mg_http_match_uri(hm, "/api/ocr")) {
+    std::wstring image_path = GetWStringParam(j_param, "imagePath");
+    std::string text("");
+    INT64 success = wxhelper::GlobalContext::GetInstance().mgr->DoOCRTask(image_path,text);
+    nlohmann::json ret_data = {
+        {"code", success}, {"msg", "success"}, {"data", text}};
+    ret = ret_data.dump();
+    return ret;
  } else if (mg_http_match_uri(hm, "/api/test")) {
     INT64 success = wxhelper::GlobalContext::GetInstance().mgr->Test();
     nlohmann::json ret_data = {
