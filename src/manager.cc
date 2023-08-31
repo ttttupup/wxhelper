@@ -1165,8 +1165,9 @@ INT64 Manager::SendApplet(const std::wstring &recv_wxid,
   common::VectorInner *list = (common::VectorInner *)temp;
 
   prototype::WeChatString *member = BuildWechatString(recv_wxid);
-
+  #ifdef _DEBUG
   list->head = reinterpret_cast<UINT64>(member);
+  #endif
   list->start = reinterpret_cast<UINT64>(member);
   list->finsh = reinterpret_cast<UINT64>(member) + 0x20;
   list->end = reinterpret_cast<UINT64>(member) + 0x20;
