@@ -33,3 +33,4 @@
 CMakePresets.json
 .vscode
 out
+.vs
