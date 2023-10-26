@@ -24,6 +24,9 @@ void GlobalManager::initialize(HMODULE module) {
       new http::HttpServer(config->GetPort()));
   http_server->AddHttpApiUrl("/api/sendTextMsg", SendTextMsg);
   http_server->AddHttpApiUrl("/api/hookSyncMsg", HookSyncMsg);
+  http_server->AddHttpApiUrl("/api/getContactList", GetContacts);
+  http_server->AddHttpApiUrl("/api/unhookSyncMsg", UnHookSyncMsg);
+
   http_server->Start();
   base::ThreadPool::GetInstance().Create(2, 8);
 

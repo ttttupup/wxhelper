@@ -1,4 +1,5 @@
 #include "wechat_service.h"
+#include "wxutils.h"
 namespace offset = wxhelper::V3_9_7_29::offset;
 namespace prototype = wxhelper::V3_9_7_29::prototype;
 namespace func = wxhelper::V3_9_7_29::function;
@@ -46,7 +47,35 @@ INT64 WechatService::SendFileMsg(const std::wstring& wxid,
 }
 
 INT64 WechatService::GetContacts(std::vector<common::ContactInner>& vec) {
-  return INT64();
+  INT64 success = -1;
+  UINT64 get_contact_mgr_addr = base_addr_ + offset::kGetContactMgr;
+  UINT64 get_contact_list_addr = base_addr_ + offset::kGetContactList;
+  func::__GetContactMgr get_contact_mgr =
+      (func::__GetContactMgr)get_contact_mgr_addr;
+  func::__GetContactList get_contact_list =
+      (func::__GetContactList)get_contact_list_addr;
+  UINT64 mgr = get_contact_mgr();
+  UINT64 contact_vec[3] = {0, 0, 0};
+  success = get_contact_list(mgr, reinterpret_cast<UINT64>(&contact_vec));
+
+  UINT64 start = contact_vec[0];
+  UINT64 end = contact_vec[2];
+  while (start < end) {
+    common::ContactInner temp;
+    temp.wxid = wxutils::ReadWstringThenConvert(start + 0x10);
+    temp.custom_account = wxutils::ReadWstringThenConvert(start + 0x30);
+    temp.encrypt_name = wxutils::ReadWstringThenConvert(start + 0x50);
+    temp.nickname = wxutils::ReadWstringThenConvert(start + 0xA0);
+    temp.pinyin = wxutils::ReadWstringThenConvert(start + 0x108);
+    temp.pinyin_all = wxutils::ReadWstringThenConvert(start + 0x128);
+    temp.verify_flag = *(DWORD *)(start + 0x70);
+    temp.type = *(DWORD *)(start + 0x74);
+    temp.reserved1 = *(DWORD *)(start + 0x1F0);
+    temp.reserved2 = *(DWORD *)(start + 0x1F4);
+    vec.push_back(temp);
+    start += 0x6A8;
+  }
+  return success;
 }
 
 INT64 WechatService::GetChatRoomDetailInfo(

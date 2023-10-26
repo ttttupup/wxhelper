@@ -184,4 +184,22 @@ int WechatHook::HookSyncMsg() {
   }
   return ret;
 }
-}  // namespace hook
+int WechatHook::UnHookSyncMsg() {
+  if (!sync_msg_flag_) {
+    SPDLOG_INFO("call UnHookSyncMsg but no hooked ");
+    return NO_ERROR;
+  }
+  UINT64 base = wxhelper::wxutils::GetWeChatWinBase();
+  DetourTransactionBegin();
+  DetourUpdateThread(GetCurrentThread());
+  DetourDetach(&(PVOID &)RealDoAddMsg, &HandleSyncMsg);
+  LONG ret = DetourTransactionCommit();
+  if (ret == NO_ERROR) {
+    sync_msg_flag_ = false;
+    strcpy_s(kServerIp, "127.0.0.1");
+  }
+  return ret;
+ }
+ int WechatHook::HookLog() { return 0; }
+ int WechatHook::UnHookLog() { return 0; }
+ }  // namespace hook

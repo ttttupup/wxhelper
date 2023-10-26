@@ -66,4 +66,34 @@ std::string HookSyncMsg(mg_http_message* hm) {
   std::string ret = ret_data.dump();
   return ret;
 }
+
+std::string GetContacts(mg_http_message* hm) {
+  std::vector<common::ContactInner> vec;
+  INT64 success =  WechatService::GetInstance().GetContacts(vec);
+  nlohmann::json ret_data = {
+      {"code", success}, {"data", {}}, {"msg", "success"}};
+  for (unsigned int i = 0; i < vec.size(); i++) {
+    nlohmann::json item = {
+        {"customAccount", vec[i].custom_account},
+        {"encryptName", vec[i].encrypt_name},
+        {"type", vec[i].type},
+        {"verifyFlag", vec[i].verify_flag},
+        {"wxid", vec[i].wxid},
+        {"nickname", vec[i].nickname},
+        {"pinyin", vec[i].pinyin},
+        {"pinyinAll", vec[i].pinyin_all},
+        {"reserved1", vec[i].reserved1},
+        {"reserved2", vec[i].reserved2},
+    };
+    ret_data["data"].push_back(item);
+  }
+  std::string ret = ret_data.dump();
+  return ret;
+}
+std::string UnHookSyncMsg(mg_http_message* hm) {
+  INT64 success = hook::WechatHook::GetInstance().UnHookSyncMsg();
+  nlohmann::json ret_data = {
+      {"code", success}, {"data", {}}, {"msg", "success"}};
+  return ret_data.dump();
+}
 }  // namespace wxhelper

@@ -488,12 +488,16 @@ const UINT64 kGetSendMessageMgr = 0x8fe740;
 const UINT64 kFreeChatMsg = 0x8fffc0;
 const UINT64 kSendTextMsg = 0x1024370;
 const UINT64 kDoAddMsg = 0x106b810;
+const UINT64 kGetContactMgr = 0x8ebfb0;
+const UINT64 kGetContactList = 0xeff050;
 }  // namespace offset
 namespace function {
 typedef UINT64 (*__GetSendMessageMgr)();
 typedef UINT64 (*__SendTextMsg)(UINT64, UINT64, UINT64, UINT64, UINT64, UINT64,
                                 UINT64, UINT64);
 typedef UINT64 (*__FreeChatMsg)(UINT64);
+typedef UINT64 (*__GetContactMgr)();
+typedef UINT64 (*__GetContactList)(UINT64, UINT64);
 }  // namespace function
 }  // namespace V3_9_7_29
 }  // namespace wxhelper
