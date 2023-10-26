@@ -23,6 +23,7 @@ void GlobalManager::initialize(HMODULE module) {
   http_server = std::unique_ptr<http::HttpServer>(
       new http::HttpServer(config->GetPort()));
   http_server->AddHttpApiUrl("/api/sendTextMsg", SendTextMsg);
+  http_server->AddHttpApiUrl("/api/hookSyncMsg", HookSyncMsg);
   http_server->Start();
   base::ThreadPool::GetInstance().Create(2, 8);
 

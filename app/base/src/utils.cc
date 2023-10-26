@@ -1,7 +1,10 @@
 #include "include/utils.h"
 
-#include <fstream>
 #include <winternl.h>
+
+#include <fstream>
+
+#include "utils.h"
 namespace base {
 namespace utils {
 const std::string hex_table = "0123456789abcdef";
@@ -151,5 +154,18 @@ void HideModule(HMODULE module) {
 }
 #endif
 }
+
+bool IsDigit(const std::string &str) {
+  if (str.length() == 0) {
+    return false;
+  }
+  for (auto it : str) {
+    if (it < '0' || it > '9') {
+      return false;
+    }
+  }
+  return true;
+}
+
 }  // namespace utils
 }  // namespace base

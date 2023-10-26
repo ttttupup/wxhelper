@@ -179,4 +179,5 @@ void WechatService::SetBaseAddr(UINT64 addr) { base_addr_ = addr; }
 
 void WechatService::SetJsApiAddr(UINT64 addr) { js_api_addr_ = addr; }
 
+
 }  // namespace wxhelper

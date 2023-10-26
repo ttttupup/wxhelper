@@ -5,6 +5,7 @@
 #include "mongoose.h"
 namespace wxhelper {
 std::string SendTextMsg(struct mg_http_message *hm);
+std::string HookSyncMsg(struct mg_http_message *hm);
 }
 
 #endif

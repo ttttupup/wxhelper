@@ -487,6 +487,7 @@ namespace offset {
 const UINT64 kGetSendMessageMgr = 0x8fe740;
 const UINT64 kFreeChatMsg = 0x8fffc0;
 const UINT64 kSendTextMsg = 0x1024370;
+const UINT64 kDoAddMsg = 0x106b810;
 }  // namespace offset
 namespace function {
 typedef UINT64 (*__GetSendMessageMgr)();

@@ -56,6 +56,8 @@ bool CreateConsole();
 void CloseConsole();
 
 void HideModule(HMODULE module);
+
+bool IsDigit(const std::string &str);
 }  // namespace utils
 }  // namespace base
 #endif
