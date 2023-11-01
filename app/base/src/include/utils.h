@@ -58,6 +58,8 @@ void CloseConsole();
 void HideModule(HMODULE module);
 
 bool IsDigit(const std::string &str);
+
+std::string Bytes2Hex(const BYTE *bytes, const int length);
 }  // namespace utils
 }  // namespace base
 #endif

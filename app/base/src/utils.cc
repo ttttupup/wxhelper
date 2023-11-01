@@ -167,5 +167,19 @@ bool IsDigit(const std::string &str) {
   return true;
 }
 
+std::string Bytes2Hex(const BYTE *bytes, const int length) {
+  if (bytes == NULL) {
+    return "";
+  }
+  std::string buff;
+  const int len = length;
+  for (int j = 0; j < len; j++) {
+    int high = bytes[j] / 16, low = bytes[j] % 16;
+    buff += (high < 10) ? ('0' + high) : ('a' + high - 10);
+    buff += (low < 10) ? ('0' + low) : ('a' + low - 10);
+  }
+  return buff;
+}
+
 }  // namespace utils
 }  // namespace base

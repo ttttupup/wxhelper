@@ -3,8 +3,8 @@
 #include <nlohmann/json.hpp>
 
 #include "utils.h"
-#include "wechat_service.h"
 #include "wechat_hook.h"
+#include "wechat_service.h"
 
 #define STR2ULL(str) (base::utils::IsDigit(str) ? stoull(str) : 0)
 #define STR2LL(str) (base::utils::IsDigit(str) ? stoll(str) : 0)
@@ -69,7 +69,7 @@ std::string HookSyncMsg(mg_http_message* hm) {
 
 std::string GetContacts(mg_http_message* hm) {
   std::vector<common::ContactInner> vec;
-  INT64 success =  WechatService::GetInstance().GetContacts(vec);
+  INT64 success = WechatService::GetInstance().GetContacts(vec);
   nlohmann::json ret_data = {
       {"code", success}, {"data", {}}, {"msg", "success"}};
   for (unsigned int i = 0; i < vec.size(); i++) {
@@ -90,10 +90,43 @@ std::string GetContacts(mg_http_message* hm) {
   std::string ret = ret_data.dump();
   return ret;
 }
+
 std::string UnHookSyncMsg(mg_http_message* hm) {
   INT64 success = hook::WechatHook::GetInstance().UnHookSyncMsg();
   nlohmann::json ret_data = {
       {"code", success}, {"data", {}}, {"msg", "success"}};
+  return ret_data.dump();
+}
+
+std::string CheckLogin(mg_http_message* hm) {
+  INT64 success = WechatService::GetInstance().CheckLogin();
+  nlohmann::json ret_data = {
+      {"code", success}, {"data", {}}, {"msg", "success"}};
+  return ret_data.dump();
+}
+
+std::string GetSelfInfo(mg_http_message* hm) {
+  common::SelfInfoInner self_info;
+  INT64 success = WechatService::GetInstance().GetSelfInfo(self_info);
+  nlohmann::json ret_data = {
+      {"code", success}, {"data", {}}, {"msg", "success"}};
+  if (success) {
+    nlohmann::json j_info = {
+        {"name", self_info.name},
+        {"city", self_info.city},
+        {"province", self_info.province},
+        {"country", self_info.country},
+        {"account", self_info.account},
+        {"wxid", self_info.wxid},
+        {"mobile", self_info.mobile},
+        {"headImage", self_info.head_img},
+        {"signature", self_info.signature},
+        {"dataSavePath", self_info.data_save_path},
+        {"currentDataPath", self_info.current_data_path},
+        {"dbKey", self_info.db_key},
+    };
+    ret_data["data"] = j_info;
+  }
   return ret_data.dump();
 }
 }  // namespace wxhelper

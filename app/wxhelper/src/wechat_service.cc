@@ -1,14 +1,185 @@
 #include "wechat_service.h"
 #include "wxutils.h"
+#include "utils.h"
 namespace offset = wxhelper::V3_9_7_29::offset;
 namespace prototype = wxhelper::V3_9_7_29::prototype;
 namespace func = wxhelper::V3_9_7_29::function;
 namespace wxhelper {
 WechatService::~WechatService() {}
 
-INT64 WechatService::CheckLogin() { return INT64(); }
+INT64 WechatService::CheckLogin() {
+  INT64 success = -1;
+  UINT64 accout_service_addr = base_addr_ + offset::kGetAccountServiceMgr;
+  func::__GetAccountService GetSevice =
+      (func::__GetAccountService)accout_service_addr;
+  UINT64 service_addr = GetSevice();
+  if (service_addr) {
+    success = *(UINT64*)(service_addr + 0x7F8);
+  }
+  return success;
+}
 
-INT64 WechatService::GetSelfInfo(common::SelfInfoInner& out) { return INT64(); }
+INT64 WechatService::GetSelfInfo(common::SelfInfoInner& out) { 
+    INT64 success = -1;
+  UINT64 accout_service_addr = base_addr_ + offset::kGetAccountServiceMgr;
+  UINT64 get_app_data_save_path_addr = base_addr_ + offset::kGetAppDataSavePath;
+  UINT64 get_current_data_path_addr = base_addr_ + offset::kGetCurrentDataPath;
+  func::__GetAccountService GetSevice = (func::__GetAccountService)accout_service_addr;
+  func::__GetDataSavePath GetDataSavePath = (func::__GetDataSavePath)get_app_data_save_path_addr;
+  func::__GetCurrentDataPath GetCurrentDataPath = (func::__GetCurrentDataPath)get_current_data_path_addr;
+
+  UINT64 service_addr = GetSevice();
+  if (service_addr) {
+    if (*(INT64 *)(service_addr + 0x80) == 0 ||
+        *(INT64 *)(service_addr + 0x80 + 0x10) == 0) {
+      out.wxid = std::string();
+    } else {
+      if (*(INT64 *)(service_addr + 0x80 + 0x18) == 0xF) {
+        out.wxid = std::string((char *)(service_addr + 0x80),
+                               *(INT64 *)(service_addr + 0x80 + 0x10));
+      } else {
+        out.wxid = std::string(*(char **)(service_addr + 0x80),
+                               *(INT64 *)(service_addr + 0x80 + 0x10));
+      }
+    }
+
+    if (*(INT64 *)(service_addr + 0x108) == 0 ||
+        *(INT64 *)(service_addr + 0x108 + 0x10) == 0) {
+      out.account = std::string();
+    } else {
+      if (*(INT64 *)(service_addr + 0x108 + 0x18) == 0xF) {
+        out.account = std::string((char *)(service_addr + 0x108),
+                                  *(INT64 *)(service_addr + 0x108 + 0x10));
+      } else {
+        out.account = std::string(*(char **)(service_addr + 0x108),
+                                  *(INT64 *)(service_addr + 0x108 + 0x10));
+      }
+    }
+
+    if (*(INT64 *)(service_addr + 0x128) == 0 ||
+        *(INT64 *)(service_addr + 0x128 + 0x10) == 0) {
+      out.mobile = std::string();
+    } else {
+      if (*(INT64 *)(service_addr + 0x128 + 0x18) == 0xF) {
+        out.mobile = std::string((char *)(service_addr + 0x128),
+                                 *(INT64 *)(service_addr + 0x128 + 0x10));
+      } else {
+        out.mobile = std::string(*(char **)(service_addr + 0x128),
+                                 *(INT64 *)(service_addr + 0x128 + 0x10));
+      }
+    }
+
+    if (*(INT64 *)(service_addr + 0x148) == 0 ||
+        *(INT64 *)(service_addr + 0x148 + 0x10) == 0) {
+      out.signature = std::string();
+    } else {
+      if (*(INT64 *)(service_addr + 0x148 + 0x18) == 0xF) {
+        out.signature = std::string((char *)(service_addr + 0x148),
+                                    *(INT64 *)(service_addr + 0x148 + 0x10));
+      } else {
+        out.signature = std::string(*(char **)(service_addr + 0x148),
+                                    *(INT64 *)(service_addr + 0x148 + 0x10));
+      }
+    }
+
+    if (*(INT64 *)(service_addr + 0x168) == 0 ||
+        *(INT64 *)(service_addr + 0x168 + 0x10) == 0) {
+      out.country = std::string();
+    } else {
+      if (*(INT64 *)(service_addr + 0x168 + 0x18) == 0xF) {
+        out.country = std::string((char *)(service_addr + 0x168),
+                                  *(INT64 *)(service_addr + 0x168 + 0x10));
+      } else {
+        out.country = std::string(*(char **)(service_addr + 0x168),
+                                  *(INT64 *)(service_addr + 0x168 + 0x10));
+      }
+    }
+
+    if (*(INT64 *)(service_addr + 0x188) == 0 ||
+        *(INT64 *)(service_addr + 0x188 + 0x10) == 0) {
+      out.province = std::string();
+    } else {
+      if (*(INT64 *)(service_addr + 0x188 + 0x18) == 0xF) {
+        out.province = std::string((char *)(service_addr + 0x188),
+                                   *(INT64 *)(service_addr + 0x188 + 0x10));
+      } else {
+        out.province = std::string(*(char **)(service_addr + 0x188),
+                                   *(INT64 *)(service_addr + 0x188 + 0x10));
+      }
+    }
+
+    if (*(INT64 *)(service_addr + 0x1A8) == 0 ||
+        *(INT64 *)(service_addr + 0x1A8 + 0x10) == 0) {
+      out.city = std::string();
+    } else {
+      if (*(INT64 *)(service_addr + 0x1A8 + 0x18) == 0xF) {
+        out.city = std::string((char *)(service_addr + 0x1A8),
+                               *(INT64 *)(service_addr + 0x1A8 + 0x10));
+      } else {
+        out.city = std::string(*(char **)(service_addr + 0x1A8),
+                               *(INT64 *)(service_addr + 0x1A8 + 0x10));
+      }
+    }
+
+    if (*(INT64 *)(service_addr + 0x1E8) == 0 ||
+        *(INT64 *)(service_addr + 0x1E8 + 0x10) == 0) {
+      out.name = std::string();
+    } else {
+      if (*(INT64 *)(service_addr + 0x1E8 + 0x18) == 0xF) {
+        out.name = std::string((char *)(service_addr + 0x1E8),
+                               *(INT64 *)(service_addr + 0x1E8 + 0x10));
+      } else {
+        out.name = std::string(*(char **)(service_addr + 0x1E8),
+                               *(INT64 *)(service_addr + 0x1E8 + 0x10));
+      }
+    }
+
+    if (*(INT64 *)(service_addr + 0x450) == 0 ||
+        *(INT64 *)(service_addr + 0x450 + 0x10) == 0) {
+      out.head_img = std::string();
+    } else {
+      out.head_img = std::string(*(char **)(service_addr + 0x450),
+                                   *(INT64 *)(service_addr + 0x450 + 0x10));
+    }
+
+    if (*(INT64 *)(service_addr + 0x6E0) == 0 ||
+        *(INT64 *)(service_addr + 0x6E8) == 0) {
+      out.db_key = std::string();
+    } else {
+      INT64 byte_addr = *(INT64 *)(service_addr + 0x6E0);
+      INT64 len = *(INT64 *)(service_addr + 0x6E8);
+      out.db_key = base::utils::Bytes2Hex((BYTE *)byte_addr, static_cast<int>(len));
+    }
+
+    UINT64 flag = *(UINT64 *)(service_addr + 0x7F8);
+    if (flag == 1) {
+      prototype::WeChatString current_data_path;
+      // _GetCurrentDataPath(get_current_data_path_addr,
+      //                     reinterpret_cast<ULONG_PTR>(&current_data_path));
+      GetCurrentDataPath(reinterpret_cast<ULONG_PTR>(&current_data_path));
+      if (current_data_path.ptr) {
+        out.current_data_path = base::utils::WstringToUtf8(
+            std::wstring(current_data_path.ptr, current_data_path.length));
+      } else {
+        out.current_data_path = std::string();
+      }
+    }
+  }
+
+  prototype::WeChatString data_save_path;
+  // _GetDataSavePath(get_app_data_save_path_addr,
+  //                  reinterpret_cast<ULONG_PTR>(&data_save_path));
+  GetCurrentDataPath(reinterpret_cast<ULONG_PTR>(&data_save_path));
+  if (data_save_path.ptr) {
+    out.data_save_path = base::utils::WstringToUtf8(
+        std::wstring(data_save_path.ptr, data_save_path.length));
+  } else {
+    out.data_save_path = std::string();
+  }
+
+  success = 1;
+  return success;
+ }
 
 INT64 WechatService::SendTextMsg(const std::wstring& wxid,
                                  const std::wstring& msg) {

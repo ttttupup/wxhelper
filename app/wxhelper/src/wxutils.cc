@@ -92,5 +92,8 @@ std::string ReadWstringThenConvert(INT64 addr) {
   std::wstring wstr = ReadWstring(addr);
   return base::utils::WstringToUtf8(wstr);
 }
+
+
+
 }  // namespace wxutils
 }  // namespace wxhelper
