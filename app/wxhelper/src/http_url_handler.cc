@@ -2,6 +2,7 @@
 
 #include <nlohmann/json.hpp>
 
+#include "db.h"
 #include "utils.h"
 #include "wechat_hook.h"
 #include "wechat_service.h"
@@ -30,6 +31,16 @@ bool GetBoolParam(nlohmann::json data, std::string key) {
 
 std::string GetStringParam(nlohmann::json data, std::string key) {
   return data[key].get<std::string>();
+}
+
+INT64 GetInt64Param(nlohmann::json data, std::string key) {
+  INT64 result;
+  try {
+    result = data[key].get<INT64>();
+  } catch (nlohmann::json::exception) {
+    result = STR2LL(data[key].get<std::string>());
+  }
+  return result;
 }
 
 std::string SendTextMsg(mg_http_message* hm) {
@@ -129,4 +140,54 @@ std::string GetSelfInfo(mg_http_message* hm) {
   }
   return ret_data.dump();
 }
+
+std::string GetDBInfo(mg_http_message* hm) {
+  std::vector<void*> v_ptr = wxhelper::DB::GetInstance().GetWeChatDbHandles();
+  nlohmann::json ret_data = {{"data", nlohmann::json::array()}};
+  for (unsigned int i = 0; i < v_ptr.size(); i++) {
+    nlohmann::json db_info;
+    db_info["tables"] = nlohmann::json::array();
+    common::DatabaseInfo* db =
+        reinterpret_cast<common::DatabaseInfo*>(v_ptr[i]);
+    db_info["handle"] = db->handle;
+    std::wstring dbname(db->db_name);
+    db_info["databaseName"] = base::utils::WstringToUtf8(dbname);
+    for (auto table : db->tables) {
+      nlohmann::json table_info = {{"name", table.name},
+                                   {"tableName", table.table_name},
+                                   {"sql", table.sql},
+                                   {"rootpage", table.rootpage}};
+      db_info["tables"].push_back(table_info);
+    }
+    ret_data["data"].push_back(db_info);
+  }
+  ret_data["code"] = 1;
+  ret_data["msg"] = "success";
+  return ret_data.dump();
+}
+
+std::string ExecSql(mg_http_message* hm) {
+  nlohmann::json j_param = nlohmann::json::parse(
+      hm->body.ptr, hm->body.ptr + hm->body.len, nullptr, false);
+  UINT64 db_handle = GetInt64Param(j_param, "dbHandle");
+  std::string sql = GetStringParam(j_param, "sql");
+  std::vector<std::vector<std::string>> items;
+  int success =
+      wxhelper::DB::GetInstance().Select(db_handle, sql.c_str(), items);
+  nlohmann::json ret_data = {
+      {"data", nlohmann::json::array()}, {"code", success}, {"msg", "success"}};
+  if (success == 0) {
+    ret_data["msg"] = "no data";
+    return ret_data.dump();
+  }
+  for (auto it : items) {
+    nlohmann::json temp_arr = nlohmann::json::array();
+    for (size_t i = 0; i < it.size(); i++) {
+      temp_arr.push_back(it[i]);
+    }
+    ret_data["data"].push_back(temp_arr);
+  }
+  return ret_data.dump();
+}
+
 }  // namespace wxhelper

@@ -181,5 +181,45 @@ std::string Bytes2Hex(const BYTE *bytes, const int length) {
   return buff;
 }
 
+bool IsTextUtf8(const char *str, INT64 length) {
+  char endian = 1;
+  bool littlen_endian = (*(char *)&endian == 1);
+
+  size_t i;
+  int bytes_num;
+  unsigned char chr;
+
+  i = 0;
+  bytes_num = 0;
+  while (i < length) {
+    if (littlen_endian) {
+      chr = *(str + i);
+    } else {  // Big Endian
+      chr = (*(str + i) << 8) | *(str + i + 1);
+      i++;
+    }
+
+    if (bytes_num == 0) {
+      if ((chr & 0x80) != 0) {
+        while ((chr & 0x80) != 0) {
+          chr <<= 1;
+          bytes_num++;
+        }
+        if ((bytes_num < 2) || (bytes_num > 6)) {
+          return false;
+        }
+        bytes_num--;
+      }
+    } else {
+      if ((chr & 0xC0) != 0x80) {
+        return false;
+      }
+      bytes_num--;
+    }
+    i++;
+  }
+  return (bytes_num == 0);
+}
+
 }  // namespace utils
 }  // namespace base

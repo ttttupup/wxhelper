@@ -484,6 +484,35 @@ struct WeChatString {
 }  // namespace prototype
 
 namespace offset {
+const UINT64 k_sqlite3_exec = 0x2654db0;
+const UINT64 k_sqlite3_prepare = 0x265c920;
+const UINT64 k_sqlite3_open = 0x2694120;
+const UINT64 k_sqlite3_backup_init = 0x260eec0;
+const UINT64 k_sqlite3_errcode = 0x2692a20;
+const UINT64 k_sqlite3_close = 0x2690b80;
+const UINT64 k_sqlite3_step = 0x2618dc0;
+const UINT64 k_sqlite3_column_count = 0x26195e0;
+const UINT64 k_sqlite3_column_name = 0x2619fe0;
+const UINT64 k_sqlite3_column_type = 0x2619e30;
+const UINT64 k_sqlite3_column_blob = 0x2619610;
+const UINT64 k_sqlite3_column_bytes = 0x2619700;
+const UINT64 k_sqlite3_finalize = 0x2617e70;
+
+const UINT64 kGPInstance = 0x3c19fe8;
+const UINT64 kMicroMsgDB = 0xb8;
+const UINT64 kChatMsgDB = 0x2c8;
+const UINT64 kMiscDB = 0x5f0;
+const UINT64 kEmotionDB = 0x888;
+const UINT64 kMediaDB = 0xf48;
+const UINT64 kBizchatMsgDB = 0x1ac0;
+const UINT64 kFunctionMsgDB = 0x1b98;
+const UINT64 kDBName = 0x28;
+const UINT64 kStorageStart = 0x0;
+const UINT64 kStorageEnd = 0x0;
+const UINT64 kMultiDBMgr = 0x3c8ef40;
+const UINT64 kPublicMsgMgr = 0x3c8c6c8;
+const UINT64 kFavoriteStorageMgr = 0x3c8fac0;
+
 const UINT64 kGetSendMessageMgr = 0x8fe740;
 const UINT64 kFreeChatMsg = 0x8fffc0;
 const UINT64 kSendTextMsg = 0x1024370;

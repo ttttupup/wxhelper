@@ -60,6 +60,8 @@ void HideModule(HMODULE module);
 bool IsDigit(const std::string &str);
 
 std::string Bytes2Hex(const BYTE *bytes, const int length);
+
+bool IsTextUtf8(const char *str, INT64 length);
 }  // namespace utils
 }  // namespace base
 #endif
