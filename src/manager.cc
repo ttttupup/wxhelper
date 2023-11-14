@@ -1246,8 +1246,8 @@ INT64 Manager::DoOCRTask(const std::wstring &img_path, std::string &result) {
                         reinterpret_cast<UINT64>(buff),reinterpret_cast<UINT64>(&unkonwn));
   INT64 number = *(INT64 *)(buff + 0x8);
   if (number > 0) {
-    INT64 header = list->start;
-    for (unsigned int i = 0; i < number - 1; i++) {
+    INT64 header = *(INT64 *)(buff);
+    for (unsigned int i = 0; i < number; i++) {
       INT64 content = *(INT64 *)header;
       result += Utils::ReadWstringThenConvert(content + 0x28);
       result += "\r\n";
