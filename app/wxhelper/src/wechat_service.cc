@@ -1,9 +1,9 @@
 #include "wechat_service.h"
 #include "wxutils.h"
 #include "utils.h"
-namespace offset = wxhelper::V3_9_7_29::offset;
-namespace prototype = wxhelper::V3_9_7_29::prototype;
-namespace func = wxhelper::V3_9_7_29::function;
+namespace offset = wxhelper::V3_9_8_25::offset;
+namespace prototype = wxhelper::V3_9_8_25::prototype;
+namespace func = wxhelper::V3_9_8_25::function;
 namespace wxhelper {
 WechatService::~WechatService() {}
 
@@ -140,6 +140,22 @@ INT64 WechatService::GetSelfInfo(common::SelfInfoInner& out) {
     } else {
       out.head_img = std::string(*(char **)(service_addr + 0x450),
                                    *(INT64 *)(service_addr + 0x450 + 0x10));
+    }
+
+    if (*(INT64 *)(service_addr + 0x7B8) == 0 ||
+        *(INT64 *)(service_addr + 0x7B8 + 0x10) == 0) {
+      out.public_key = std::string();
+    } else {
+      out.public_key = std::string(*(char **)(service_addr + 0x7B8),
+                                 *(INT64 *)(service_addr + 0x7B8 + 0x10));
+    }
+
+    if (*(INT64 *)(service_addr + 0x7D8) == 0 ||
+        *(INT64 *)(service_addr + 0x7D8 + 0x10) == 0) {
+      out.private_key = std::string();
+    } else {
+      out.private_key = std::string(*(char **)(service_addr + 0x7D8),
+                                 *(INT64 *)(service_addr + 0x7D8 + 0x10));
     }
 
     if (*(INT64 *)(service_addr + 0x6E0) == 0 ||
@@ -373,6 +389,30 @@ INT64 WechatService::SendPatMsg(const std::wstring& room_id,
 INT64 WechatService::DoOCRTask(const std::wstring& img_path,
                                std::string& result) {
   return INT64();
+}
+
+INT64 WechatService::LockWeChat() {
+  INT64 success = -1;
+  UINT64 lock_mgr_addr = base_addr_ + offset::kGetLockWechatMgr;
+  UINT64 request_lock_addr = base_addr_ + offset::kRequestLockWechat;
+  func::__GetLockWechatMgr GetLockMgr = (func::__GetLockWechatMgr)lock_mgr_addr;
+  func::__RequestLockWechat request_lock =
+      (func::__RequestLockWechat)request_lock_addr;
+  UINT64 mgr = GetLockMgr();
+  success = request_lock(mgr);
+  return success;
+}
+
+INT64 WechatService::UnLockWeChat() {
+  INT64 success = -1;
+  UINT64 lock_mgr_addr = base_addr_ + offset::kGetLockWechatMgr;
+  UINT64 request_unlock_addr = base_addr_ + offset::kRequestUnLockWechat;
+  func::__GetLockWechatMgr GetLockMgr = (func::__GetLockWechatMgr)lock_mgr_addr;
+  func::__RequestUnLockWechat request_unlock =
+      (func::__RequestUnLockWechat)request_unlock_addr;
+  UINT64 mgr = GetLockMgr();
+  success = request_unlock(mgr);
+  return success;
 }
 
 void WechatService::SetBaseAddr(UINT64 addr) { base_addr_ = addr; }

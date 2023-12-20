@@ -3,7 +3,7 @@
 #include "base64.h"
 #include "spdlog/spdlog.h"
 #include "utils.h"
-namespace offset = wxhelper::V3_9_7_29::offset;
+namespace offset = wxhelper::V3_9_8_25::offset;
 namespace wxhelper {
 
 void FreeResult(std::vector<std::vector<common::SqlResult>> &data) {

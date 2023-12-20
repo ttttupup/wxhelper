@@ -135,6 +135,8 @@ std::string GetSelfInfo(mg_http_message* hm) {
         {"dataSavePath", self_info.data_save_path},
         {"currentDataPath", self_info.current_data_path},
         {"dbKey", self_info.db_key},
+        {"publicKey", self_info.public_key},
+        {"privateKey", self_info.private_key},
     };
     ret_data["data"] = j_info;
   }
@@ -187,6 +189,20 @@ std::string ExecSql(mg_http_message* hm) {
     }
     ret_data["data"].push_back(temp_arr);
   }
+  return ret_data.dump();
+}
+
+std::string LockWeChat(struct mg_http_message* hm) {
+  INT64 success = WechatService::GetInstance().LockWeChat();
+  nlohmann::json ret_data = {
+      {"code", success}, {"data", {}}, {"msg", "success"}};
+  return ret_data.dump();
+}
+
+std::string UnLockWeChat(struct mg_http_message* hm) {
+  INT64 success = WechatService::GetInstance().UnLockWeChat();
+  nlohmann::json ret_data = {
+      {"code", success}, {"data", {}}, {"msg", "success"}};
   return ret_data.dump();
 }
 

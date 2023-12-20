@@ -131,6 +131,8 @@ struct SelfInfoInner {
   std::string signature;
   std::string current_data_path;
   std::string db_key;
+  std::string public_key;
+  std::string private_key;
 };
 
 struct ContactInner {
@@ -205,7 +207,7 @@ struct ContactProfileInner {
 };
 
 }  // namespace common
-namespace V3_9_5_81 {
+namespace V3_9_8_25 {
 namespace function {
 
 typedef UINT64 (*__GetAccountService)();
@@ -284,6 +286,11 @@ typedef UINT64 (*__SendPatMsg)(UINT64, UINT64);
 typedef UINT64 (*__GetOCRManager)();
 typedef UINT64 (*__DoOCRTask)(UINT64, UINT64, UINT64, UINT64, UINT64);
 
+
+typedef UINT64 (*__GetLockWechatMgr)();
+typedef UINT64 (*__RequestLockWechat)(UINT64);
+typedef UINT64 (*__RequestUnLockWechat)(UINT64);
+
 }  // namespace function
 namespace prototype {
 
@@ -343,51 +350,48 @@ struct WeChatStr {
 
 }  // namespace prototype
 namespace offset {
-const UINT64 kGetAccountServiceMgr = 0x8c1230;
+const UINT64 kGetAccountServiceMgr = 0x94e510;
 const UINT64 kSyncMsg = 0xc39680;
 const UINT64 kSyncMsgNext = 0xc39680;
-const UINT64 kGetCurrentDataPath = 0xf5d130;
-const UINT64 kGetAppDataSavePath = 0x12d7040;
-const UINT64 kGetSendMessageMgr = 0x8c00e0;
-const UINT64 kSendTextMsg = 0xfcd8d0;
-const UINT64 kFreeChatMsg = 0x8aaa00;
+const UINT64 kGetCurrentDataPath = 0x101a920;
+const UINT64 kGetAppDataSavePath = 0x13a5b90;
+const UINT64 kGetSendMessageMgr = 0x94cd10;
+const UINT64 kSendTextMsg = 0x1091F70;
+const UINT64 kFreeChatMsg = 0x94e590;
 
-const UINT64 kDoAddMsg = 0x1010d80;
+const UINT64 kDoAddMsg = 0x10d9450;
 const UINT64 kSendImageMsg = 0xfc3d30;
 const UINT64 kChatMsgInstanceCounter = 0x8c7fd0;
 const UINT64 kSendFileMsg = 0xdd27f0;
 const UINT64 kGetAppMsgMgr = 0x8c33f0;
-const UINT64 kGetContactMgr = 0x8ae3d0;
-const UINT64 kGetContactList = 0xeab270;
+const UINT64 kGetContactMgr = 0x93a570;
+const UINT64 kGetContactList = 0xf6cb70;
 
-const UINT64 k_sqlite3_exec = 0x252e340;
-const UINT64 k_sqlite3_prepare = 0x2535eb0;
-const UINT64 k_sqlite3_open = 0x256d6b0;
-const UINT64 k_sqlite3_backup_init = 0x24e8450;
-const UINT64 k_sqlite3_errcode = 0x256bfb0;
-const UINT64 k_sqlite3_close = 0x256a110;
-const UINT64 k_sqlite3_step = 0x24f2350;
-const UINT64 k_sqlite3_column_count = 0x24f2b70;
-const UINT64 k_sqlite3_column_name = 0x24f3570;
-const UINT64 k_sqlite3_column_type = 0x24f33c0;
-const UINT64 k_sqlite3_column_blob = 0x24f2ba0;
-const UINT64 k_sqlite3_column_bytes = 0x24f2c90;
-const UINT64 k_sqlite3_finalize = 0x24f1400;
+const UINT64 k_sqlite3_exec = 0x26e4f20;
+const UINT64 k_sqlite3_prepare = 0x26ecaa0;
+const UINT64 k_sqlite3_open = 0x27242a0;
+const UINT64 k_sqlite3_step = 0x26a8f30;
+const UINT64 k_sqlite3_column_count = 0x26a9750;
+const UINT64 k_sqlite3_column_name = 0x26aa150;
+const UINT64 k_sqlite3_column_type = 0x26a9fa0;
+const UINT64 k_sqlite3_column_blob = 0x26a9780;
+const UINT64 k_sqlite3_column_bytes = 0x26a9870;
+const UINT64 k_sqlite3_finalize = 0x26a7fe0;
 
-const UINT64 kGPInstance = 0x3a6f908;
+const UINT64 kGPInstance = 0x3d8b4f8;
 const UINT64 kMicroMsgDB = 0xb8;
 const UINT64 kChatMsgDB = 0x2c8;
 const UINT64 kMiscDB = 0x5f0;
-const UINT64 kEmotionDB = 0x838;
-const UINT64 kMediaDB = 0xef8;
-const UINT64 kBizchatMsgDB = 0x1a70;
-const UINT64 kFunctionMsgDB = 0x1b48;
+const UINT64 kEmotionDB = 0x888;
+const UINT64 kMediaDB = 0xF48;
+const UINT64 kBizchatMsgDB = 0x1AC0;
+const UINT64 kFunctionMsgDB = 0x1b98;
 const UINT64 kDBName = 0x28;
 const UINT64 kStorageStart = 0x0;
 const UINT64 kStorageEnd = 0x0;
-const UINT64 kMultiDBMgr = 0x3acfb68;
-const UINT64 kPublicMsgMgr = 0x3acc268;
-const UINT64 kFavoriteStorageMgr = 0x3acf0d0;
+const UINT64 kMultiDBMgr = 0x3e00910;
+const UINT64 kPublicMsgMgr = 0x3dfe098;
+const UINT64 kFavoriteStorageMgr = 0x3e01478;
 
 const UINT64 kChatRoomMgr = 0x8e9d30;
 const UINT64 kGetChatRoomDetailInfo = 0xe73590;
@@ -444,99 +448,13 @@ const UINT64 kSendPatMsg = 0x195f340;
 const UINT64 kGetOCRManager = 0x999780;
 const UINT64 kDoOCRTask = 0x190b2a0;
 
-}  // namespace offset
-}  // namespace V3_9_5_81
-
-namespace V3_9_7_29 {
-
-namespace prototype {
-struct WeChatString {
-  wchar_t *ptr;
-  DWORD length;
-  DWORD max_length;
-  INT64 c_ptr = 0;
-  DWORD c_len = 0;
-  WeChatString() { WeChatString(NULL); }
-
-  WeChatString(const std::wstring &s) {
-    ptr = (wchar_t *)(s.c_str());
-    length = static_cast<DWORD>(s.length());
-    max_length = static_cast<DWORD>(s.length());
-  }
-  WeChatString(const wchar_t *pStr) { WeChatString((wchar_t *)pStr); }
-  WeChatString(int tmp) {
-    ptr = NULL;
-    length = 0x0;
-    max_length = 0x0;
-  }
-  WeChatString(wchar_t *pStr) {
-    ptr = pStr;
-    length = static_cast<DWORD>(wcslen(pStr));
-    max_length = static_cast<DWORD>(wcslen(pStr));
-  }
-  void set_value(const wchar_t *pStr) {
-    ptr = (wchar_t *)pStr;
-    length = static_cast<DWORD>(wcslen(pStr));
-    max_length = static_cast<DWORD>(wcslen(pStr) * 2);
-  }
-};
-
-}  // namespace prototype
-
-namespace offset {
-const UINT64 k_sqlite3_exec = 0x2654db0;
-const UINT64 k_sqlite3_prepare = 0x265c920;
-const UINT64 k_sqlite3_open = 0x2694120;
-const UINT64 k_sqlite3_backup_init = 0x260eec0;
-const UINT64 k_sqlite3_errcode = 0x2692a20;
-const UINT64 k_sqlite3_close = 0x2690b80;
-const UINT64 k_sqlite3_step = 0x2618dc0;
-const UINT64 k_sqlite3_column_count = 0x26195e0;
-const UINT64 k_sqlite3_column_name = 0x2619fe0;
-const UINT64 k_sqlite3_column_type = 0x2619e30;
-const UINT64 k_sqlite3_column_blob = 0x2619610;
-const UINT64 k_sqlite3_column_bytes = 0x2619700;
-const UINT64 k_sqlite3_finalize = 0x2617e70;
-
-const UINT64 kGPInstance = 0x3c19fe8;
-const UINT64 kMicroMsgDB = 0xb8;
-const UINT64 kChatMsgDB = 0x2c8;
-const UINT64 kMiscDB = 0x5f0;
-const UINT64 kEmotionDB = 0x888;
-const UINT64 kMediaDB = 0xf48;
-const UINT64 kBizchatMsgDB = 0x1ac0;
-const UINT64 kFunctionMsgDB = 0x1b98;
-const UINT64 kDBName = 0x28;
-const UINT64 kStorageStart = 0x0;
-const UINT64 kStorageEnd = 0x0;
-const UINT64 kMultiDBMgr = 0x3c8ef40;
-const UINT64 kPublicMsgMgr = 0x3c8c6c8;
-const UINT64 kFavoriteStorageMgr = 0x3c8fac0;
-
-const UINT64 kGetSendMessageMgr = 0x8fe740;
-const UINT64 kFreeChatMsg = 0x8fffc0;
-const UINT64 kSendTextMsg = 0x1024370;
-const UINT64 kDoAddMsg = 0x106b810;
-const UINT64 kGetContactMgr = 0x8ebfb0;
-const UINT64 kGetContactList = 0xeff050;
-const UINT64 kGetAccountServiceMgr = 0x8fff40;
-const UINT64 kGetAppDataSavePath = 0x1336c60;
-const UINT64 kGetCurrentDataPath = 0xfacb50;
-
+const UINT64 kGetLockWechatMgr = 0xa727b0;
+const UINT64 kRequestLockWechat = 0xa2cc70;
+const UINT64 kRequestUnLockWechat = 0xa2cf10;
 
 }  // namespace offset
-namespace function {
-typedef UINT64 (*__GetSendMessageMgr)();
-typedef UINT64 (*__SendTextMsg)(UINT64, UINT64, UINT64, UINT64, UINT64, UINT64,
-                                UINT64, UINT64);
-typedef UINT64 (*__FreeChatMsg)(UINT64);
-typedef UINT64 (*__GetContactMgr)();
-typedef UINT64 (*__GetContactList)(UINT64, UINT64);
-typedef UINT64(*__GetAccountService)();
-typedef UINT64 (*__GetDataSavePath)(UINT64);
-typedef UINT64 (*__GetCurrentDataPath)(UINT64);
-}  // namespace function
-}  // namespace V3_9_7_29
+}  // namespace V3_9_8_15
+
 }  // namespace wxhelper
 
 #endif

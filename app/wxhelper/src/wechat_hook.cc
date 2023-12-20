@@ -12,7 +12,7 @@
 #include "spdlog/spdlog.h"
 #include "thread_pool.h"
 #include "wxutils.h"
-namespace offset = wxhelper::V3_9_7_29::offset;
+namespace offset = wxhelper::V3_9_8_25::offset;
 namespace common = wxhelper::common;
 
 namespace hook {

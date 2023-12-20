@@ -70,6 +70,8 @@ class WechatService : public base::Singleton<WechatService> {
                    const std::string& index_page);
   INT64 SendPatMsg(const std::wstring& room_id, const std::wstring& wxid);
   INT64 DoOCRTask(const std::wstring& img_path, std::string& result);
+  INT64 LockWeChat();
+  INT64 UnLockWeChat();
   void SetBaseAddr(UINT64 addr);
   void SetJsApiAddr(UINT64 addr);
 

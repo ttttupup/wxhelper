@@ -12,6 +12,8 @@ std::string CheckLogin(struct mg_http_message *hm);
 std::string GetSelfInfo(struct mg_http_message *hm);
 std::string GetDBInfo(struct mg_http_message *hm);
 std::string ExecSql(struct mg_http_message *hm);
+std::string LockWeChat(struct mg_http_message *hm);
+std::string UnLockWeChat(struct mg_http_message *hm);
 }  // namespace wxhelper
 
 #endif
