@@ -11,8 +11,16 @@
 #define STR2LL(str) (base::utils::IsDigit(str) ? stoll(str) : 0)
 #define STR2I(str) (base::utils::IsDigit(str) ? stoi(str) : 0)
 namespace wxhelper {
+
 std::wstring GetWStringParam(nlohmann::json data, std::string key) {
   return base::utils::Utf8ToWstring(data[key].get<std::string>());
+}
+
+std::vector<std::wstring> GetArrayParam(nlohmann::json data, std::string key) {
+  std::vector<std::wstring> result;
+  std::wstring param = GetWStringParam(data, key);
+  result = base::utils::split(param, L',');
+  return result;
 }
 
 int GetIntParam(nlohmann::json data, std::string key) {
@@ -203,6 +211,93 @@ std::string UnLockWeChat(struct mg_http_message* hm) {
   INT64 success = WechatService::GetInstance().UnLockWeChat();
   nlohmann::json ret_data = {
       {"code", success}, {"data", {}}, {"msg", "success"}};
+  return ret_data.dump();
+}
+
+
+std::string EnterWeChat(struct mg_http_message* hm) {
+  INT64 success = WechatService::GetInstance().EnterWeChat();
+  nlohmann::json ret_data = {
+      {"code", success}, {"data", {}}, {"msg", "success"}};
+  return ret_data.dump();
+}
+
+std::string ForwardMsg(struct mg_http_message* hm){
+  nlohmann::json j_param = nlohmann::json::parse(
+      hm->body.ptr, hm->body.ptr + hm->body.len, nullptr, false);
+  INT64 msg_id = GetInt64Param(j_param, "msgId");
+  std::wstring wxid = GetWStringParam(j_param, "wxid");
+  INT64 success =
+      wxhelper::WechatService::GetInstance().ForwardMsg(msg_id, wxid);
+  nlohmann::json ret_data = {
+      {"code", success}, {"msg", "success"}, {"data", {}}};
+  return ret_data.dump();
+}
+
+std::string SendImageMsg(struct mg_http_message* hm){
+  nlohmann::json j_param = nlohmann::json::parse(
+      hm->body.ptr, hm->body.ptr + hm->body.len, nullptr, false);
+  std::wstring wxid = GetWStringParam(j_param, "wxid");
+  std::wstring path = GetWStringParam(j_param, "imagePath");
+  INT64 success =
+      wxhelper::WechatService::GetInstance().SendImageMsg(wxid, path);
+  nlohmann::json ret_data = {
+      {"code", success}, {"data", {}}, {"msg", "success"}};
+  return ret_data.dump();
+}
+
+std::string SendFileMsg(struct mg_http_message* hm){
+  nlohmann::json j_param = nlohmann::json::parse(
+      hm->body.ptr, hm->body.ptr + hm->body.len, nullptr, false);
+  std::wstring wxid = GetWStringParam(j_param, "wxid");
+  std::wstring path = GetWStringParam(j_param, "filePath");
+  INT64 success =
+      wxhelper::WechatService::GetInstance().SendFileMsg(wxid, path);
+  nlohmann::json ret_data = {
+      {"code", success}, {"data", {}}, {"msg", "success"}};
+  return ret_data.dump();
+}
+
+std::string SendAtText(struct mg_http_message* hm) {
+  nlohmann::json j_param = nlohmann::json::parse(
+      hm->body.ptr, hm->body.ptr + hm->body.len, nullptr, false);
+  std::wstring chat_room_id = GetWStringParam(j_param, "chatRoomId");
+  std::vector<std::wstring> wxids = GetArrayParam(j_param, "wxids");
+  std::wstring msg = GetWStringParam(j_param, "msg");
+  std::vector<std::wstring> wxid_list;
+  for (unsigned int i = 0; i < wxids.size(); i++) {
+    wxid_list.push_back(wxids[i]);
+  }
+  INT64 success = wxhelper::WechatService::GetInstance().SendAtText(
+      chat_room_id, wxid_list, msg);
+  nlohmann::json ret_data = {
+      {"code", success}, {"msg", "success"}, {"data", {}}};
+  return ret_data.dump();
+}
+
+std::string SendMultiAtText(struct mg_http_message* hm) {
+  nlohmann::json j_param = nlohmann::json::parse(
+      hm->body.ptr, hm->body.ptr + hm->body.len, nullptr, false);
+  nlohmann::json array = j_param["at"];
+  std::vector<std::pair<std::wstring, std::wstring>> at_vector;
+  if (array.is_array()) {
+    for (const auto& item : array) {
+      at_vector.push_back(std::make_pair(GetWStringParam(item, "wxid"),
+                                         GetWStringParam(item, "msg")));
+    }
+  }
+  std::wstring chat_room_id = GetWStringParam(j_param, "chatRoomId");
+  INT64 success = wxhelper::WechatService::GetInstance().SendMultiAtText(
+      chat_room_id, at_vector);
+  nlohmann::json ret_data = {
+      {"code", success}, {"msg", "success"}, {"data", {}}};
+  return ret_data.dump();
+}
+
+std::string GetLoginUrl(struct mg_http_message* hm) {
+  std::string url = wxhelper::WechatService::GetInstance().GetLoginUrl();
+  nlohmann::json ret_data = {
+      {"code", 1}, {"msg", "success"}, {"data", {{"loginUrl", url}}}};
   return ret_data.dump();
 }
 

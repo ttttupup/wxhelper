@@ -62,6 +62,12 @@ bool IsDigit(const std::string &str);
 std::string Bytes2Hex(const BYTE *bytes, const int length);
 
 bool IsTextUtf8(const char *str, INT64 length);
+
+template <typename T>
+static T *WxHeapAlloc(size_t n) {
+  return (T *)HeapAlloc(GetProcessHeap(), 0, n);
+}
+
 }  // namespace utils
 }  // namespace base
 #endif

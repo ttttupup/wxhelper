@@ -93,6 +93,9 @@ std::string ReadWstringThenConvert(INT64 addr) {
   return base::utils::WstringToUtf8(wstr);
 }
 
+INT64 DecodeImage(const wchar_t* file_path, const wchar_t* save_dir){
+  return -1;
+}
 
 
 }  // namespace wxutils

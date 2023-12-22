@@ -14,6 +14,13 @@ std::string GetDBInfo(struct mg_http_message *hm);
 std::string ExecSql(struct mg_http_message *hm);
 std::string LockWeChat(struct mg_http_message *hm);
 std::string UnLockWeChat(struct mg_http_message *hm);
+std::string EnterWeChat(struct mg_http_message* hm);
+std::string ForwardMsg(struct mg_http_message* hm);
+std::string SendImageMsg(struct mg_http_message* hm);
+std::string SendFileMsg(struct mg_http_message* hm);
+std::string SendAtText(struct mg_http_message* hm);
+std::string SendMultiAtText(struct mg_http_message* hm);
+std::string GetLoginUrl(struct mg_http_message* hm);
 }  // namespace wxhelper
 
 #endif

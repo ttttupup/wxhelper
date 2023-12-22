@@ -72,6 +72,11 @@ class WechatService : public base::Singleton<WechatService> {
   INT64 DoOCRTask(const std::wstring& img_path, std::string& result);
   INT64 LockWeChat();
   INT64 UnLockWeChat();
+  INT64 EnterWeChat();
+  INT64 SendMultiAtText(
+      const std::wstring& room_id,
+      const std::vector<std::pair<std::wstring, std::wstring>>& at);
+  std::string GetLoginUrl();
   void SetBaseAddr(UINT64 addr);
   void SetJsApiAddr(UINT64 addr);
 

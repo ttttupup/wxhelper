@@ -34,6 +34,13 @@ void GlobalManager::initialize(HMODULE module) {
   http_server->AddHttpApiUrl("/api/execSql", ExecSql);
   http_server->AddHttpApiUrl("/api/lockWeChat", LockWeChat);
   http_server->AddHttpApiUrl("/api/unlockWeChat", UnLockWeChat);
+  http_server->AddHttpApiUrl("/api/clickEnterWeChat", EnterWeChat);
+  http_server->AddHttpApiUrl("/api/forwardMsg", ForwardMsg);
+  http_server->AddHttpApiUrl("/api/sendImagesMsg", SendImageMsg);
+  http_server->AddHttpApiUrl("/api/sendFileMsg", SendFileMsg);
+  http_server->AddHttpApiUrl("/api/sendAtText", SendAtText);
+  http_server->AddHttpApiUrl("/api/sendMultiAtText", SendMultiAtText);
+  http_server->AddHttpApiUrl("/api/getLoginUrl", GetLoginUrl);
 
   http_server->Start();
   base::ThreadPool::GetInstance().Create(2, 8);

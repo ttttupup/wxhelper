@@ -1,10 +1,27 @@
 #include "wechat_service.h"
 #include "wxutils.h"
 #include "utils.h"
+#include "memory.h"
+#include "db.h"
 namespace offset = wxhelper::V3_9_8_25::offset;
 namespace prototype = wxhelper::V3_9_8_25::prototype;
 namespace func = wxhelper::V3_9_8_25::function;
 namespace wxhelper {
+
+prototype::WeChatString *BuildWechatString(const std::wstring &ws) {
+  prototype::WeChatString *p =
+      base::utils::WxHeapAlloc<prototype::WeChatString>(
+          sizeof(prototype::WeChatString));
+  wchar_t *p_chat_room_id =
+      base::utils::WxHeapAlloc<wchar_t>((ws.size() + 1) * 2);
+  wmemcpy(p_chat_room_id, ws.c_str(), ws.size() + 1);
+  p->ptr = p_chat_room_id;
+  p->length = static_cast<DWORD>(ws.size());
+  p->max_length = static_cast<DWORD>(ws.size());
+  p->c_len = 0;
+  p->c_ptr = 0;
+  return p;
+}
 WechatService::~WechatService() {}
 
 INT64 WechatService::CheckLogin() {
@@ -20,7 +37,7 @@ INT64 WechatService::CheckLogin() {
 }
 
 INT64 WechatService::GetSelfInfo(common::SelfInfoInner& out) { 
-    INT64 success = -1;
+  INT64 success = -1;
   UINT64 accout_service_addr = base_addr_ + offset::kGetAccountServiceMgr;
   UINT64 get_app_data_save_path_addr = base_addr_ + offset::kGetAppDataSavePath;
   UINT64 get_current_data_path_addr = base_addr_ + offset::kGetCurrentDataPath;
@@ -225,12 +242,99 @@ INT64 WechatService::SendTextMsg(const std::wstring& wxid,
 
 INT64 WechatService::SendImageMsg(const std::wstring& wxid,
                                   const std::wstring& image_path) {
-  return INT64();
+  INT64 success = -1;
+  prototype::WeChatString to_user(wxid);
+  prototype::WeChatString image_full_path(image_path);
+  UINT64 send_message_mgr_addr = base_addr_ + offset::kGetSendMessageMgr;
+  UINT64 send_img_addr = base_addr_ + offset::kSendImageMsg;
+  UINT64 new_chat_msg_addr = base_addr_ + offset::kChatMsgInstanceCounter;
+  UINT64 free_chat_msg_addr = base_addr_ + offset::kFreeChatMsg;
+  func::__NewChatMsg new_chat_msg = (func::__NewChatMsg)new_chat_msg_addr;
+  func::__GetSendMessageMgr mgr =
+      (func::__GetSendMessageMgr)send_message_mgr_addr;
+  func::__SendImageMsg send_img = (func::__SendImageMsg)send_img_addr;
+  func::__FreeChatMsg free = (func::__FreeChatMsg)free_chat_msg_addr;
+
+  char chat_msg[0x460] = {0};
+  char chat_msg_temp[0x460] = {0};
+
+  UINT64 p_chat_msg_temp = new_chat_msg(reinterpret_cast<UINT64>(&chat_msg_temp));
+  UINT64 temp1 =0;
+  UINT64 temp2 =0;
+  UINT64* flag[10] = {};
+  flag[8] = &temp1;
+  flag[9] = &temp2;
+  flag[1] = reinterpret_cast<UINT64*>(p_chat_msg_temp);
+  
+  UINT64 p_chat_msg = new_chat_msg(reinterpret_cast<UINT64>(&chat_msg));
+  UINT64 send_mgr = mgr();
+  send_img(send_mgr, p_chat_msg,
+           reinterpret_cast<UINT64>(&to_user),
+           reinterpret_cast<UINT64>(&image_full_path),
+           reinterpret_cast<UINT64>(&flag));
+  free(p_chat_msg);
+  free(p_chat_msg_temp);
+  success = 1;
+  return success;
 }
 
 INT64 WechatService::SendFileMsg(const std::wstring& wxid,
                                  const std::wstring& file_path) {
-  return INT64();
+  INT64 success = -1;
+  prototype::WeChatString* to_user= (prototype::WeChatString*)HeapAlloc(GetProcessHeap(),0,sizeof(prototype::WeChatString));
+  wchar_t * ptr_wxid = (wchar_t*)HeapAlloc(GetProcessHeap(),0,(wxid.length()+1)*2);
+  wmemcpy(ptr_wxid,wxid.c_str(),wxid.length()+1);
+  to_user->ptr = ptr_wxid;
+  to_user->length = static_cast<DWORD>(wxid.length());
+  to_user->max_length = static_cast<DWORD>(wxid.length());
+  to_user->c_len=0;
+  to_user->c_ptr=0;
+  prototype::WeChatString* file_full_path= (prototype::WeChatString*)HeapAlloc(GetProcessHeap(),0,sizeof(prototype::WeChatString));
+  wchar_t * ptr_path = (wchar_t*)HeapAlloc(GetProcessHeap(),0,(file_path.length()+1)*2);
+  wmemcpy(ptr_path,file_path.c_str(),file_path.length()+1);
+  file_full_path->ptr = ptr_path;
+  file_full_path->length = static_cast<DWORD>(file_path.length());
+  file_full_path->max_length = static_cast<DWORD>(file_path.length());
+  file_full_path->c_len = 0;
+  file_full_path->c_ptr = 0;
+
+  UINT64 get_app_msg_mgr_addr = base_addr_ + offset::kGetAppMsgMgr;
+  UINT64 send_file_addr = base_addr_ + offset::kSendFileMsg;
+  UINT64 new_chat_msg_addr = base_addr_ + offset::kChatMsgInstanceCounter;
+  UINT64 free_chat_msg_addr = base_addr_ + offset::kFreeChatMsg;
+  func::__NewChatMsg new_chat_msg = (func::__NewChatMsg)new_chat_msg_addr;
+  func::__GetAppMsgMgr get_app_mgr =
+      (func::__GetAppMsgMgr)get_app_msg_mgr_addr;
+  func::__SendFile send_file = (func::__SendFile)send_file_addr;
+  func::__FreeChatMsg free = (func::__FreeChatMsg)free_chat_msg_addr;
+
+ 
+  char* chat_msg= (char*)HeapAlloc(GetProcessHeap(),0,0x460);
+
+  UINT64* temp1 = (UINT64*)HeapAlloc(GetProcessHeap(),0,sizeof(UINT64)*4);
+  UINT64* temp2 = (UINT64*)HeapAlloc(GetProcessHeap(),0,sizeof(UINT64)*4);
+  UINT64* temp3 = (UINT64*)HeapAlloc(GetProcessHeap(),0,sizeof(UINT64)*4);
+  UINT64* temp4 = (UINT64*)HeapAlloc(GetProcessHeap(),0,sizeof(UINT64)*4);
+  ZeroMemory(temp1,sizeof(UINT64)*4);
+  ZeroMemory(temp2,sizeof(UINT64)*4);
+  ZeroMemory(temp3,sizeof(UINT64)*4);
+  ZeroMemory(temp4,sizeof(UINT64)*4);
+  *temp4=0x1F;
+  UINT64 app_mgr = get_app_mgr();
+  send_file(app_mgr, reinterpret_cast<UINT64>(chat_msg),
+            reinterpret_cast<UINT64>(to_user),
+            reinterpret_cast<UINT64>(file_full_path), 1,
+            reinterpret_cast<UINT64>(temp1), 0, reinterpret_cast<UINT64>(temp2),
+            0, reinterpret_cast<UINT64>(temp3), 0, 0);
+  free(reinterpret_cast<UINT64>(chat_msg));  
+  HeapFree(GetProcessHeap(),0,to_user);
+  HeapFree(GetProcessHeap(),0,file_full_path);
+  HeapFree(GetProcessHeap(),0,temp1);
+  HeapFree(GetProcessHeap(),0,temp2);
+  HeapFree(GetProcessHeap(),0,temp3);
+  HeapFree(GetProcessHeap(),0,temp4);
+  success = 1;
+  return success;
 }
 
 INT64 WechatService::GetContacts(std::vector<common::ContactInner>& vec) {
@@ -311,7 +415,21 @@ INT64 WechatService::QuitChatRoom(const std::wstring& room_id) {
 }
 
 INT64 WechatService::ForwardMsg(UINT64 msg_id, const std::wstring& wxid) {
-  return INT64();
+  INT64 success = -1;
+  UINT64 forward_addr = base_addr_ + offset::kForwardMsg;
+  func::__ForwardMsg forward_msg = (func::__ForwardMsg)forward_addr;
+  INT64 index = 0;
+  INT64 local_id = wxhelper::DB::GetInstance().GetLocalIdByMsgId(msg_id, index);
+  if (local_id <= 0 || index >> 32 == 0) {
+    success = -2;
+    return success;
+  }
+  LARGE_INTEGER l;
+  l.HighPart = index >> 32;
+  l.LowPart = (DWORD)local_id;
+  prototype::WeChatString *recv = BuildWechatString(wxid);
+  success = forward_msg(reinterpret_cast<UINT64>(recv), l.QuadPart, 0x4, 0x0);
+  return success;
 }
 
 INT64 WechatService::GetSNSFirstPage() { return INT64(); }
@@ -328,12 +446,74 @@ INT64 WechatService::AddFavFromImage(const std::wstring& wxid,
 INT64 WechatService::SendAtText(const std::wstring& room_id,
                                 const std::vector<std::wstring>& wxids,
                                 const std::wstring& msg) {
-  return INT64();
+  INT64 success = -1;
+  std::vector<prototype::WeChatString> wxid_list;
+  common::VectorInner *list = (common::VectorInner *)&wxid_list;
+  std::wstring at_msg = L"";
+  int number = 0;
+  for (unsigned int i = 0; i < wxids.size(); i++) {
+    std::wstring nickname;
+    std::wstring at_all = L"notify@all";
+    if (at_all.compare(wxids[i]) == 0) {
+      nickname = L"\u6240\u6709\u4eba";
+    } else {
+      nickname = GetContactOrChatRoomNickname(wxids[i]);
+    }
+    if (nickname.length() == 0) {
+      continue;
+    }
+    prototype::WeChatString id(wxids[i]);
+    wxid_list.push_back(id);
+    at_msg = at_msg + L"@" + nickname + L" ";
+    number++;
+  }
+  if (number < 1) {
+    return success;
+  }
+  at_msg += msg;
+
+  INT64 head = (INT64)&list->start;
+  prototype::WeChatString to_user(room_id);
+  prototype::WeChatString text_msg(at_msg);
+  UINT64 send_message_mgr_addr = base_addr_ + offset::kGetSendMessageMgr;
+  UINT64 send_text_msg_addr = base_addr_ + offset::kSendTextMsg;
+  UINT64 free_chat_msg_addr = base_addr_ + offset::kFreeChatMsg;
+  char chat_msg[0x460] = {0};
+  func::__GetSendMessageMgr mgr= (func::__GetSendMessageMgr)send_message_mgr_addr;
+  func::__SendTextMsg send= (func::__SendTextMsg)send_text_msg_addr;
+  func::__FreeChatMsg free= (func::__FreeChatMsg)free_chat_msg_addr;
+  mgr();
+  success = send(reinterpret_cast<UINT64>(&chat_msg),
+                 reinterpret_cast<UINT64>(&to_user),
+                 reinterpret_cast<UINT64>(&text_msg), head, 1, 1, 0, 0);
+  free(reinterpret_cast<UINT64>(&chat_msg));
+  return success;
 }
 
 std::wstring WechatService::GetContactOrChatRoomNickname(
     const std::wstring& wxid) {
-  return std::wstring();
+  prototype::WeChatString to_user(wxid);
+  UINT64 get_contact_mgr_addr = base_addr_ + offset::kGetContactMgr;
+  UINT64 new_contact_addr = base_addr_ + offset::kNewContact;
+  UINT64 get_contact_addr = base_addr_ + offset::kGetContact;
+  UINT64 free_contact_addr = base_addr_ + offset::kFreeContact;
+  func::__GetContactMgr get_contact_mgr =
+      (func::__GetContactMgr)get_contact_mgr_addr;
+  func::__GetContact get_contact = (func::__GetContact)get_contact_addr;
+  func::__NewContact new_contact = (func::__NewContact)new_contact_addr;
+  func::__FreeContact free_contact = (func::__FreeContact)free_contact_addr;
+  char buff[0x6A9] = {0};
+  UINT64 contact = new_contact(reinterpret_cast<UINT64>(&buff));
+  UINT64 mgr = get_contact_mgr();
+  INT64 success = get_contact(mgr, reinterpret_cast<UINT64>(&to_user), contact);
+  if (success == 1) {
+    std::wstring nickname = wxutils::ReadWstring(contact + 0xA0);
+    free_contact(contact);
+    return nickname;
+  } else {
+    free_contact(contact);
+    return L"";
+  }
 }
 
 INT64 WechatService::GetContactByWxid(const std::wstring& wxid,
@@ -413,6 +593,78 @@ INT64 WechatService::UnLockWeChat() {
   UINT64 mgr = GetLockMgr();
   success = request_unlock(mgr);
   return success;
+}
+
+INT64 WechatService::EnterWeChat() {
+  INT64 success = -1;
+  UINT64 click_cb_addr = base_addr_ + offset::kOnLoginBtnClick;
+  func::__OnLoginBtnClick cb = (func::__OnLoginBtnClick)click_cb_addr;
+  auto vec =
+      base::memory::ScanAndMatchValue(base_addr_ + 0x34e0c18, 0x1000, 0x8);
+  for (int i = 0; i < vec.size(); i++) {
+    INT64 ptr = vec.at(i);
+    if (*(INT64 *)ptr == base_addr_ + 0x34e0c18) {
+      INT64 login_wnd = ptr;
+      success = cb(ptr);
+      break;
+    }
+  }
+  return success;
+}
+
+INT64 WechatService::SendMultiAtText(
+    const std::wstring &room_id,
+    const std::vector<std::pair<std::wstring, std::wstring>> &at) {
+  INT64 success = -1;
+  std::vector<prototype::WeChatString> wxid_list;
+  common::VectorInner *list = (common::VectorInner *)&wxid_list;
+  std::wstring at_msg = L"";
+  int number = 0;
+  for (unsigned int i = 0; i < at.size(); i++) {
+    std::wstring nickname;
+    std::wstring at_all = L"notify@all";
+    if (at_all.compare(at[i].first) == 0) {
+      nickname = L"\u6240\u6709\u4eba";
+    } else {
+      nickname = GetContactOrChatRoomNickname(at[i].first);
+    }
+    if (nickname.length() == 0) {
+      continue;
+    }
+    prototype::WeChatString id(at[i].first);
+    wxid_list.push_back(id);
+    at_msg = at_msg + L"@" + nickname + L" "+ at[i].second + L" ";
+    number++;
+  }
+  if (number < 1) {
+    return success;
+  }
+  INT64 head = (INT64)&list->start;
+  prototype::WeChatString to_user(room_id);
+  prototype::WeChatString text_msg(at_msg);
+  UINT64 send_message_mgr_addr = base_addr_ + offset::kGetSendMessageMgr;
+  UINT64 send_text_msg_addr = base_addr_ + offset::kSendTextMsg;
+  UINT64 free_chat_msg_addr = base_addr_ + offset::kFreeChatMsg;
+  char chat_msg[0x460] = {0};
+  func::__GetSendMessageMgr mgr =
+      (func::__GetSendMessageMgr)send_message_mgr_addr;
+  func::__SendTextMsg send = (func::__SendTextMsg)send_text_msg_addr;
+  func::__FreeChatMsg free = (func::__FreeChatMsg)free_chat_msg_addr;
+  mgr();
+  success = send(reinterpret_cast<UINT64>(&chat_msg),
+                 reinterpret_cast<UINT64>(&to_user),
+                 reinterpret_cast<UINT64>(&text_msg), head, 1, 1, 0, 0);
+  free(reinterpret_cast<UINT64>(&chat_msg));
+  return success;
+}
+
+std::string WechatService::GetLoginUrl(){
+  INT64 success = -1;
+  UINT64 login_mgr_addr = base_addr_ + offset::kGetQRCodeLoginMgr;
+  func::__GetQRCodeLoginMgr get = (func::__GetQRCodeLoginMgr)login_mgr_addr;
+  UINT64 addr = get();
+  std::string login_url = wxutils::ReadWeChatStr(addr + 0x68);
+  return "http://weixin.qq.com/x/" + login_url;
 }
 
 void WechatService::SetBaseAddr(UINT64 addr) { base_addr_ = addr; }

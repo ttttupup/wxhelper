@@ -290,6 +290,8 @@ typedef UINT64 (*__DoOCRTask)(UINT64, UINT64, UINT64, UINT64, UINT64);
 typedef UINT64 (*__GetLockWechatMgr)();
 typedef UINT64 (*__RequestLockWechat)(UINT64);
 typedef UINT64 (*__RequestUnLockWechat)(UINT64);
+typedef UINT64 (*__OnLoginBtnClick)(UINT64);
+typedef UINT64 (*__GetQRCodeLoginMgr)();
 
 }  // namespace function
 namespace prototype {
@@ -360,10 +362,10 @@ const UINT64 kSendTextMsg = 0x1091F70;
 const UINT64 kFreeChatMsg = 0x94e590;
 
 const UINT64 kDoAddMsg = 0x10d9450;
-const UINT64 kSendImageMsg = 0xfc3d30;
-const UINT64 kChatMsgInstanceCounter = 0x8c7fd0;
-const UINT64 kSendFileMsg = 0xdd27f0;
-const UINT64 kGetAppMsgMgr = 0x8c33f0;
+const UINT64 kSendImageMsg = 0x1087950;
+const UINT64 kChatMsgInstanceCounter = 0x956e00;
+const UINT64 kSendFileMsg = 0xea0850;
+const UINT64 kGetAppMsgMgr = 0x951cb0;
 const UINT64 kGetContactMgr = 0x93a570;
 const UINT64 kGetContactList = 0xf6cb70;
 
@@ -411,7 +413,7 @@ const UINT64 kHookLog = 0x1304e60;
 
 const UINT64 kCreateChatRoom = 0xe63340;
 const UINT64 kQuitChatRoom = 0xe6e3b0;
-const UINT64 kForwardMsg = 0xfcd0f0;
+const UINT64 kForwardMsg = 0x1091660;
 
 const UINT64 kOnSnsTimeLineSceneFinish = 0x1a73150;
 const UINT64 kSNSGetFirstPage = 0x1a51dd0;
@@ -423,9 +425,9 @@ const UINT64 kAddFavFromMsg = 0x1601520;
 const UINT64 kGetChatMgr = 0x8f0400;
 const UINT64 kGetFavoriteMgr = 0x8c69b0;
 const UINT64 kAddFavFromImage = 0x160b920;
-const UINT64 kGetContact = 0xEA5F90;
-const UINT64 kNewContact = 0x1212e40;
-const UINT64 kFreeContact = 0x12134e0;
+const UINT64 kGetContact = 0xf67060;
+const UINT64 kNewContact = 0x12e01f0;
+const UINT64 kFreeContact = 0x12e08a0;
 const UINT64 kNewMMReaderItem = 0x8c79a0;
 const UINT64 kFreeMMReaderItem = 0x8c6da0;
 const UINT64 kForwordPublicMsg = 0xddc6c0;
@@ -451,6 +453,10 @@ const UINT64 kDoOCRTask = 0x190b2a0;
 const UINT64 kGetLockWechatMgr = 0xa727b0;
 const UINT64 kRequestLockWechat = 0xa2cc70;
 const UINT64 kRequestUnLockWechat = 0xa2cf10;
+
+const UINT64 kOnLoginBtnClick = 0xe0cf70;
+
+const UINT64 kGetQRCodeLoginMgr = 0xdff6d0;
 
 }  // namespace offset
 }  // namespace V3_9_8_15
