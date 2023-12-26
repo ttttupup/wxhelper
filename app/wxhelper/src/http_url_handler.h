@@ -21,6 +21,8 @@ std::string SendFileMsg(struct mg_http_message* hm);
 std::string SendAtText(struct mg_http_message* hm);
 std::string SendMultiAtText(struct mg_http_message* hm);
 std::string GetLoginUrl(struct mg_http_message* hm);
+std::string TranslateVoice(struct mg_http_message* hm);
+std::string GetTranslateVoiceText(struct mg_http_message* hm);
 }  // namespace wxhelper
 
 #endif

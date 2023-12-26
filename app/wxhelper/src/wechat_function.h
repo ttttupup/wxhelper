@@ -292,6 +292,10 @@ typedef UINT64 (*__RequestLockWechat)(UINT64);
 typedef UINT64 (*__RequestUnLockWechat)(UINT64);
 typedef UINT64 (*__OnLoginBtnClick)(UINT64);
 typedef UINT64 (*__GetQRCodeLoginMgr)();
+typedef UINT64 (*__UpdateMsg)(UINT64,UINT64,UINT64);
+typedef UINT64 (*__GetVoiceMgr)();
+typedef UINT64 (*__ChatMsg2NetSceneSendMsg)(UINT64,UINT64);
+typedef UINT64 (*__TranslateVoice)(UINT64,UINT64,UINT64);
 
 }  // namespace function
 namespace prototype {
@@ -420,9 +424,9 @@ const UINT64 kSNSGetFirstPage = 0x1a51dd0;
 const UINT64 kSNSGetNextPageScene = 0x1a77240;
 const UINT64 kSNSDataMgr = 0xeebda0;
 const UINT64 kSNSTimeLineMgr = 0x19e83a0;
-const UINT64 kGetMgrByPrefixLocalId = 0xe4add0;
+const UINT64 kGetMgrByPrefixLocalId = 0xf0ea60;
 const UINT64 kAddFavFromMsg = 0x1601520;
-const UINT64 kGetChatMgr = 0x8f0400;
+const UINT64 kGetChatMgr = 0x97e4d0;
 const UINT64 kGetFavoriteMgr = 0x8c69b0;
 const UINT64 kAddFavFromImage = 0x160b920;
 const UINT64 kGetContact = 0xf67060;
@@ -457,6 +461,11 @@ const UINT64 kRequestUnLockWechat = 0xa2cf10;
 const UINT64 kOnLoginBtnClick = 0xe0cf70;
 
 const UINT64 kGetQRCodeLoginMgr = 0xdff6d0;
+
+const UINT64 kUpdateMsg = 0xf15c40;
+const UINT64 kGetVoiceMgr = 0xbf78f0;
+const UINT64 kChatMsg2NetSceneSendMsg = 0x96e8d0;
+const UINT64 kTranslateVoice = 0x11217e0;
 
 }  // namespace offset
 }  // namespace V3_9_8_15

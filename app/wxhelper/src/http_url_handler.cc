@@ -301,4 +301,24 @@ std::string GetLoginUrl(struct mg_http_message* hm) {
   return ret_data.dump();
 }
 
+std::string TranslateVoice(struct mg_http_message* hm) {
+  nlohmann::json j_param = nlohmann::json::parse(
+      hm->body.ptr, hm->body.ptr + hm->body.len, nullptr, false);
+  INT64 msg_id = GetInt64Param(j_param, "msgId");
+  INT64 success = wxhelper::WechatService::GetInstance().TranslateVoice(msg_id);
+  nlohmann::json ret_data = {
+      {"code", success}, {"msg", "success"}, {"data", {}}};
+  return ret_data.dump();
+}
+
+std::string GetTranslateVoiceText(struct mg_http_message* hm) {
+  nlohmann::json j_param = nlohmann::json::parse(
+      hm->body.ptr, hm->body.ptr + hm->body.len, nullptr, false);
+  INT64 msg_id = GetInt64Param(j_param, "msgId");
+  std::string content =
+      wxhelper::WechatService::GetInstance().GetTranslateVoiceText(msg_id);
+  nlohmann::json ret_data = {
+      {"code", 1}, {"msg", "success"}, {"data", {{"transtext", content}}}};
+  return ret_data.dump();
+}
 }  // namespace wxhelper

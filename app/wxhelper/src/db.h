@@ -24,6 +24,8 @@ class DB : public base::Singleton<DB> {
 
   std::string GetPublicMsgCompressContentByMsgId(ULONG64 msgid);
 
+  std::string GetChatMsgStrContentByMsgId(ULONG64 msgid);
+
  private:
   int ExecSelect(UINT64 db, const char *sql,
                  std::vector<std::vector<common::SqlResult>> &data);

@@ -3,6 +3,8 @@
 #include "utils.h"
 #include "memory.h"
 #include "db.h"
+#include "tinyxml2.h"
+#include "spdlog/spdlog.h"
 namespace offset = wxhelper::V3_9_8_25::offset;
 namespace prototype = wxhelper::V3_9_8_25::prototype;
 namespace func = wxhelper::V3_9_8_25::function;
@@ -671,5 +673,79 @@ void WechatService::SetBaseAddr(UINT64 addr) { base_addr_ = addr; }
 
 void WechatService::SetJsApiAddr(UINT64 addr) { js_api_addr_ = addr; }
 
+INT64 WechatService::TranslateVoice(UINT64 msg_id){
+  INT64 success = -1;
+  UINT64 get_by_local_id_addr = base_addr_ + offset::kGetMgrByPrefixLocalId;
+  func::__GetMgrByPrefixLocalId get_by_local_id =
+      (func::__GetMgrByPrefixLocalId)get_by_local_id_addr;
 
+  UINT64 get_chat_mgr_addr = base_addr_ + offset::kGetChatMgr;
+  func::__GetChatMgr get_chat_mgr = (func::__GetChatMgr)get_chat_mgr_addr;
+
+  UINT64 free_chat_msg_addr = base_addr_ + offset::kFreeChatMsg;
+  func::__FreeChatMsg free_chat_msg = (func::__FreeChatMsg)free_chat_msg_addr;
+
+  UINT64 new_chat_msg_addr = base_addr_ + offset::kChatMsgInstanceCounter;
+  func::__NewChatMsg new_chat_msg = (func::__NewChatMsg)new_chat_msg_addr;
+
+  UINT64 update_addr = base_addr_ + offset::kUpdateMsg;
+  func::__UpdateMsg update = (func::__UpdateMsg)update_addr;
+
+  UINT64 get_voice_mgr_addr = base_addr_ + offset::kGetVoiceMgr;
+  func::__GetVoiceMgr get_voice_mgr = (func::__GetVoiceMgr)get_voice_mgr_addr;
+
+  UINT64 to_msg_addr = base_addr_ + offset::kChatMsg2NetSceneSendMsg;
+  func::__ChatMsg2NetSceneSendMsg to_msg =
+      (func::__ChatMsg2NetSceneSendMsg)to_msg_addr;
+
+  UINT64 trans_addr = base_addr_ + offset::kTranslateVoice;
+  func::__TranslateVoice translate_voice = (func::__TranslateVoice)trans_addr;
+
+  char temp_msg[0x460] = {0};
+
+  char *chat_msg = base::utils::WxHeapAlloc<char>(0x460);
+  INT64 index = 0;
+  INT64 local_id = DB::GetInstance().GetLocalIdByMsgId(msg_id, index);
+  if (local_id <= 0 || index >> 32 == 0) {
+    success = -2;
+    return success;
+  }
+  LARGE_INTEGER l;
+  l.HighPart = index >> 32;
+  l.LowPart = (DWORD)local_id;
+  UINT64 p_chat_msg = new_chat_msg(reinterpret_cast<UINT64>(chat_msg));
+  get_chat_mgr();
+  get_by_local_id(l.QuadPart, p_chat_msg);
+  UINT64 mgr = get_chat_mgr();
+  update(mgr, p_chat_msg, 0);
+
+  UINT64 voice_mgr = get_voice_mgr();
+  UINT64 msg = to_msg(reinterpret_cast<UINT64>(&temp_msg), p_chat_msg);
+
+  success = translate_voice(voice_mgr, msg, 0);
+
+  return success;
+}
+
+std::string WechatService::GetTranslateVoiceText(UINT64 msg_id) {
+  std::string content = DB::GetInstance().GetChatMsgStrContentByMsgId(msg_id);
+  if (content.empty()) {
+    return {};
+  }
+
+  tinyxml2::XMLDocument doc;
+  if (doc.Parse(content.c_str(), content.size()) != 0) {
+    SPDLOG_INFO("tinyxml2 parse error");
+    return {};
+  }
+  tinyxml2::XMLElement *msg = doc.FirstChildElement("msg");
+  if (msg != nullptr) {
+    tinyxml2::XMLElement *voicetrans = msg->FirstChildElement("voicetrans");
+    if (voicetrans != nullptr) {
+      const char *value = voicetrans->Attribute("transtext",nullptr);
+      return value;
+    }
+  }
+  return "";
+}
 }  // namespace wxhelper

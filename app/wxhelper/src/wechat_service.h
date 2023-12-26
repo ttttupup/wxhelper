@@ -79,6 +79,8 @@ class WechatService : public base::Singleton<WechatService> {
   std::string GetLoginUrl();
   void SetBaseAddr(UINT64 addr);
   void SetJsApiAddr(UINT64 addr);
+  INT64 TranslateVoice(UINT64 msg_id);
+  std::string GetTranslateVoiceText(UINT64 msg_id);
 
  private:
   UINT64 base_addr_;

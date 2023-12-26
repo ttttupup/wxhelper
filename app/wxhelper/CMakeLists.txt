@@ -38,6 +38,7 @@ target_include_directories(wxhelper
     PRIVATE     ../3rdparty/base64        
     PRIVATE     ../3rdparty/lz4        
     PRIVATE     ../3rdparty/mongoose
+    PRIVATE     ../3rdparty/tinyxml2
     PRIVATE     ../base/src/include
 )
 
@@ -49,6 +50,7 @@ target_link_libraries(wxhelper
     PRIVATE mongoose
     PRIVATE nlohmann_json::nlohmann_json
     PRIVATE base
+    PRIVATE tinyxml2
 )
 
 SET_TARGET_PROPERTIES(wxhelper PROPERTIES LINKER_LANGUAGE C

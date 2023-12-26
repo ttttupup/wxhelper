@@ -492,4 +492,22 @@ std::string DB::GetPublicMsgCompressContentByMsgId(ULONG64 msgid) {
   return result[1][0];
 }
 
+std::string DB::GetChatMsgStrContentByMsgId(ULONG64 msgid) {
+  char sql[260] = {0};
+  sprintf_s(sql, "select StrContent  from MSG where MsgSvrID=%llu;", msgid);
+  wchar_t dbname[20] = {0};
+  for (int i = 0;; i++) {
+    swprintf_s(dbname, L"MSG%d.db", i);
+    UINT64 handle = GetDbHandleByDbName(dbname);
+    if (handle == 0) {
+      SPDLOG_INFO("MSG db handle is null");
+      return {};
+    }
+    std::vector<std::vector<std::string>> result;
+    int ret = Select(handle, (const char *)sql, result);
+    if (result.size() == 0) continue;
+    return result[1][0];
+  }
+  return {};
+}
 }  // namespace wxhelper
