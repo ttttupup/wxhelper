@@ -142,6 +142,10 @@ struct ContactInner {
   std::string nickname;
   std::string pinyin;
   std::string pinyin_all;
+  std::string remark;
+  std::string remark_pinyin;
+  std::string remark_pinyin_all;
+  std::string label_ids;
   DWORD type;
   DWORD verify_flag;
   DWORD reserved1;
@@ -153,6 +157,10 @@ struct ContactInner {
     nickname = "";
     pinyin = "";
     pinyin_all = "";
+    remark = "";
+    remark_pinyin = "";
+    remark_pinyin_all = "";
+    label_ids = "";
     type = -1;
     verify_flag = -1;
     reserved1 = -1;
@@ -296,6 +304,11 @@ typedef UINT64 (*__UpdateMsg)(UINT64,UINT64,UINT64);
 typedef UINT64 (*__GetVoiceMgr)();
 typedef UINT64 (*__ChatMsg2NetSceneSendMsg)(UINT64,UINT64);
 typedef UINT64 (*__TranslateVoice)(UINT64,UINT64,UINT64);
+typedef UINT64 (*__ShowWebView)(UINT64,UINT64,UINT64,UINT64,UINT64,UINT64);
+typedef UINT64 (*__NewWebViewPageConfig)(UINT64);
+typedef UINT64 (*__FreeWebViewPageConfig)(UINT64);
+typedef UINT64 (*__GetWebViewMgr)();
+typedef UINT64 (*__SetUrl)(UINT64,UINT64,UINT64);
 
 }  // namespace function
 namespace prototype {
@@ -466,6 +479,11 @@ const UINT64 kUpdateMsg = 0xf15c40;
 const UINT64 kGetVoiceMgr = 0xbf78f0;
 const UINT64 kChatMsg2NetSceneSendMsg = 0x96e8d0;
 const UINT64 kTranslateVoice = 0x11217e0;
+const UINT64 kNewWebViewPageConfig = 0x9512f0;
+const UINT64 kFreeWebViewPageConfig = 0x951520;
+const UINT64 kGetWebViewMgr = 0x9412d0;
+const UINT64 kShowWebView = 0x1d236b0;
+const UINT64 kSetUrl = 0x13dd410;
 
 }  // namespace offset
 }  // namespace V3_9_8_15

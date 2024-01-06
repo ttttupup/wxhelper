@@ -358,6 +358,10 @@ INT64 WechatService::GetContacts(std::vector<common::ContactInner>& vec) {
     temp.wxid = wxutils::ReadWstringThenConvert(start + 0x10);
     temp.custom_account = wxutils::ReadWstringThenConvert(start + 0x30);
     temp.encrypt_name = wxutils::ReadWstringThenConvert(start + 0x50);
+    temp.remark = wxutils::ReadWstringThenConvert(start + 0x80);
+    temp.remark_pinyin = wxutils::ReadWstringThenConvert(start + 0x148);
+    temp.remark_pinyin_all = wxutils::ReadWstringThenConvert(start + 0x168);
+    temp.label_ids = wxutils::ReadWstringThenConvert(start + 0xc0);
     temp.nickname = wxutils::ReadWstringThenConvert(start + 0xA0);
     temp.pinyin = wxutils::ReadWstringThenConvert(start + 0x108);
     temp.pinyin_all = wxutils::ReadWstringThenConvert(start + 0x128);
@@ -747,5 +751,36 @@ std::string WechatService::GetTranslateVoiceText(UINT64 msg_id) {
     }
   }
   return "";
+}
+INT64 WechatService::OpenUrlByWeChatBrowser(const std::wstring &url, int flag) {
+  INT64 success = -1;
+  UINT64 config_addr = base_addr_ + offset::kNewWebViewPageConfig;
+  func::__NewWebViewPageConfig config =(func::__NewWebViewPageConfig)config_addr;
+
+  UINT64 free_config_addr = base_addr_ + offset::kFreeWebViewPageConfig;
+  func::__FreeWebViewPageConfig free_config =(func::__FreeWebViewPageConfig)free_config_addr;
+
+  UINT64 web_view_mgr_addr = base_addr_ + offset::kGetWebViewMgr;
+  func::__GetWebViewMgr web_view_mgr = (func::__GetWebViewMgr)web_view_mgr_addr;
+
+  UINT64 show_addr = base_addr_ + offset::kShowWebView;
+  func::__ShowWebView show_web_view = (func::__ShowWebView)show_addr;
+
+  UINT64 set_url_addr = base_addr_ + offset::kSetUrl;
+  func::__SetUrl set_url = (func::__SetUrl)set_url_addr;
+
+  int a  = flag >> 4;
+  int b = flag & 0x1;
+  int c = flag & 0x2;
+  int d = flag & 0x4;
+  int e = flag & 0x8;
+  char* web_config= (char*)HeapAlloc(GetProcessHeap(),0,0xA20);
+
+  UINT64 ptr = config(reinterpret_cast<UINT64>(web_config));
+  set_url( ptr + 0x868,reinterpret_cast<UINT64>(url.c_str()),url.size());
+  web_view_mgr();
+  success = show_web_view(ptr,a,b,c,d,e);
+  free_config(ptr);
+  return success;
 }
 }  // namespace wxhelper

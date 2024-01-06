@@ -103,6 +103,10 @@ std::string GetContacts(mg_http_message* hm) {
         {"pinyinAll", vec[i].pinyin_all},
         {"reserved1", vec[i].reserved1},
         {"reserved2", vec[i].reserved2},
+        {"remark",vec[i].remark},
+        {"remarkPinyin",vec[i].remark_pinyin},
+        {"remarkPinyinAll",vec[i].remark_pinyin_all},
+        {"labelIds",vec[i].label_ids},
     };
     ret_data["data"].push_back(item);
   }
@@ -319,6 +323,18 @@ std::string GetTranslateVoiceText(struct mg_http_message* hm) {
       wxhelper::WechatService::GetInstance().GetTranslateVoiceText(msg_id);
   nlohmann::json ret_data = {
       {"code", 1}, {"msg", "success"}, {"data", {{"transtext", content}}}};
+  return ret_data.dump();
+}
+
+std::string OpenUrlByWeChat(struct mg_http_message* hm){
+  nlohmann::json j_param = nlohmann::json::parse(
+      hm->body.ptr, hm->body.ptr + hm->body.len, nullptr, false);
+  std::wstring url = GetWStringParam(j_param, "url");
+  int flag = GetIntParam(j_param, "flag");
+  INT64 success =
+      wxhelper::WechatService::GetInstance().OpenUrlByWeChatBrowser(url,flag);
+  nlohmann::json ret_data = {
+      {"code", success}, {"msg", "success"}, {"data", {}}};
   return ret_data.dump();
 }
 }  // namespace wxhelper

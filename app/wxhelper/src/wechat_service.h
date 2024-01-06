@@ -81,6 +81,7 @@ class WechatService : public base::Singleton<WechatService> {
   void SetJsApiAddr(UINT64 addr);
   INT64 TranslateVoice(UINT64 msg_id);
   std::string GetTranslateVoiceText(UINT64 msg_id);
+  INT64 OpenUrlByWeChatBrowser(const std::wstring& url, int flag);
 
  private:
   UINT64 base_addr_;
