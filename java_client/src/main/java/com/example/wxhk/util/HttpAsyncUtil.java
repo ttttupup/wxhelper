@@ -24,7 +24,7 @@ public class HttpAsyncUtil {
     protected static final Log log = Log.get();
 
     public static Future<HttpResponse<Buffer>> exec(Type type, JsonObject object) {
-        return client.post(InitWeChat.wxPort, "localhost", "/api/?type=" + type.getType())
+        return client.post(InitWeChat.wxPort, "localhost", "/api/" + type.getType())
                 .sendJsonObject(object)
                 .onSuccess(event ->
                         {

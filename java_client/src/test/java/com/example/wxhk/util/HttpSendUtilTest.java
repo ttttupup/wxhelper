@@ -7,6 +7,8 @@ import org.dromara.hutool.core.lang.Console;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @SpringBootTest
@@ -41,5 +43,7 @@ class HttpSendUtilTest {
     void 获取群成员() {
         GroupMembers 获取群成员 = HttpSendUtil.获取群成员(new GetGroupMembers().setChatRoomId("24964676359@chatroom"));
         Console.log(获取群成员);
+
+        Duration between = Duration.between(LocalDateTime.now(), LocalDateTime.now());
     }
 }
