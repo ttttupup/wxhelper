@@ -32,12 +32,14 @@ public class WxSmgServerImpl implements com.example.wxhk.server.WxSmgServer {
     public void 私聊(PrivateChatMsg chatMsg) {
         if (Objects.equals(chatMsg.getIsSendMsg(), 1) && Objects.equals(chatMsg.getIsSendByPhone(), 1)) {
             log.info("手机端对:{}发出:{}", chatMsg.getFromUser(), chatMsg.getContent());
+        }else{
+            log.info("收到私聊{}",chatMsg);
         }
     }
 
     @Override
     public void 文件助手(PrivateChatMsg chatMsg) {
-
+        log.info("文件助手:{}",chatMsg);
     }
 
     @Override

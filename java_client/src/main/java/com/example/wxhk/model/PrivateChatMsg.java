@@ -42,6 +42,11 @@ public class PrivateChatMsg implements Serializable {
     private String signature;
     private String time;
     private Integer timestamp;
+
+    /**
+     * 对用户,如果是文件助手是filehelper
+     */
+    private String toUser;
     /**
      * 类型
      */
