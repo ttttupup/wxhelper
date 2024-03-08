@@ -18,6 +18,7 @@ import org.w3c.dom.NodeList;
 import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -50,7 +51,12 @@ public class WxMsgHandle {
     @PostConstruct
     public void init() {
         add(chatMsg -> {
-            wxSmgServer.私聊(chatMsg);
+            if(Objects.equals(chatMsg.getToUser(), FILEHELPER)){
+                wxSmgServer.文件助手(chatMsg);
+            }else{
+                wxSmgServer.私聊(chatMsg);
+            }
+
             return null;
         }, WxMsgType.私聊信息);
         add(chatMsg -> {
@@ -174,8 +180,8 @@ public class WxMsgHandle {
                     if (monery.startsWith("￥")) {
                         String substring = monery.substring(1);
                         BigDecimal decimal = new BigDecimal(substring);
-                        log.info("收款:{},付款人:{},付款备注:{}", decimal.stripTrailingZeros().toPlainString(), chatMsg.getFromUser(), remark);
-                        wxSmgServer.收款之后(new PayoutInformation(chatMsg.getFromUser(), decimal, remark));
+                        log.info("收款:{},付款人:{},付款备注:{}", decimal.stripTrailingZeros().toPlainString(), receiver_username, remark);
+                        wxSmgServer.收款之后(new PayoutInformation(receiver_username, decimal, remark));
                         return false;
                     };
 
