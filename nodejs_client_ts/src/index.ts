@@ -415,7 +415,7 @@ export const getSNSNextPage = (snsId: string) => {
 export const addFavFromMsg = (msgId: string) => {
     return post('/api/addFavFromMsg', { msgId })
 }
-    
+
 // def addFavFromImage():
 //     print("modify wxid imagePath ")
 //     raise RuntimeError("modify wxid  imagePath then deleted me")
@@ -497,8 +497,16 @@ export const sendAtText = (wxids: string, chatRoomId: string, msg: string) => {
 //     response = requests.request("POST", url, headers=headers, data=payload)
 
 //     print(response.text)
-export const forwardPublicMsg = (appName: string, userName: string, title: string, url: string, thumbUrl: string, digest: string, wxid: string) => {
-    return post('/api/forwardPublicMsg', { appName, userName, title, url, thumbUrl, digest, wxid })
+export const forwardPublicMsg = (param: {
+    appName: string;
+    userName: string;
+    title: string;
+    url: string;
+    thumbUrl: string;
+    digest: string;
+    wxid: string
+}) => {
+    return post('/api/forwardPublicMsg', param)
 }
 
 // def forwardPublicMsgByMsgId():
@@ -580,4 +588,30 @@ export const decodeImage = (filePath: string, storeDir: string) => {
 //     print(response.text)
 export const getVoiceByMsgId = (msgId: number, storeDir: string) => {
     return post('/api/getVoiceByMsgId', { msgId, storeDir })
+}
+
+// /api/sendApplet
+export const sendApplet = (param: {
+    wxid: string
+    waidConcat: string
+    appletWxid: string
+    jsonParam: string
+    headImgUrl: string
+    mainImg: string
+    indexPage: string
+}) => {
+    return post('/api/sendApplet', param)
+}
+
+// /api/sendPatMsg
+export const sendPatMsg = (receiver: string,
+    wxid: string) => {
+    return post('/api/sendPatMsg', { wxid, receiver })
+}
+
+// /api/ocr
+export const ocr = (
+    imagePath: string
+) => {
+    return post('/api/ocr', { imagePath })
 }
