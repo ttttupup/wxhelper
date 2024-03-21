@@ -2,7 +2,8 @@ package com.example.wxhk.tcp.vertx;
 
 import com.example.wxhk.WxhkApplication;
 import com.example.wxhk.constant.WxMsgType;
-import com.example.wxhk.util.HttpAsyncUtil;
+import com.example.wxhk.model.request.OpenHook;
+import com.example.wxhk.util.HttpSendUtil;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
@@ -75,7 +76,10 @@ public class VertxTcp extends AbstractVerticle implements CommandLineRunner {
         listen.onComplete(event -> {
             boolean succeeded = event.succeeded();
             if (succeeded) {
-                HttpAsyncUtil.exec(HttpAsyncUtil.Type.开启hook, new JsonObject().put("port", InitWeChat.getVertxPort().toString()).put("ip", "127.0.0.1"));
+                HttpSendUtil.开启hook(new OpenHook().setPort(InitWeChat.getVertxPort().toString()).setIp("127.0.0.1")
+                        .setEnableHttp(false)
+                        .setTimeout("5000"));
+                // HttpAsyncUtil.exec(HttpAsyncUtil.Type.开启hook, new JsonObject().put("port", InitWeChat.getVertxPort().toString()).put("ip", "127.0.0.1"));
                 startPromise.complete();
             } else {
                 startPromise.fail(event.cause());
