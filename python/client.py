@@ -1,13 +1,14 @@
 import requests
 import json
 
+host = "http://127.0.0.1:19088"
 
 def check_login():
     """
      0.检查是否登录
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=0"
+    url = host + "/api/?type=0"
     payload = {}
     headers = {}
     response = requests.request("POST", url, headers=headers, data=payload)
@@ -19,22 +20,22 @@ def user_info():
     登录用户信息
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=8"
+    url = host + "/api/?type=8"
     payload = {}
     headers = {}
     response = requests.request("POST", url, headers=headers, data=payload)
     print(response.text)
 
 
-def send_text():
+def send_text(wxid, msg):
     """
     发送文本
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=2"
+    url = host + "/api/?type=2"
     payload = json.dumps({
-        "wxid": "filehelper",
-        "msg": "123"
+        "wxid": wxid,
+        "msg": msg
     })
     headers = {
         'Content-Type': 'application/json'
@@ -43,16 +44,16 @@ def send_text():
     print(response.text)
 
 
-def send_at():
+def send_at(chatRoomId, wxids, msg):
     """
     发送@消息
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=3"
+    url = host + "/api/?type=3"
     payload = json.dumps({
-        "chatRoomId": "12333@chatroom",
-        "wxids": "notify@all",
-        "msg": "12333"
+        "chatRoomId": chatRoomId,
+        "wxids": wxids, # "notify@all"
+        "msg": msg
     })
     headers = {
         'Content-Type': 'application/json'
@@ -61,15 +62,19 @@ def send_at():
     print(response.text)
 
 
-def send_img():
+def send_img(wxid, imgPath):
+    # {
+    #     "wxid": "filehelper",
+    #     "imagePath": "C:/123.png"
+    # }
     """
     发送图片
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=5"
+    url = host + "/api/?type=5"
     payload = json.dumps({
-        "wxid": "filehelper",
-        "imagePath": "C:/123.png"
+        "wxid": wxid,
+        "imagePath": imgPath
     })
     headers = {
         'Content-Type': 'application/json'
@@ -83,7 +88,7 @@ def send_file():
     发送文件
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=6"
+    url = host + "/api/?type=6"
     payload = json.dumps({
         "wxid": "filehelper",
         "filePath": "C:/test.txt"
@@ -100,7 +105,7 @@ def hook_msg():
     hook 消息
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=9"
+    url = host + "/api/?type=9"
     payload = json.dumps({
         "port": "19099",
         "ip": "127.0.0.1"
@@ -117,7 +122,7 @@ def unhook_msg():
     取消消息hook
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=10"
+    url = host + "/api/?type=10"
     payload = {}
     headers = {}
     response = requests.request("POST", url, headers=headers, data=payload)
@@ -129,7 +134,7 @@ def hook_img():
     hook 图片
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=11"
+    url = host + "/api/?type=11"
     payload = json.dumps({
         "imgDir": "C:\\img"
     })
@@ -145,7 +150,7 @@ def unhook_img():
     取消hook 图片
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=12"
+    url = host + "/api/?type=12"
     payload = json.dumps({
         "imgDir": "C:\\img"
     })
@@ -161,7 +166,7 @@ def hook_voice():
     hook 语音
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=56"
+    url = host + "/api/?type=56"
     payload = json.dumps({
         "msgId": 322456091115784000
     })
@@ -177,7 +182,7 @@ def unhook_voice():
     取消hook 语音
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=14"
+    url = host + "/api/?type=14"
     payload = {}
     headers = {}
     response = requests.request("POST", url, headers=headers, data=payload)
@@ -189,7 +194,7 @@ def del_friend():
     删除好友
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=17"
+    url = host + "/api/?type=17"
     payload = json.dumps({
         "wxid": "wxid_1124423322"
     })
@@ -205,7 +210,7 @@ def search_friend():
     网络搜素用户
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=19"
+    url = host + "/api/?type=19"
     payload = json.dumps({
         "keyword": "13812345678"
     })
@@ -221,7 +226,7 @@ def add_friend():
     添加好友
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=20"
+    url = host + "/api/?type=20"
     payload = json.dumps({
         "wxid": "wxid_o11222334422"
     })
@@ -237,7 +242,7 @@ def fetch_chat_room_members():
     群成员
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=25"
+    url = host + "/api/?type=25"
     payload = json.dumps({
         "chatRoomId": "2112222004@chatroom"
     })
@@ -253,7 +258,7 @@ def get_member_nickname():
     群成员昵称
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=26"
+    url = host + "/api/?type=26"
     payload = json.dumps({
         "chatRoomId": "322333384@chatroom",
         "memberId": "wxid_4m1112222u22"
@@ -270,7 +275,7 @@ def del_member():
     删除群成员
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=27"
+    url = host + "/api/?type=27"
     payload = json.dumps({
         "chatRoomId": "31122263384@chatroom",
         "memberIds": "wxid_12223334422"
@@ -287,7 +292,7 @@ def add_member():
     增加群成员
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=28"
+    url = host + "/api/?type=28"
     payload = json.dumps({
         "chatRoomId": "1111163384@chatroom",
         "memberIds": "wxid_o12222222"
@@ -304,7 +309,7 @@ def modify_room_name():
     修改群昵称
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=31"
+    url = host + "/api/?type=31"
     payload = json.dumps({
         "chatRoomId": "222285428@chatroom",
         "wxid": "wxid_222222512",
@@ -322,7 +327,7 @@ def get_db_handlers():
     获取sqlite3的操作句柄
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=32"
+    url = host + "/api/?type=32"
     payload = {}
     headers = {}
     response = requests.request("POST", url, headers=headers, data=payload)
@@ -334,7 +339,7 @@ def query_db_by_sql():
     查询数据库
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=34"
+    url = host + "/api/?type=34"
     payload = json.dumps({
         "dbHandle": 116201928,
         "sql": "select localId from MSG where MsgSvrID= 7533111101686156"
@@ -351,7 +356,7 @@ def hook_log():
     hook 日志
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=36"
+    url = host + "/api/?type=36"
     payload = {}
     headers = {}
     response = requests.request("POST", url, headers=headers, data=payload)
@@ -363,7 +368,7 @@ def unhook_log():
     取消hook日志
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=37"
+    url = host + "/api/?type=37"
     payload = {}
     headers = {}
     response = requests.request("POST", url, headers=headers, data=payload)
@@ -375,7 +380,7 @@ def forward():
     转发消息
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=40"
+    url = host + "/api/?type=40"
     payload = json.dumps({
         "wxid": "filehelper",
         "msgid": "705117679011122708"
@@ -392,7 +397,7 @@ def logout():
     退出登录
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=44"
+    url = host + "/api/?type=44"
     payload = {}
     headers = {}
     response = requests.request("POST", url, headers=headers, data=payload)
@@ -404,7 +409,7 @@ def confirm_receipt():
     确认收款
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=45"
+    url = host + "/api/?type=45"
     payload = json.dumps({
         "wxid": "wxid_1111112622",
         "transcationId": "10000500012312222212243388865912",
@@ -422,7 +427,7 @@ def contact_list():
     好友列表
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=46"
+    url = host + "/api/?type=46"
     payload = {}
     headers = {}
     response = requests.request("POST", url, headers=headers, data=payload)
@@ -434,7 +439,7 @@ def room_detail():
     群详情
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=47"
+    url = host + "/api/?type=47"
     payload = json.dumps({
         "chatRoomId": "199134446111@chatroom"
     })
@@ -450,7 +455,7 @@ def ocr():
     ocr提取文字
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=49"
+    url = host + "/api/?type=49"
     payload = json.dumps({
         "imagePath": "C:\\WeChat Files\\b23e84997144dd12f21554b0.dat"
     })
@@ -466,7 +471,7 @@ def pat():
     拍一拍
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=50"
+    url = host + "/api/?type=50"
     payload = json.dumps({
         "chatRoomId": "211111121004@chatroom",
         "wxid": "wxid_111111111422"
@@ -483,7 +488,7 @@ def top_msg():
     消息置顶
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=51"
+    url = host + "/api/?type=51"
     payload = json.dumps({
         "wxid": "wxid_o11114422",
         "msgid": 3728307145189195000
@@ -500,7 +505,7 @@ def close_top_msg():
     取消置顶
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=52"
+    url = host + "/api/?type=52"
     payload = json.dumps({
         "chatRoomId": "213222231004@chatroom",
         "msgid": 3728307145189195000
@@ -517,7 +522,7 @@ def sns_first():
     朋友圈首页
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=53"
+    url = host + "/api/?type=53"
     payload = {}
     headers = {}
     response = requests.request("POST", url, headers=headers, data=payload)
@@ -529,7 +534,7 @@ def sns_next():
     朋友圈下一页
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=54"
+    url = host + "/api/?type=54"
     payload = json.dumps({
         "snsId": "14091988153735844377"
     })
@@ -545,7 +550,7 @@ def query_nickname():
     查询联系人或群名称
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=55"
+    url = host + "/api/?type=55"
 
     payload = json.dumps({
         "id": "wxid_1112p4422"
@@ -562,7 +567,7 @@ def download_msg_attach():
     下载消息附件
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=56"
+    url = host + "/api/?type=56"
     payload = json.dumps({
         "msgId": 6080100336053626000
     })
@@ -578,7 +583,7 @@ def get_member_info():
     获取群/群成员信息
     :return:
     """
-    url = "127.0.0.1:19088/api/?type=57"
+    url = host + "/api/?type=57"
     payload = json.dumps({
         "wxid": "wxid_tx8k6tu21112"
     })
@@ -592,4 +597,4 @@ def get_member_info():
 if __name__ == '__main__':
     check_login()
     user_info()
-    send_text()
+    send_text("filehelper","123")
