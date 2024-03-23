@@ -24,7 +24,7 @@ public class HttpAsyncUtil {
     protected static final Log log = Log.get();
 
     public static Future<HttpResponse<Buffer>> exec(Type type, JsonObject object) {
-        return client.post(InitWeChat.wxPort, "localhost", "/api/?type=" + type.getType())
+        return client.post(InitWeChat.wxPort, "localhost", "/api/" + type.getType())
                 .sendJsonObject(object)
                 .onSuccess(event ->
                         {
@@ -36,7 +36,7 @@ public class HttpAsyncUtil {
     }
 
     public static Future<HttpResponse<Buffer>> exec(Type type, JsonObject object, Handler<AsyncResult<HttpResponse<Buffer>>> handler) {
-        return client.post(InitWeChat.wxPort, "localhost", "/api/?type=" + type.getType())
+        return client.post(InitWeChat.wxPort, "localhost", "/api/" + type.getType())
                 .sendJsonObject(object)
                 .onComplete(handler)
                 ;
@@ -45,22 +45,31 @@ public class HttpAsyncUtil {
     }
 
     public enum Type {
-        检查微信登陆("0"),
-        获取登录信息("1"),
-        发送文本("2"),
-        发送at文本("3"),
+        检查微信登陆("checkLogin"),
+        获取登录信息("userInfo"),
+        发送文本("sendTextMsg"),
+        转发消息("forwardMsg"),
+        发送at文本("sendAtText"),
         发送图片("5"),
-        发送文件("6"),
-        开启hook("9"),
-        关闭hook("10"),
+        发送文件("sendFileMsg"),
+        开启hook("hookSyncMsg"),
+        关闭hook("unhookSyncMsg"),
         添加好友("20"),
         通过好友申请("23"),
-        获取群成员("25"),
-        获取群成员昵称("26"),
-        删除群成员("27"),
+        获取群成员("getMemberFromChatRoom"),
+        获取群成员基础信息("getContactProfile"),
+        获取群详情("getChatRoomDetailInfo"),
+        添加群成员("addMemberToChatRoom"),
+        修改群昵称("modifyNickname"),
+        删除群成员("delMemberFromChatRoom"),
+        置顶群消息("topMsg"),
+        取消置顶群消息("removeTopMsg"),
+        邀请入群("InviteMemberToChatRoom"),
         确认收款("45"),
-        联系人列表("46"),
+        联系人列表("getContactList"),
         查询微信信息("55"),
+        下载附件("downloadAttach"),
+        解码("decodeImage"),
 
 
         ;

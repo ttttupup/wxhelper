@@ -27,7 +27,7 @@ public class HttpSyncUtil {
     }
 
     public static JsonObject exec(HttpAsyncUtil.Type type, JsonObject obj) {
-        String post = engine.send(Request.of("http://localhost:" + InitWeChat.wxPort + "/api/?type=" + type.getType()).method(Method.POST).body(obj.encode())).bodyStr();
+        String post = engine.send(Request.of("http://localhost:" + InitWeChat.wxPort + "/api/" + type.getType()).method(Method.POST).body(obj.encode())).bodyStr();
         if (log.isDebugEnabled()) {
             log.debug("type:{},{}", type.getType(), post);
         }

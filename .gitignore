@@ -33,3 +33,6 @@
 CMakePresets.json
 .vscode
 out
+nodejs_client_ts/node_modules
+nodejs_client_ts/msgStore.json
+nodejs_client_ts/dist
