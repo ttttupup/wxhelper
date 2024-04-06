@@ -130,11 +130,11 @@ const uint64_t kSyncMsg = 0xc39680;
 const uint64_t kSyncMsgNext = 0xc39680;
 const uint64_t kGetCurrentDataPath = 0x101a920;
 const uint64_t kGetAppDataSavePath = 0x13a5b90;
-const uint64_t kGetSendMessageMgr = 0x94cd10;
-const uint64_t kSendTextMsg = 0x1091F70;
-const uint64_t kFreeChatMsg = 0x94e590;
+const uint64_t kGetSendMessageMgr = 0xa7c730;
+const uint64_t kSendTextMsg = 0x11de090;
+const uint64_t kFreeChatMsg = 0xa7dfb0;
 
-const uint64_t kDoAddMsg = 0x10d9450;
+const uint64_t kDoAddMsg = 0x1225a60;
 const uint64_t kSendImageMsg = 0x1087950;
 const uint64_t kChatMsgInstanceCounter = 0x956e00;
 const uint64_t kSendFileMsg = 0xea0850;

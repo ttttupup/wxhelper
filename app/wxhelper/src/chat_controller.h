@@ -1,9 +1,8 @@
 #ifndef WXHELPER_CHAT_CONTROLLER_H_
 #define WXHELPER_CHAT_CONTROLLER_H_
-#include <Windows.h>
 
 #include "http_controller.h"
-#include "spdlog/spdlog.h"
+
 namespace wxhelper {
 class ChatController : public http::HttpController<ChatController> {
  public:

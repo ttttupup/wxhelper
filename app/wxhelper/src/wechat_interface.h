@@ -32,17 +32,6 @@ struct SqlResult {
   bool is_blob;
 };
 
-struct InnerMessageStruct {
-  char *buffer;
-  int64_t length;
-  ~InnerMessageStruct() {
-    if (this->buffer != NULL) {
-      delete[] this->buffer;
-      this->buffer = NULL;
-    }
-  }
-};
-
 struct SelfInfoInner {
   std::string name;
   std::string city;

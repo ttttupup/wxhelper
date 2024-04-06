@@ -12,7 +12,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}    /std:c++17  /MD  /EHsc ")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}    /std:c++17  /MD  /EHsc /FAcs")
 
 
 file(GLOB CPP_FILES  ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc  ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c )
@@ -30,7 +30,7 @@ add_subdirectory(../base base)
    
 add_library(wxhelper  SHARED ${CPP_FILES} ${ASM_FILES})
 
-target_compile_definitions(wxhelper PRIVATE WECHAT_VERSION=39825)
+target_compile_definitions(wxhelper PRIVATE WECHAT_VERSION=39943)
 
 # target_include_directories(wxhelper 
 #     PRIVATE     ../base/src/include

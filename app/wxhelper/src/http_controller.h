@@ -1,9 +1,9 @@
 
 #ifndef WXHELPER_HTTP_CONTROLLER_H_
 #define WXHELPER_HTTP_CONTROLLER_H_
-#include <Windows.h>
 
 #include "http_router.h"
+#include "singleton.h"
 namespace http {
 #define PATHS_BEGIN static void AddPath() {
 #define ADD_PATH(path, method) RegisterPath(path, &method)
@@ -15,7 +15,7 @@ class BaseHttpController {
 };
 
 template <typename T>
-class HttpController : public BaseHttpController {
+class HttpController : public base::Singleton<T>{
  public:
   virtual ~HttpController() {}
 
