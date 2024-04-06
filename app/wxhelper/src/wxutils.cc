@@ -15,7 +15,15 @@
 #define GIF2 0x46
 namespace wxhelper {
 namespace wxutils {
-UINT64 GetWeChatWinBase() { return (UINT64)GetModuleHandleA("WeChatWin.dll"); }
+#ifdef _WIN64
+int64_t GetWeChatWinBase() {
+  return (int64_t)GetModuleHandleA("WeChatWin.dll");
+}
+#else
+int32_t GetWeChatWinBase() {
+  return (int32_t)GetModuleHandleA("WeChatWin.dll");
+}
+#endif
 
 std::string ReadSKBuiltinString(INT64 addr) {
   INT64 inner_string = *(INT64 *)(addr + 0x8);
@@ -93,7 +101,7 @@ std::string ReadWstringThenConvert(INT64 addr) {
   return base::utils::WstringToUtf8(wstr);
 }
 
-INT64 DecodeImage(const wchar_t* file_path, const wchar_t* save_dir){
+int DecodeImage(const wchar_t *file_path, const wchar_t *save_dir) {
   return -1;
 }
 

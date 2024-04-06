@@ -7,7 +7,7 @@
 #include "singleton.h"
 
 namespace http {
-typedef std::function<std::string(std::string, std::string)> HttpHandler;
+typedef std::function<std::string(std::string)> HttpHandler;
 
 class HttpRouter : public base::Singleton<HttpRouter> {
  public:

@@ -1,11 +1,12 @@
 #ifndef WXHELPER_CHAT_CONTROLLER_H_
 #define WXHELPER_CHAT_CONTROLLER_H_
+#include <Windows.h>
+
 #include "http_controller.h"
 #include "spdlog/spdlog.h"
-#include <Windows.h>
 namespace wxhelper {
 class ChatController : public http::HttpController<ChatController> {
-   public:
+ public:
   PATHS_BEGIN
   ADD_PATH("/api/sendTextMsg", SendTextMsg);
   ADD_PATH("/api/sendImagesMsg", SendImageMsg);
@@ -16,12 +17,12 @@ class ChatController : public http::HttpController<ChatController> {
   PATHS_END
 
  public:
-  static std::string SendTextMsg(std::string, std::string);
-  static std::string SendImageMsg(std::string, std::string);
-  static std::string SendFileMsg(std::string, std::string);
-  static std::string SendAtText(std::string, std::string);
-  static std::string SendMultiAtText(std::string, std::string);
-  static std::string ForwardMsg(std::string, std::string);
+  static std::string SendTextMsg(std::string params);
+  static std::string SendImageMsg(std::string params);
+  static std::string SendFileMsg(std::string params);
+  static std::string SendAtText(std::string params);
+  static std::string SendMultiAtText(std::string params);
+  static std::string ForwardMsg(std::string params);
 };
 }  // namespace wxhelper
 
