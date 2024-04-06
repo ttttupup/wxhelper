@@ -1,11 +1,13 @@
-#include "global_manager.h"
 
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call,
-                      LPVOID lpReserved) {
+
+#include "wxhelper.h"
+BOOL APIENTRY DllMain(HMODULE module, DWORD ul_reason_for_call,
+                      LPVOID reserved) {
   switch (ul_reason_for_call) {
     case DLL_PROCESS_ATTACH: {
-      DisableThreadLibraryCalls(hModule);
-      wxhelper::GlobalManager::GetInstance().initialize(hModule);
+      OutputDebugString("start\n"); 
+      DisableThreadLibraryCalls(module);
+      wxhelper::WxHelper::GetInstance().init(module);
       break;
     }
     case DLL_THREAD_ATTACH: {
@@ -15,6 +17,8 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call,
       break;
     }
     case DLL_PROCESS_DETACH: {
+      OutputDebugString("end\n"); 
+      wxhelper::WxHelper::GetInstance().finally();
       break;
     }
   }

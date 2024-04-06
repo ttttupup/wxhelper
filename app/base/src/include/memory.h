@@ -5,7 +5,7 @@
 namespace base {
 namespace memory {
     std::vector<INT64> ScanAndMatchValue(INT64 value, INT64 start,int align);
-    int sunday(const byte* total, int tlen, const byte* part, int plen);
+    int Sunday(const byte* total, int tlen, const byte* part, int plen);
 }
 }  // namespace base
 #endif

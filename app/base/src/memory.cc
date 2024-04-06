@@ -40,7 +40,7 @@ std::vector<INT64> ScanAndMatchValue(INT64 value, INT64 start, int align) {
   return result;
 }
 
-int sunday(const byte* total, int tlen, const byte* part, int plen) {
+int Sunday(const byte* total, int tlen, const byte* part, int plen) {
   byte move[128] = {0};
   for (int i = 0; i < plen; i++) {
     move[part[i]] = plen - i;

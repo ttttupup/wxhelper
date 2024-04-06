@@ -2,13 +2,18 @@
 
 namespace http {
 
+HttpClient::HttpClient(std::string url, int timeout)
+    : url_(url), timeout_(timeout) {}
+
 void HttpClient::SendRequest(const std::string &content) {
   struct mg_mgr mgr;
   Data data;
   data.done = false;
   data.post_data = content;
+  data.url = url_;
+  data.timeout = timeout_;
   mg_mgr_init(&mgr);
-  mg_http_connect(&mgr, kUrl.c_str(), OnHttpEvent, &data);
+  mg_http_connect(&mgr, url_.c_str(), &HttpClient::OnHttpEvent, &data);
   while (!data.done) {
     mg_mgr_poll(&mgr, 500);
   }
@@ -16,18 +21,15 @@ void HttpClient::SendRequest(const std::string &content) {
   data.done = false;
 }
 
-void HttpClient::SetConfig(std::string url, uint64_t timeout) {
-  kUrl = url;
-  kTimeout = timeout;
-}
-
 void HttpClient::OnHttpEvent(struct mg_connection *c, int ev, void *ev_data,
                              void *fn_data) {
-  const char *s_url = kUrl.c_str();
+ 
   Data *data = (Data *)fn_data;
+  const char *s_url = data->url.c_str();
+  int timeout = data->timeout;
   if (ev == MG_EV_OPEN) {
     // Connection created. Store connect expiration time in c->data
-    *(uint64_t *)c->data = mg_millis() + kTimeout;
+    *(uint64_t *)c->data = mg_millis() + timeout;
   } else if (ev == MG_EV_POLL) {
     if (mg_millis() > *(uint64_t *)c->data &&
         (c->is_connecting || c->is_resolving)) {
