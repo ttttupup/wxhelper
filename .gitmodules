@@ -2,3 +2,9 @@
 	path = app/3rdparty/spdlog
 	url = https://github.com/gabime/spdlog.git
 	branch = v1.x
+[submodule "app/3rdparty/json"]
+	path = app/3rdparty/json
+	url = https://github.com/nlohmann/json
+[submodule "app/3rdparty/Detours"]
+	path = app/3rdparty/Detours
+	url = https://github.com/microsoft/Detours
