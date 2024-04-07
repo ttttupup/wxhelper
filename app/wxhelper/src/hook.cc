@@ -65,7 +65,7 @@ int BaseHook::Hook() {
   }
   DetourTransactionBegin();
   DetourUpdateThread(GetCurrentThread());
-  DetourAttach((PVOID *)origin_, (PVOID *)detour_);
+  DetourAttach((PVOID *)origin_, detour_);
   LONG ret = DetourTransactionCommit();
   if (ret == NO_ERROR) {
     hook_flag_ = true;
@@ -81,7 +81,7 @@ int BaseHook::Unhook() {
   UINT64 base = wxhelper::wxutils::GetWeChatWinBase();
   DetourTransactionBegin();
   DetourUpdateThread(GetCurrentThread());
-  DetourDetach((PVOID *)origin_, (PVOID *)detour_);
+  DetourDetach((PVOID *)origin_, detour_);
   LONG ret = DetourTransactionCommit();
   if (ret == NO_ERROR) {
     hook_flag_ = false;

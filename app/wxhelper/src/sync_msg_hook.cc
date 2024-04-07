@@ -7,40 +7,35 @@
 #include "spdlog/spdlog.h"
 #include "thread_pool.h"
 #include "utils.h"
-#include "wechat_interface.h"
+
 #include "wxutils.h"
 
 namespace wxhelper {
 
 void SyncMsgHook::Init() {
   int64_t addr = wxutils::GetWeChatWinBase() + wechat::offset::kDoAddMsg;
-  wechat::function::__DoAddMsg addMsg = (wechat::function::__DoAddMsg)addr;
-  origin_ = addMsg;
+  kDoAddMsg = (wechat::function::__DoAddMsg)addr;
+  origin_ = &kDoAddMsg;
   detour_ = &HandleSyncMsg;
+  hook_flag_ = false;
 }
 
-void SyncMsgHook::HandleSyncMsg(INT64 param1, INT64 param2, INT64 param3) {
+void SyncMsgHook::HandleSyncMsg(int64_t param1, int64_t param2, int64_t param3) {
   nlohmann::json msg;
 
   msg["pid"] = GetCurrentProcessId();
-  msg["fromUser"] =
-      wxhelper::wxutils::ReadSKBuiltinString(*(INT64 *)(param2 + 0x18));
-  msg["toUser"] =
-      wxhelper::wxutils::ReadSKBuiltinString(*(INT64 *)(param2 + 0x28));
-  msg["content"] =
-      wxhelper::wxutils::ReadSKBuiltinString(*(INT64 *)(param2 + 0x30));
-  msg["signature"] =
-      wxhelper::wxutils::ReadWeChatStr(*(INT64 *)(param2 + 0x48));
-  msg["msgId"] = *(INT64 *)(param2 + 0x60);
+  msg["fromUser"] = wxutils::ReadSKBuiltinString(*(int64_t *)(param2 + 0x18));
+  msg["toUser"] = wxutils::ReadSKBuiltinString(*(int64_t *)(param2 + 0x28));
+  msg["content"] = wxutils::ReadSKBuiltinString(*(int64_t *)(param2 + 0x30));
+  msg["signature"] = wxutils::ReadWeChatStr(*(int64_t *)(param2 + 0x48));
+  msg["msgId"] = *(int64_t *)(param2 + 0x60);
   msg["msgSequence"] = *(DWORD *)(param2 + 0x5C);
   msg["createTime"] = *(DWORD *)(param2 + 0x58);
-  msg["displayFullContent"] =
-      wxhelper::wxutils::ReadWeChatStr(*(INT64 *)(param2 + 0x50));
+  msg["displayFullContent"] = wxutils::ReadWeChatStr(*(int64_t *)(param2 + 0x50));
   DWORD type = *(DWORD *)(param2 + 0x24);
   msg["type"] = type;
   if (type == 3) {
-    std::string img =
-        wxhelper::wxutils::ReadSKBuiltinBuffer(*(INT64 *)(param2 + 0x40));
+    std::string img = wxutils::ReadSKBuiltinBuffer(*(int64_t *)(param2 + 0x40));
     SPDLOG_INFO("encode size:{}", img.size());
     msg["base64Img"] = base64_encode(img);
   }
@@ -49,7 +44,7 @@ void SyncMsgHook::HandleSyncMsg(INT64 param1, INT64 param2, INT64 param3) {
   inner_msg->buffer = new char[jstr.size() + 1];
   memcpy(inner_msg->buffer, jstr.c_str(), jstr.size() + 1);
   inner_msg->length = jstr.size();
-  std::string mode = wxhelper::Config::GetInstance().GetRecvMessageMode();
+  std::string mode = Config::GetInstance().GetRecvMessageMode();
   if (mode == "http") {
     bool add = base::ThreadPool::GetInstance().AddWork(
         hook::SendHttpMsgCallback, inner_msg);
@@ -59,9 +54,10 @@ void SyncMsgHook::HandleSyncMsg(INT64 param1, INT64 param2, INT64 param3) {
                                                        inner_msg);
     SPDLOG_INFO("add tcp msg work:{}", add);
   }
-  int64_t addr =
-      wxhelper::wxutils::GetWeChatWinBase() + wechat::offset::kDoAddMsg;
-  wechat::function::__DoAddMsg addMsg = (wechat::function::__DoAddMsg)addr;
-  addMsg(param1, param2, param3);
+  if (kDoAddMsg == nullptr){
+    int64_t addr = wxutils::GetWeChatWinBase() + wechat::offset::kDoAddMsg;
+    kDoAddMsg = (wechat::function::__DoAddMsg)addr;
+  }
+  kDoAddMsg(param1, param2, param3);
 }
 }  // namespace wxhelper
