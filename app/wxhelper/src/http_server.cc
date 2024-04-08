@@ -1,4 +1,4 @@
-#include "http_server.h"
+﻿#include "http_server.h"
 
 #include "http_router.h"
 #include "nlohmann/json.hpp"
@@ -105,9 +105,12 @@ void HttpServer::HandleHttpRequest(struct mg_connection *c, void *ev_data,
       ret = ret_data.dump();
     } else if (mg_vcasecmp(&hm->method, "POST") == 0) {
       std::string url(hm->uri.ptr, hm->uri.len);
-      nlohmann::json params =
-          nlohmann::json::parse(hm->body.ptr, hm->body.ptr + hm->body.len);
-      std::string p = params.dump();
+      std::string p = "{}";
+      if (hm->body.len > 0){
+        nlohmann::json params =
+            nlohmann::json::parse(hm->body.ptr, hm->body.ptr + hm->body.len);
+        p = params.dump();
+      }
       ret = HttpRouter::GetInstance().HandleHttpRequest(url, p);
     }
   } catch (nlohmann::json::exception &e) {
@@ -121,11 +124,17 @@ void HttpServer::HandleHttpRequest(struct mg_connection *c, void *ev_data,
 void HttpServer::HandleWebsocketRequest(struct mg_connection *c, void *ev_data,
                                         void *fn_data) {
   struct mg_ws_message *wm = (struct mg_ws_message *)ev_data;
-  nlohmann::json params =
-      nlohmann::json::parse(wm->data.ptr, wm->data.ptr + wm->data.len);
-  std::string cmd = params["cmd"];
-  std::string p = params.dump();
-  std::string ret = HttpRouter::GetInstance().HandleHttpRequest(cmd, p);
+  std::string ret = R"({"code":200,"msg":"success"})";
+  try {
+    nlohmann::json params =
+        nlohmann::json::parse(wm->data.ptr, wm->data.ptr + wm->data.len);
+    std::string cmd = params["cmd"];
+    std::string p = params.dump();
+    ret = HttpRouter::GetInstance().HandleHttpRequest(cmd, p);
+  } catch (nlohmann::json::exception &e) {
+    nlohmann::json res = {{"code", "500"}, {"msg", e.what()}, {"data", NULL}};
+    ret = res.dump();
+  }
   mg_ws_send(c, ret.c_str(), ret.size(), WEBSOCKET_OP_TEXT);
 }
 

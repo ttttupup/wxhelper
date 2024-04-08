@@ -1,4 +1,4 @@
-#ifndef WXHELPER_OFFSET_H_
+﻿#ifndef WXHELPER_OFFSET_H_
 #define WXHELPER_OFFSET_H_
 #include <cstdint>
 namespace wechat {
@@ -142,18 +142,18 @@ const uint64_t kGetAppMsgMgr = 0x951cb0;
 const uint64_t kGetContactMgr = 0x93a570;
 const uint64_t kGetContactList = 0xf6cb70;
 
-const uint64_t k_sqlite3_exec = 0x26e4f20;
-const uint64_t k_sqlite3_prepare = 0x26ecaa0;
-const uint64_t k_sqlite3_open = 0x27242a0;
-const uint64_t k_sqlite3_step = 0x26a8f30;
-const uint64_t k_sqlite3_column_count = 0x26a9750;
-const uint64_t k_sqlite3_column_name = 0x26aa150;
-const uint64_t k_sqlite3_column_type = 0x26a9fa0;
-const uint64_t k_sqlite3_column_blob = 0x26a9780;
-const uint64_t k_sqlite3_column_bytes = 0x26a9870;
-const uint64_t k_sqlite3_finalize = 0x26a7fe0;
+const uint64_t k_sqlite3_exec = 0x288ea10;
+const uint64_t k_sqlite3_prepare = 0x2896590;
+const uint64_t k_sqlite3_open = 0x28cdd90;
+const uint64_t k_sqlite3_step = 0x2852a20;
+const uint64_t k_sqlite3_column_count = 0x2853240;
+const uint64_t k_sqlite3_column_name = 0x2853c40;
+const uint64_t k_sqlite3_column_type = 0x2853a90;
+const uint64_t k_sqlite3_column_blob = 0x2853270;
+const uint64_t k_sqlite3_column_bytes = 0x2853360;
+const uint64_t k_sqlite3_finalize = 0x2851ad0;
 
-const uint64_t kGPInstance = 0x3d8b4f8;
+const uint64_t kGPInstance = 0x4076558;
 const uint64_t kMicroMsgDB = 0xb8;
 const uint64_t kChatMsgDB = 0x2c8;
 const uint64_t kMiscDB = 0x5f0;
@@ -164,9 +164,10 @@ const uint64_t kFunctionMsgDB = 0x1b98;
 const uint64_t kDBName = 0x28;
 const uint64_t kStorageStart = 0x0;
 const uint64_t kStorageEnd = 0x0;
-const uint64_t kMultiDBMgr = 0x3e00910;
-const uint64_t kPublicMsgMgr = 0x3dfe098;
-const uint64_t kFavoriteStorageMgr = 0x3e01478;
+const uint64_t kMultiDBMgr = 0x40ecf98;
+const uint64_t kPublicMsgMgr = 0x40ea558;
+const uint64_t kFavoriteStorageMgr = 0x40edb28;
+const uint64_t kHardLinkMgr = 0x40ecec0;
 
 const uint64_t kChatRoomMgr = 0x8e9d30;
 const uint64_t kGetChatRoomDetailInfo = 0xe73590;

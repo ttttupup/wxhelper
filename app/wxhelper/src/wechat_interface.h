@@ -1,4 +1,4 @@
-#ifndef WXHELPER_WECHAT_INNER_H_
+﻿#ifndef WXHELPER_WECHAT_INNER_H_
 #define WXHELPER_WECHAT_INNER_H_
 #include <string>
 #include <vector>

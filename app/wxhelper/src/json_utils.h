@@ -1,4 +1,4 @@
-#ifndef WXHELPER_JSON_UTILS_H_
+﻿#ifndef WXHELPER_JSON_UTILS_H_
 #define WXHELPER_JSON_UTILS_H_
 #include "nlohmann/json.hpp"
 namespace wxhelper {

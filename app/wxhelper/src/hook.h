@@ -1,4 +1,4 @@
-#ifndef WXHELPER_HOOK_H_
+﻿#ifndef WXHELPER_HOOK_H_
 #define WXHELPER_HOOK_H_
 #include <Windows.h>
 #include <stdint.h>

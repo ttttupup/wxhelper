@@ -1,4 +1,4 @@
-#include "sync_msg_hook.h"
+﻿#include "sync_msg_hook.h"
 
 #include "base64.h"
 #include "config.h"

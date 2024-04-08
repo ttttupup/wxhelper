@@ -1,4 +1,4 @@
-#ifndef WXHELPER_SQLITE_FUNCTION_H_
+﻿#ifndef WXHELPER_SQLITE_FUNCTION_H_
 #define WXHELPER_SQLITE_FUNCTION_H_
 #include <cstdint>
 #include "offset.h"
@@ -79,6 +79,7 @@ typedef int(__cdecl *sqlite3_finalize)(uint64_t *pStmt);
 
 
 struct SqliteFunction {
+  SqliteFunction(){}
   SqliteFunction(uint64_t base_addr) {
     sqlite3_exec =
         reinterpret_cast<sqlite3::sqlite3_exec>(base_addr + offset::k_sqlite3_exec);

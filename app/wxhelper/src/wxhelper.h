@@ -1,4 +1,4 @@
-
+﻿
 #ifndef WXHELPER_WXHELPER_H_
 #define WXHELPER_WXHELPER_H_
 #include <Windows.h>

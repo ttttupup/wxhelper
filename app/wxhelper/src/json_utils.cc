@@ -1,4 +1,4 @@
-#include "json_utils.h"
+﻿#include "json_utils.h"
 #include "utils.h"
 #define STR2ULL(str) (base::utils::IsDigit(str) ? stoull(str) : 0)
 #define STR2LL(str) (base::utils::IsDigit(str) ? stoll(str) : 0)

@@ -1,4 +1,4 @@
-#ifndef WXHELPER_CONFIG_H_
+﻿#ifndef WXHELPER_CONFIG_H_
 #define WXHELPER_CONFIG_H_
 #include <string>
 

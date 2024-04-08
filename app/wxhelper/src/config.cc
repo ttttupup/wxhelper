@@ -1,4 +1,4 @@
-#include "config.h"
+﻿#include "config.h"
 
 #include <Windows.h>
 
@@ -20,7 +20,7 @@ void Config::init() {
   spdlog::set_pattern("%Y-%m-%d %H:%M:%S [%l] [%t] - <%s>|<%#>|<%!>,%v");
   http_server_port_ =
       GetPrivateProfileInt("config", "HttpServerPort", 19088, "./config.ini");
-  hidden_dll_ = GetPrivateProfileInt("config", "HiddenDll", 1, "./config.ini");
+  hidden_dll_ = GetPrivateProfileInt("config", "HiddenDll", 0, "./config.ini");
   TCHAR host[MAX_PATH];
   GetPrivateProfileStringA("config", "HttpServerHost", "http://0.0.0.0", host,
                            sizeof(host), "./config.ini");

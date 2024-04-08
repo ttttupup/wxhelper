@@ -1,4 +1,4 @@
-#ifndef WXHELPER_HTTP_SERVER_H_
+﻿#ifndef WXHELPER_HTTP_SERVER_H_
 #define WXHELPER_HTTP_SERVER_H_
 #include <atomic>
 #include <functional>

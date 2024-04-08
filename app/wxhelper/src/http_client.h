@@ -1,4 +1,4 @@
-#ifndef WXHELPER_HTTP_CLIENT_H_
+﻿#ifndef WXHELPER_HTTP_CLIENT_H_
 #define WXHELPER_HTTP_CLIENT_H_
 #include <string>
 

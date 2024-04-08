@@ -1,4 +1,4 @@
-#ifndef WXHELPER_CLIENT_SOCKET_H_
+﻿#ifndef WXHELPER_CLIENT_SOCKET_H_
 #define WXHELPER_CLIENT_SOCKET_H_
 #include <string>
 

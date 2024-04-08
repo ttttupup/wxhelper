@@ -1,4 +1,4 @@
-#include "wxutils.h"
+﻿#include "wxutils.h"
 
 #include "utils.h"
 #define BUFSIZE 1024

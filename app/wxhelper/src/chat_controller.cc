@@ -1,4 +1,4 @@
-#include "chat_controller.h"
+﻿#include "chat_controller.h"
 
 #include "json_utils.h"
 #include "nlohmann/json.hpp"
@@ -18,7 +18,7 @@ namespace wxhelper {
 std::string ChatController::SendTextMsg(std::string params) {
   int64_t base_addr = wxutils::GetWeChatWinBase();
   nlohmann::json jp = nlohmann::json::parse(params);
-  SPDLOG_INFO("sendTextMsg wxid={},msg={}",jp["wxid"],jp["msg"]);
+  SPDLOG_INFO("sendTextMsg wxid={},msg={}", jp["wxid"], jp["msg"]);
   std::wstring wxid = jsonutils::GetWStringParam(jp, "wxid");
   std::wstring msg = jsonutils::GetWStringParam(jp, "msg");
   prototype::WeChatString to_user(wxid);
@@ -41,22 +41,70 @@ std::string ChatController::SendTextMsg(std::string params) {
                           reinterpret_cast<UINT64>(&temp), 1, 1, 0, 0);
   free(reinterpret_cast<UINT64>(&chat_msg));
 
-  nlohmann::json ret_data = {{"code", success}, {"data", {}}, {"msg", "success"}};
+  nlohmann::json ret_data = {
+      {"code", success}, {"data", {}}, {"msg", "success"}};
   return ret_data.dump();
 }
+
 std::string ChatController::SendImageMsg(std::string params) {
-  return std::string();
+  nlohmann::json ret = {
+      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+  return ret.dump();
 }
+
 std::string ChatController::SendFileMsg(std::string params) {
-  return std::string();
+  nlohmann::json ret = {
+      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+  return ret.dump();
 }
+
 std::string ChatController::SendAtText(std::string params) {
-  return std::string();
+  nlohmann::json ret = {
+      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+  return ret.dump();
 }
+
 std::string ChatController::SendMultiAtText(std::string params) {
-  return std::string();
+  nlohmann::json ret = {
+      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+  return ret.dump();
 }
+
+std::string ChatController::SendCustomEmotion(std::string params) {
+  nlohmann::json ret = {
+      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+  return ret.dump();
+}
+
+std::string ChatController::SendApplet(std::string params) {
+  nlohmann::json ret = {
+      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+  return ret.dump();
+}
+
+std::string ChatController::SendPatMsg(std::string params) {
+  nlohmann::json ret = {
+      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+  return ret.dump();
+}
+
 std::string ChatController::ForwardMsg(std::string params) {
-  return std::string();
+  nlohmann::json ret = {
+      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+  return ret.dump();
 }
+
+std::string ChatController::ForwardPublicMsgByMsgId(std::string params) {
+  nlohmann::json ret = {
+      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+  return ret.dump();
+}
+
+std::string ChatController::ForwardPublicMsg(std::string params) {
+  nlohmann::json ret = {
+      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+  return ret.dump();
+}
+
+
 }  // namespace wxhelper
