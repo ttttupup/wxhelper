@@ -18,6 +18,17 @@ class WeChatDb : public base::Singleton<WeChatDb> {
   int Select(uint64_t db_hanle, const std::string &sql,
              std::vector<std::vector<std::string>> &query_result);
 
+  int64_t GetLocalIdByMsgId(uint64_t msgid, int64_t &dbIndex);
+  std::vector<std::string> GetChatMsgByMsgId(uint64_t msgid);
+
+  std::string GetVoiceBuffByMsgId(uint64_t msgid);
+
+  std::string GetPublicMsgCompressContentByMsgId(uint64_t msgid);
+
+  std::string GetChatMsgStrContentByMsgId(uint64_t msgid);
+
+  int64_t GetDbHandleByDbName(wchar_t *dbname);
+
  private:
   void AddDatebaseInfo(uint64_t storage);
   int ExecSelect(uint64_t db, const std::string &sql,
@@ -30,7 +41,7 @@ class WeChatDb : public base::Singleton<WeChatDb> {
   std::vector<DatabaseInfo> dbs_;
   sqlite3::SqliteFunction func_;
   uint64_t base_addr_;
-  mutable std::mutex m;
+  mutable std::recursive_mutex m;
 };
 
 }  // namespace wechat

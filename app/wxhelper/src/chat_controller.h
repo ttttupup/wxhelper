@@ -71,6 +71,10 @@ class ChatController : public http::HttpController<ChatController> {
   /// @param params json
   /// @return json
   static std::string ForwardPublicMsg(std::string params);
+  /// @brief 获取联系人昵称
+  /// @param params json
+  /// @return json
+  static std::string GetContactOrChatRoomNickname(std::string params);
 };
 }  // namespace wxhelper
 

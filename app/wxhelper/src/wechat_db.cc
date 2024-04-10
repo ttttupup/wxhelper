@@ -64,6 +64,7 @@ int GetDbInfoCallback(void *data, int argc, char **argv, char **name) {
 }
 
 void WeChatDb::Init() {
+  std::lock_guard<std::recursive_mutex> lock(m);
   base_addr_ = wxhelper::wxutils::GetWeChatWinBase();
   func_ = sqlite3::SqliteFunction(base_addr_);
   dbmap_ = {};
@@ -75,8 +76,18 @@ int WeChatDb::ExecuteSQL(uint64_t db, const char *sql,
   return func_.sqlite3_exec(db, sql, callback, data, 0);
 }
 
+int64_t WeChatDb::GetDbHandleByDbName(wchar_t *dbname) {
+  if (dbmap_.size() == 0) {
+    GetWeChatDbHandles();
+  }
+  if (dbmap_.find(dbname) != dbmap_.end()) {
+    return dbmap_[dbname].handle;
+  }
+  return 0;
+}
+
 std::vector<void *> WeChatDb::GetWeChatDbHandles() {
-  std::lock_guard<std::mutex> lock(m);
+  std::lock_guard<std::recursive_mutex> lock(m);
   dbs_.clear();
   dbmap_.clear();
   uint64_t p_contact_addr = *(uint64_t *)(base_addr_ + offset::kGPInstance);
@@ -217,7 +228,111 @@ int WeChatDb::Select(uint64_t db_hanle, const std::string &sql,
   return 1;
 }
 
+int64_t WeChatDb::GetLocalIdByMsgId(uint64_t msgid, int64_t &dbIndex) {
+  char sql[260] = {0};
+  sprintf_s(sql, "select localId from MSG where MsgSvrID=%llu;", msgid);
+  wchar_t dbname[20] = {0};
+  for (int i = 0;; i++) {
+    swprintf_s(dbname, L"MSG%d.db", i);
+    uint64_t handle = GetDbHandleByDbName(dbname);
+    if (handle == 0) {
+      SPDLOG_INFO("MSG db handle is null");
+      return 0;
+    }
+    std::vector<std::vector<std::string>> result;
+    int ret = Select(handle, (const char *)sql, result);
+    if (result.size() == 0) continue;
+    dbIndex = dbmap_[dbname].extrainfo;
+    return stoi(result[1][0]);
+  }
+  return 0;
+}
+
+std::vector<std::string> WeChatDb::GetChatMsgByMsgId(uint64_t msgid) {
+  char sql[260] = {0};
+  sprintf_s(sql,
+            "select "
+            "localId,TalkerId,MsgSvrID,Type,SubType,IsSender,CreateTime,"
+            "Sequence,StatusEx,FlagEx,Status,MsgServerSeq,MsgSequence,"
+            "StrTalker,StrContent,BytesExtra from MSG where MsgSvrID=%llu;",
+            msgid);
+  wchar_t dbname[20] = {0};
+  for (int i = 0;; i++) {
+    swprintf_s(dbname, L"MSG%d.db", i);
+    UINT64 handle = GetDbHandleByDbName(dbname);
+    if (handle == 0) {
+      SPDLOG_INFO("MSG db handle is null");
+      return {};
+    }
+    std::vector<std::vector<std::string>> result;
+    int ret = Select(handle, (const char *)sql, result);
+    if (result.size() == 0) continue;
+    return result[1];
+  }
+  return {};
+}
+
+std::string WeChatDb::GetVoiceBuffByMsgId(uint64_t msgid) {
+  char sql[260] = {0};
+  sprintf_s(sql, "SELECT Buf from Media  WHERE Reserved0=%llu;", msgid);
+  wchar_t dbname[20] = {0};
+  for (int i = 0;; i++) {
+    swprintf_s(dbname, L"MediaMSG%d.db", i);
+    UINT64 handle = GetDbHandleByDbName(dbname);
+    if (handle == 0) {
+      SPDLOG_INFO("Media db handle is null");
+      return "";
+    }
+    std::vector<std::vector<std::string>> result;
+    int ret = Select(handle, (const char *)sql, result);
+    if (result.size() == 0) continue;
+    return result[1][0];
+  }
+  return "";
+}
+
+std::string WeChatDb::GetPublicMsgCompressContentByMsgId(uint64_t msgid) {
+  char sql[260] = {0};
+  sprintf_s(sql, "SELECT CompressContent from PublicMsg  WHERE MsgSvrID=%llu;",
+            msgid);
+  wchar_t dbname[20] = {0};
+  swprintf_s(dbname, 20, L"%s", L"PublicMsg.db");
+  UINT64 handle = GetDbHandleByDbName(dbname);
+  if (handle == 0) {
+    SPDLOG_INFO("db handle not found,check msgid");
+    return "";
+  }
+  std::vector<std::vector<std::string>> result;
+  int ret = Select(handle, (const char *)sql, result);
+  if (result.size() == 0) {
+    SPDLOG_INFO(
+        "this SQL statement executed normally, but the result was empty");
+    return "";
+  }
+  return result[1][0];
+}
+
+std::string WeChatDb::GetChatMsgStrContentByMsgId(uint64_t msgid) {
+  char sql[260] = {0};
+  sprintf_s(sql, "select StrContent  from MSG where MsgSvrID=%llu;", msgid);
+  wchar_t dbname[20] = {0};
+  for (int i = 0;; i++) {
+    swprintf_s(dbname, L"MSG%d.db", i);
+    UINT64 handle = GetDbHandleByDbName(dbname);
+    if (handle == 0) {
+      SPDLOG_INFO("MSG db handle is null");
+      return {};
+    }
+    std::vector<std::vector<std::string>> result;
+    int ret = Select(handle, (const char *)sql, result);
+    if (result.size() == 0) continue;
+    return result[1][0];
+  }
+  return {};
+}
+
 void WeChatDb::AddDatebaseInfo(uint64_t storage) {
+  std::lock_guard<std::recursive_mutex> lock(m);
   uint64_t storage_addr = *(uint64_t *)(storage + 0x50);
   std::wstring name = std::wstring((wchar_t *)(*(uint64_t *)(storage + 0x78)),
                                    *(int32_t *)(storage + 0x80));
