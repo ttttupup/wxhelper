@@ -8,6 +8,7 @@
 #include "wxutils.h"
 #include "wechat_db.h"
 #include "sync_msg_hook.h"
+#include "wechat_service.h"
 namespace wxhelper {
 
 void WxHelper::init(HMODULE module) {
@@ -16,6 +17,7 @@ void WxHelper::init(HMODULE module) {
     base::utils::HideModule(module);
   }
   wechat::WeChatDb::GetInstance().Init();
+  wechat::WeChatService::GetInstance().Init();
   SyncMsgHook::GetInstance().Init();
   http::HttpServer::GetInstance().init(
       Config::GetInstance().GetHttpServerHost(),
