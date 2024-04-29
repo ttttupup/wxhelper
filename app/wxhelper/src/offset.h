@@ -243,12 +243,12 @@ const uint64_t kGetWebViewMgr = 0x9412d0;
 const uint64_t kShowWebView = 0x1d236b0;
 const uint64_t kSetUrl = 0x13dd410;
 #elif WECHAT_VERSION == V_3_9_10_19
-const uint64_t kGetAccountServiceMgr = 0xa7df30;
+const uint64_t kGetAccountServiceMgr = 0x1c1fe70;
 const uint64_t kSyncMsg = 0xc39680;
 const uint64_t kSyncMsgNext = 0xc39680;
-const uint64_t kGetCurrentDataPath = 0x11664e0;
-const uint64_t kGetAppDataSavePath = 0x14f29c0;
-const uint64_t kGetSendMessageMgr = 0xa7c730;
+const uint64_t kGetCurrentDataPath = 0x2315ea0;
+const uint64_t kGetAppDataSavePath = 0x26a7df0;
+const uint64_t kGetSendMessageMgr = 0x1c1e670;
 const uint64_t kSendTextMsg = 0x238ec70;
 const uint64_t kFreeChatMsg = 0x1c1fef0;
 
@@ -257,8 +257,8 @@ const uint64_t kSendImageMsg = 0x2384400;
 const uint64_t kChatMsgInstanceCounter = 0x1c287e0;
 const uint64_t kSendFileMsg = 0x2197a40;
 const uint64_t kGetAppMsgMgr = 0x1c23610;
-const uint64_t kGetContactMgr = 0xa69fd0;
-const uint64_t kGetContactList = 0x10b8420;
+const uint64_t kGetContactMgr = 0x1c0bdc0;
+const uint64_t kGetContactList = 0x22665a0;
 
 const uint64_t k_sqlite3_exec = 0x288ea10;
 const uint64_t k_sqlite3_prepare = 0x2896590;

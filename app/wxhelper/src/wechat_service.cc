@@ -267,7 +267,9 @@ int64_t wechat::WeChatService::SendImageMsg(const std::wstring& wxid,
       new_chat_msg(reinterpret_cast<uint64_t>(&chat_msg_temp));
   uint64_t temp1 = 0;
   uint64_t temp2 = 0;
+  uint64_t temp3 = 1;
   uint64_t* flag[10] = {};
+  flag[0] =  reinterpret_cast<uint64_t*>(temp3);
   flag[8] = &temp1;
   flag[9] = &temp2;
   flag[1] = reinterpret_cast<uint64_t*>(p_chat_msg_temp);
@@ -323,27 +325,24 @@ int64_t wechat::WeChatService::SendFileMsg(const std::wstring& wxid,
       (uint64_t*)HeapAlloc(GetProcessHeap(), 0, sizeof(uint64_t) * 4);
   uint64_t* temp3 =
       (uint64_t*)HeapAlloc(GetProcessHeap(), 0, sizeof(uint64_t) * 4);
-  uint64_t* temp4 =
-      (uint64_t*)HeapAlloc(GetProcessHeap(), 0, sizeof(uint64_t) * 4);
+
   ZeroMemory(temp1, sizeof(uint64_t) * 4);
   ZeroMemory(temp2, sizeof(uint64_t) * 4);
   ZeroMemory(temp3, sizeof(uint64_t) * 4);
-  ZeroMemory(temp4, sizeof(uint64_t) * 4);
-  *temp4 = 0x1F;
+
   uint64_t app_mgr = get_app_mgr();
   success = send_file(app_mgr, reinterpret_cast<uint64_t>(chat_msg),
                       reinterpret_cast<uint64_t>(to_user),
                       reinterpret_cast<uint64_t>(file_full_path), 1,
                       reinterpret_cast<uint64_t>(temp1), 0,
                       reinterpret_cast<uint64_t>(temp2), 0,
-                      reinterpret_cast<uint64_t>(temp3), 0, 0);
+                      reinterpret_cast<uint64_t>(temp3), 0, 0xC);
   free(reinterpret_cast<uint64_t>(chat_msg));
   HeapFree(GetProcessHeap(), 0, to_user);
   HeapFree(GetProcessHeap(), 0, file_full_path);
   HeapFree(GetProcessHeap(), 0, temp1);
   HeapFree(GetProcessHeap(), 0, temp2);
   HeapFree(GetProcessHeap(), 0, temp3);
-  HeapFree(GetProcessHeap(), 0, temp4);
   return success;
 }
 
