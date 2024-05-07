@@ -4,7 +4,7 @@
 #include "http_controller.h"
 
 namespace wxhelper {
-class ChatController : public http::HttpController<ChatController> {
+class ChatRoomController : public http::HttpController<ChatRoomController> {
  public:
   PATHS_BEGIN
   ADD_PATH("/api/getChatRoomDetailInfo", GetChatRoomDetailInfo);

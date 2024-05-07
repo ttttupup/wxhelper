@@ -385,12 +385,70 @@ int64_t wechat::WeChatService::GetContacts(std::vector<ContactInner>& vec) {
 
 int64_t wechat::WeChatService::GetChatRoomDetailInfo(
     const std::wstring& room_id, ChatRoomInfoInner& room_info) {
-  return 0;
+   int64_t success = -1;
+  prototype::WeChatString chat_room_id(room_id);
+  int64_t base_addr = wxutils::GetWeChatWinBase();
+  uint64_t get_chat_room_mgr_addr = base_addr + offset::kChatRoomMgr;
+  uint64_t get_chat_room_detail_addr = base_addr + offset::kGetChatRoomDetailInfo;
+  uint64_t create_chat_room_info_addr = base_addr + offset::kNewChatRoomInfo;
+  uint64_t free_chat_room_info_addr = base_addr + offset::kFreeChatRoomInfo;
+  
+
+  func::__GetChatRoomMgr get_chat_room_mgr = (func::__GetChatRoomMgr)get_chat_room_mgr_addr;
+  func::__NewChatRoomInfo new_chat_room_info = (func::__NewChatRoomInfo)create_chat_room_info_addr;
+  func::__FreeChatRoomInfo free_chat_room_info = (func::__FreeChatRoomInfo)free_chat_room_info_addr;
+  func::__GetChatRoomDetailInfo get_chat_room_detail = (func::__GetChatRoomDetailInfo)get_chat_room_detail_addr;
+
+  char chat_room_info[0x144] = {0};
+  
+  uint64_t new_room_info = new_chat_room_info(reinterpret_cast<uint64_t>(&chat_room_info));
+
+  uint64_t mgr = get_chat_room_mgr();
+  success = get_chat_room_detail(mgr,reinterpret_cast<uint64_t>(&chat_room_id),new_room_info,1);
+ 
+  room_info.chat_room_id = wxutils::ReadWstringThenConvert(new_room_info + 0x8);
+  room_info.notice = wxutils::ReadWstringThenConvert(new_room_info + 0x28);
+  room_info.admin = wxutils::ReadWstringThenConvert(new_room_info + 0x48);
+  room_info.xml = wxutils::ReadWstringThenConvert(new_room_info + 0x78);
+  free_chat_room_info(new_room_info);
+
+  return success;
 }
 
 int64_t wechat::WeChatService::AddMemberToChatRoom(
     const std::wstring& room_id, const std::vector<std::wstring>& members) {
-  return 0;
+  int64_t success = -1;
+  uint64_t get_chat_room_mgr_addr = base_addr_ + offset::kChatRoomMgr;
+  uint64_t add_members_addr = base_addr_ + offset::kDoAddMemberToChatRoom;
+  func::__GetChatRoomMgr get_chat_room_mgr =
+      (func::__GetChatRoomMgr)get_chat_room_mgr_addr;
+  func::__DoAddMemberToChatRoom add_members =
+      (func::__DoAddMemberToChatRoom)add_members_addr;
+
+  prototype::WeChatString *chat_room_id = (prototype::WeChatString *)HeapAlloc(
+      GetProcessHeap(), 0, sizeof(prototype::WeChatString));
+  wchar_t *p_chat_room_id =
+      (wchar_t *)HeapAlloc(GetProcessHeap(), 0, (room_id.size() + 1) * 2);
+  wmemcpy(p_chat_room_id, room_id.c_str(), room_id.size() + 1);
+  chat_room_id->ptr = p_chat_room_id;
+  chat_room_id->length = static_cast<int32_t>(room_id.size());
+  chat_room_id->max_length = static_cast<int32_t>(room_id.size());
+  chat_room_id->c_len = 0;
+  chat_room_id->c_ptr = 0;
+
+  std::vector<prototype::WeChatString> member_list;
+  uint64_t temp[2] = {0};
+  wechat::VectorInner *list = (wechat::VectorInner *)&member_list;
+  int64_t members_ptr = (int64_t)&list->start;
+  for (int i = 0; i < members.size(); i++) {
+    prototype::WeChatString member(members[i]);
+    member_list.push_back(member);
+  }
+  uint64_t mgr = get_chat_room_mgr();
+  success =
+      add_members(mgr, members_ptr, reinterpret_cast<uint64_t>(chat_room_id),
+                  reinterpret_cast<uint64_t>(&temp));
+  return success;
 }
 
 int64_t wechat::WeChatService::ModChatRoomMemberNickName(
@@ -401,12 +459,56 @@ int64_t wechat::WeChatService::ModChatRoomMemberNickName(
 
 int64_t wechat::WeChatService::DelMemberFromChatRoom(
     const std::wstring& room_id, const std::vector<std::wstring>& members) {
-  return 0;
+  int64_t success = -1;
+  uint64_t get_chat_room_mgr_addr = base_addr_ + offset::kChatRoomMgr;
+  uint64_t del_members_addr = base_addr_ + offset::kDelMemberFromChatRoom;
+  func::__GetChatRoomMgr get_chat_room_mgr =
+      (func::__GetChatRoomMgr)get_chat_room_mgr_addr;
+  func::__DoDelMemberFromChatRoom del_members =
+      (func::__DoDelMemberFromChatRoom)del_members_addr;
+
+  prototype::WeChatString* chat_room_id = BuildWechatString(room_id);
+  std::vector<prototype::WeChatString> member_list;
+  uint64_t temp[2] = {0};
+  wechat::VectorInner* list = (wechat::VectorInner*)&member_list;
+  int64_t members_ptr = (int64_t)&list->start;
+  for (int i = 0; i < members.size(); i++) {
+    prototype::WeChatString member(members[i]);
+    member_list.push_back(member);
+  }
+  uint64_t mgr = get_chat_room_mgr();
+  success =
+      del_members(mgr, members_ptr, reinterpret_cast<uint64_t>(chat_room_id));
+  return success;
 }
 
 int64_t wechat::WeChatService::GetMemberFromChatRoom(
     const std::wstring& room_id, ChatRoomMemberInner& member) {
-  return 0;
+  int64_t success = -1;
+  uint64_t get_chat_room_mgr_addr = base_addr_ + offset::kChatRoomMgr;
+  uint64_t get_members_addr = base_addr_ + offset::kGetMemberFromChatRoom;
+  uint64_t new_chat_room_addr = base_addr_ + offset::kNewChatRoom;
+  uint64_t free_chat_room_addr = base_addr_ + offset::kFreeChatRoom;
+  func::__GetChatRoomMgr get_chat_room_mgr =
+      (func::__GetChatRoomMgr)get_chat_room_mgr_addr;
+  func::__GetMemberFromChatRoom get_members =
+      (func::__GetMemberFromChatRoom)get_members_addr;
+  func::__NewChatRoom new_chat_room = (func::__NewChatRoom)new_chat_room_addr;
+  func::__FreeChatRoom free_chat_room =
+      (func::__FreeChatRoom)free_chat_room_addr;
+
+  prototype::WeChatString chat_room_id(room_id);
+  char chat_room_info[0x308] = {0};
+  uint64_t addr =  new_chat_room(reinterpret_cast<uint64_t>(&chat_room_info));
+  uint64_t mgr = get_chat_room_mgr();
+  success = get_members(mgr, reinterpret_cast<uint64_t>(&chat_room_id), addr);
+  member.chat_room_id = wxutils::ReadWstringThenConvert(addr + 0x10);
+  member.admin = wxutils::ReadWstringThenConvert(addr + 0x78);
+  member.member_nickname = wxutils::ReadWstringThenConvert(addr + 0x50);
+  member.admin_nickname = wxutils::ReadWstringThenConvert(addr + 0xA0);
+  member.member = wxutils::ReadWeChatStr(addr + 0x30);
+  free_chat_room(addr);
+  return success;
 }
 
 int64_t wechat::WeChatService::SetTopMsg(uint64_t msg_id) { return 0; }
