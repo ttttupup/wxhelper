@@ -252,7 +252,7 @@ const uint64_t kGetSendMessageMgr = 0x1c1e670;
 const uint64_t kSendTextMsg = 0x238ec70;
 const uint64_t kFreeChatMsg = 0x1c1fef0;
 
-const uint64_t kDoAddMsg = 0x1225a60;
+const uint64_t kDoAddMsg = 0x23d6f50;
 const uint64_t kSendImageMsg = 0x2384400;
 const uint64_t kChatMsgInstanceCounter = 0x1c287e0;
 const uint64_t kSendFileMsg = 0x2197a40;
