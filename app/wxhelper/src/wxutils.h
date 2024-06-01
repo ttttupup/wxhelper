@@ -18,6 +18,8 @@ std::string ImageXor(std::string buf);
 std::wstring ReadWstring(INT64 addr);
 std::string ReadWstringThenConvert(INT64 addr);
 int DecodeImage(const wchar_t* file_path, const wchar_t* save_dir);
+// 添加 print_utf8_to_console 函数的声明
+void print_utf8_to_console(const std::string& utf8_str);
 }  // namespace wxutils
 
 }  // namespace wxhelper
