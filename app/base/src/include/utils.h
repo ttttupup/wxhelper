@@ -7,6 +7,13 @@
 namespace base {
 
 namespace utils {
+
+#define STRINGIFY(S) #S
+#define DEFER_STRINGIFY(S) STRINGIFY(S)
+#define PRAGMA_MESSAGE(MSG) _Pragma(STRINGIFY(message(MSG)))
+#define FORMATTED_MESSAGE(MSG) "warning [TODO-" DEFER_STRINGIFY(__COUNTER__) "] " MSG " : "  __FILE__ "(" DEFER_STRINGIFY(__LINE__)  ")"
+#define TODO(MSG)  PRAGMA_MESSAGE(FORMATTED_MESSAGE(MSG))
+
 std::wstring Utf8ToWstring(const std::string &str);
 
 std::string WstringToUtf8(const std::wstring &str);

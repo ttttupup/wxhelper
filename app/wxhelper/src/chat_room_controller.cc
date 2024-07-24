@@ -5,6 +5,7 @@
 #include "spdlog/spdlog.h"
 #include "wechat_interface.h"
 #include "wechat_service.h"
+#include "utils.h"
 namespace wxhelper {
 std::string ChatRoomController::GetChatRoomDetailInfo(std::string params) {
   nlohmann::json jp = nlohmann::json::parse(params);
@@ -31,7 +32,8 @@ std::string ChatRoomController::GetMemberFromChatRoom(std::string params) {
   wechat::ChatRoomMemberInner member;
   int64_t success = wechat::WeChatService::GetInstance().GetMemberFromChatRoom(
       room_id, member);
-  nlohmann::json ret_data = {{"code", success}, {"data", {}}, {"msg", "success"}};
+  nlohmann::json ret_data = {
+      {"code", success}, {"data", {}}, {"msg", "success"}};
   if (success > 0) {
     nlohmann::json member_info = {
         {"admin", member.admin},
@@ -56,8 +58,7 @@ std::string ChatRoomController::AddMemberToChatRoom(std::string params) {
   }
   int64_t success = wechat::WeChatService::GetInstance().AddMemberToChatRoom(
       room_id, wxid_list);
-  nlohmann::json ret = {
-      {"code", success}, {"data", {}}, {"msg", "success"}};
+  nlohmann::json ret = {{"code", success}, {"data", {}}, {"msg", "success"}};
   return ret.dump();
 }
 std::string ChatRoomController::DelMemberFromChatRoom(std::string params) {
@@ -70,44 +71,80 @@ std::string ChatRoomController::DelMemberFromChatRoom(std::string params) {
   for (unsigned int i = 0; i < wxids.size(); i++) {
     wxid_list.push_back(wxids[i]);
   }
-  INT64 success = wechat::WeChatService::GetInstance().DelMemberFromChatRoom(
+  int64_t success = wechat::WeChatService::GetInstance().DelMemberFromChatRoom(
       room_id, wxid_list);
   nlohmann::json ret_data = {
       {"code", success}, {"msg", "success"}, {"data", {}}};
   return ret_data.dump();
 }
 std::string ChatRoomController::CreateChatRoom(std::string params) {
-  nlohmann::json ret = {
-      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+  SPDLOG_INFO("CreateChatRoom params:{}", params);
+  nlohmann::json jp = nlohmann::json::parse(params);
+  std::vector<std::wstring> wxids = jsonutils::GetArrayParam(jp, "memberIds");
+  int64_t success = wechat::WeChatService::GetInstance().CreateChatRoom(wxids);
+  nlohmann::json ret = {{"code", success}, {"data", {}}, {"msg", "success"}};
   return ret.dump();
 }
 std::string ChatRoomController::QuitChatRoom(std::string params) {
-  nlohmann::json ret = {
-      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+  SPDLOG_INFO("QuitChatRoom params:{}", params);
+  nlohmann::json jp = nlohmann::json::parse(params);
+  std::wstring room_id = jsonutils::GetWStringParam(jp, "chatRoomId");
+  int64_t success = wechat::WeChatService::GetInstance().QuitChatRoom(room_id);
+  nlohmann::json ret = {{"code", success}, {"data", {}}, {"msg", "success"}};
   return ret.dump();
 }
 std::string ChatRoomController::InviteMemberToChatRoom(std::string params) {
-  nlohmann::json ret = {
-      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+  SPDLOG_INFO("InviteMemberToChatRoom params:{}", params);
+  nlohmann::json jp = nlohmann::json::parse(params);
+  std::wstring room_id = jsonutils::GetWStringParam(jp, "chatRoomId");
+  std::vector<std::wstring> wxids = jsonutils::GetArrayParam(jp, "memberIds");
+  int64_t success = wechat::WeChatService::GetInstance().InviteMemberToChatRoom(
+      room_id, wxids);
+  nlohmann::json ret = {{"code", success}, {"data", {}}, {"msg", "success"}};
   return ret.dump();
 }
 std::string ChatRoomController::TopMsg(std::string params) {
-  return std::string();
+  SPDLOG_INFO("TopMsg params:{}", params);
+  nlohmann::json jp = nlohmann::json::parse(params);
+  int64_t msg_id = jsonutils::GetInt64Param(jp, "msgId");
+  int64_t success = wechat::WeChatService::GetInstance().SetTopMsg(msg_id);
+  nlohmann::json ret = {{"code", success}, {"data", {}}, {"msg", "success"}};
+  return ret.dump();
 }
 std::string ChatRoomController::RemoveTopMsg(std::string params) {
-  nlohmann::json ret = {
-      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+  SPDLOG_INFO("RemoveTopMsg params:{}", params);
+  nlohmann::json jp = nlohmann::json::parse(params);
+  std::wstring room_id = jsonutils::GetWStringParam(jp, "chatRoomId");
+  int64_t msg_id = jsonutils::GetInt64Param(jp, "msgId");
+  int64_t success =
+      wechat::WeChatService::GetInstance().RemoveTopMsg(room_id, msg_id);
+  nlohmann::json ret = {{"code", success}, {"data", {}}, {"msg", "success"}};
   return ret.dump();
 }
 std::string ChatRoomController::GetChatRoomMemberNickname(std::string params) {
+  SPDLOG_INFO("GetChatRoomMemberNickname params:{}", params);
+  nlohmann::json jp = nlohmann::json::parse(params);
+  std::wstring room_id = jsonutils::GetWStringParam(jp, "chatRoomId");
+  std::wstring member_id = jsonutils::GetWStringParam(jp, "memberId");
+  std::wstring name = wechat::WeChatService::GetInstance().GetChatRoomMemberNickname(room_id,
+                                                                     member_id);
   nlohmann::json ret = {
-      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+      {"code", 1},
+      {"data", {{"nickname", base::utils::WstringToUtf8(name)}}},
+      {"msg", "success"}};
   return ret.dump();
 }
 std::string ChatRoomController::ModifyChatRoomMemberNickName(
     std::string params) {
-  nlohmann::json ret = {
-      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+  SPDLOG_INFO("ModifyChatRoomMemberNickName params:{}", params);
+  nlohmann::json jp = nlohmann::json::parse(params);
+  std::wstring room_id = jsonutils::GetWStringParam(jp, "chatRoomId");
+  std::wstring wxid = jsonutils::GetWStringParam(jp, "wxid");
+  std::wstring nickName = jsonutils::GetWStringParam(jp, "nickName");
+  int64_t success =
+      wechat::WeChatService::GetInstance().ModChatRoomMemberNickName(
+          room_id, wxid, nickName);
+  nlohmann::json ret = {{"code", success}, {"msg", "success"}, {"data", {}}};
   return ret.dump();
 }
 }  // namespace wxhelper

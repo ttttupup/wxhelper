@@ -38,38 +38,65 @@ std::string MiscController::GetUserInfo(std::string params) {
   return ret.dump();
 }
 std::string MiscController::GetSNSFirstPage(std::string params) {
-  nlohmann::json ret = {
-      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+  int64_t success = wechat::WeChatService::GetInstance().GetSNSFirstPage();
+  nlohmann::json ret = {{"code", success}, {"data", {}}, {"msg", "success"}};
   return ret.dump();
 }
 std::string MiscController::GetSNSNextPage(std::string params) {
-  nlohmann::json ret = {
-      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+  SPDLOG_INFO("GetSNSNextPage params:{}", params);
+  nlohmann::json jp = nlohmann::json::parse(params);
+  int64_t sns_id = jsonutils::GetInt64Param(jp, "snsId");
+  int64_t success = wechat::WeChatService::GetInstance().GetSNSNextPage(sns_id);
+  nlohmann::json ret = {{"code", success}, {"data", {}}, {"msg", "success"}};
   return ret.dump();
 }
 std::string MiscController::AddFavFromMsg(std::string params) {
-  nlohmann::json ret = {
-      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+  SPDLOG_INFO("AddFavFromMsg params:{}", params);
+  nlohmann::json jp = nlohmann::json::parse(params);
+  int64_t sns_id = jsonutils::GetInt64Param(jp, "msgId");
+  int64_t success = wechat::WeChatService::GetInstance().AddFavFromMsg(sns_id);
+  nlohmann::json ret = {{"code", success}, {"data", {}}, {"msg", "success"}};
   return ret.dump();
 }
 std::string MiscController::AddFavFromImage(std::string params) {
-  nlohmann::json ret = {
-      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+  SPDLOG_INFO("AddFavFromImage params:{}", params);
+  nlohmann::json jp = nlohmann::json::parse(params);
+  std::wstring wxid = jsonutils::GetWStringParam(jp, "wxid");
+  std::wstring image_path = jsonutils::GetWStringParam(jp, "imagePath");
+  int64_t success =
+      wechat::WeChatService::GetInstance().AddFavFromImage(wxid, image_path);
+  nlohmann::json ret = {{"code", success}, {"data", {}}, {"msg", "success"}};
   return ret.dump();
 }
 std::string MiscController::DecodeImage(std::string params) {
-  nlohmann::json ret = {
-      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+  SPDLOG_INFO("DecodeImage params:{}", params);
+  nlohmann::json jp = nlohmann::json::parse(params);
+  std::wstring file_path = jsonutils::GetWStringParam(jp, "filePath");
+  std::wstring store_dir = jsonutils::GetWStringParam(jp, "storeDir");
+  int64_t success =
+      wechat::WeChatService::GetInstance().DecodeImage(file_path, store_dir);
+  nlohmann::json ret = {{"code", success}, {"data", {}}, {"msg", "success"}};
   return ret.dump();
 }
 std::string MiscController::GetVoiceByMsgId(std::string params) {
-  nlohmann::json ret = {
-      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+  SPDLOG_INFO("GetVoiceByMsgId params:{}", params);
+  nlohmann::json jp = nlohmann::json::parse(params);
+  int64_t msg_id = jsonutils::GetInt64Param(jp, "msgId");
+  std::wstring store_dir = jsonutils::GetWStringParam(jp, "storeDir");
+  int64_t success =
+      wechat::WeChatService::GetInstance().GetVoiceByDB(msg_id, store_dir);
+  nlohmann::json ret = {{"code", success}, {"data", {}}, {"msg", "success"}};
   return ret.dump();
 }
 std::string MiscController::DoOcrTask(std::string params) {
+  SPDLOG_INFO("DoOcrTask params:{}", params);
+  nlohmann::json jp = nlohmann::json::parse(params);
+  std::wstring image_path = jsonutils::GetWStringParam(jp, "imagePath");
+  std::string text("");
+  int64_t success =
+      wechat::WeChatService::GetInstance().DoOCRTask(image_path, text);
   nlohmann::json ret = {
-      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+      {"code", success}, {"data", {{"content", text}}}, {"msg", "success"}};
   return ret.dump();
 }
 std::string MiscController::LockWeChat(std::string params) {
@@ -94,6 +121,7 @@ std::string MiscController::GetLoginUrl(std::string params) {
   return ret.dump();
 }
 std::string MiscController::TranslateVoice(std::string params) {
+  SPDLOG_INFO("TranslateVoice params:{}", params);
   nlohmann::json jp = nlohmann::json::parse(params);
   int64_t msg_id = jsonutils::GetInt64Param(jp, "msgId");
   int64_t success = wechat::WeChatService::GetInstance().TranslateVoice(msg_id);
@@ -110,23 +138,32 @@ std::string MiscController::GetTranslateVoiceText(std::string params) {
   return ret_data.dump();
 }
 std::string MiscController::OpenUrlByWeChat(std::string params) {
+  SPDLOG_INFO("OpenUrlByWeChat params:{}", params);
   nlohmann::json jp = nlohmann::json::parse(params);
   std::wstring url = jsonutils::GetWStringParam(jp, "url");
   int flag = jsonutils::GetIntParam(jp, "flag");
   int64_t success =
       wechat::WeChatService::GetInstance().OpenUrlByWeChatBrowser(url, flag);
-  nlohmann::json ret = {
-      {"code", success}, {"data", {}}, {"msg", "Not Implemented"}};
+  nlohmann::json ret = {{"code", success}, {"data", {}}, {"msg", "success"}};
   return ret.dump();
 }
 std::string MiscController::ConfirmReceipt(std::string params) {
-  nlohmann::json ret = {
-      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+  SPDLOG_INFO("ConfirmReceipt params:{}", params);
+  nlohmann::json jp = nlohmann::json::parse(params);
+  std::wstring wxid = jsonutils::GetWStringParam(jp, "wxid");
+  std::wstring transcationid = jsonutils::GetWStringParam(jp, "transcationId");
+  std::wstring transferid = jsonutils::GetWStringParam(jp, "transferId");
+  int64_t success = wechat::WeChatService::GetInstance().DoConfirmReceipt(
+      wxid, transcationid, transferid);
+  nlohmann::json ret = {{"code", success}, {"data", {}}, {"msg", "success"}};
   return ret.dump();
 }
 std::string MiscController::DownloadAttach(std::string params) {
-  nlohmann::json ret = {
-      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+  SPDLOG_INFO("DownloadAttach params:{}", params);
+  nlohmann::json jp = nlohmann::json::parse(params);
+  int64_t msg_id = jsonutils::GetInt64Param(jp, "msgId");
+  int64_t success = wechat::WeChatService::GetInstance().DoDownloadTask(msg_id);
+  nlohmann::json ret = {{"code", success}, {"data", {}}, {"msg", "success"}};
   return ret.dump();
 }
 }  // namespace wxhelper

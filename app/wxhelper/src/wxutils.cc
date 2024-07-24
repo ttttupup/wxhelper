@@ -105,6 +105,20 @@ int DecodeImage(const wchar_t *file_path, const wchar_t *save_dir) {
   return -1;
 }
 
+bool FindOrCreateDirectory(const std::wstring &path) {
+  WIN32_FIND_DATAW fd;
+  HANDLE found = ::FindFirstFileW(path.c_str(), &fd);
+  if (found != INVALID_HANDLE_VALUE &&
+      (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+    FindClose(found);
+    return true;
+  }
+
+  if (!::CreateDirectoryW(path.c_str(), NULL)) {
+    return false;
+  }
+  return true;
+}
 
 }  // namespace wxutils
 }  // namespace wxhelper

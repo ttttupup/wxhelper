@@ -37,7 +37,7 @@ class WeChatService : public base::Singleton<WeChatService> {
   int64_t GetMemberFromChatRoom(const std::wstring& room_id,
                                 ChatRoomMemberInner& member);
   int64_t SetTopMsg(uint64_t msg_id);
-  int64_t RemoveTopMsg(const std::wstring& room_id, ULONG64 msg_id);
+  int64_t RemoveTopMsg(const std::wstring& room_id, uint64_t msg_id);
   int64_t InviteMemberToChatRoom(const std::wstring& room_id,
                                  const std::vector<std::wstring>& wxids);
   int64_t CreateChatRoom(const std::vector<std::wstring>& wxids);
@@ -70,11 +70,11 @@ class WeChatService : public base::Singleton<WeChatService> {
                             const std::wstring& wxid);
   int64_t SendApplet(const std::wstring& recv_wxid,
                      const std::wstring& waid_suff, const std::wstring& waid_w,
-                     const std::string& waid_s, const std::string& wa_wxid,
-                     const std::string& json_param,
-                     const std::string& head_image,
-                     const std::string& big_image,
-                     const std::string& index_page);
+                     const std::wstring& waid_s, const std::wstring& wa_wxid,
+                     const std::wstring& json_param,
+                     const std::wstring& head_image,
+                     const std::wstring& big_image,
+                     const std::wstring& index_page);
   int64_t SendPatMsg(const std::wstring& room_id, const std::wstring& wxid);
   int64_t DoOCRTask(const std::wstring& img_path, std::string& result);
   int64_t LockWeChat();
@@ -88,6 +88,24 @@ class WeChatService : public base::Singleton<WeChatService> {
   int64_t TranslateVoice(uint64_t msg_id);
   std::string GetTranslateVoiceText(uint64_t msg_id);
   int64_t OpenUrlByWeChatBrowser(const std::wstring& url, int flag);
+  std::wstring GetChatRoomMemberNickname(const std::wstring& room_id,
+                                         const std::wstring& member_id);
+  int64_t DelContact(const std::wstring& wxid);
+
+  int64_t SearchContact(const std::wstring& keyword,
+                        wechat::SearchContactInner& contact);
+
+  int64_t AddFriendByWxid(const std::wstring& wxid, const std::wstring& msg);
+
+  int64_t VerifyApply(const std::wstring& v3, const std::wstring& v4,
+                      int32_t permission);
+  int64_t DoConfirmReceipt(const std::wstring& wxid,
+                           const std::wstring& transcationid,
+                           const std::wstring& transferid);
+
+  int64_t DoRefuseReceipt(const std::wstring& wxid,
+                          const std::wstring& transcationid,
+                          const std::wstring& transferid);
 
  private:
   uint64_t base_addr_;

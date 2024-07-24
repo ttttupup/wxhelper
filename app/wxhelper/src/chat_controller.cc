@@ -5,6 +5,7 @@
 #include "spdlog/spdlog.h"
 #include "wechat_interface.h"
 #include "wechat_service.h"
+#include "utils.h"
 namespace jsonutils = wxhelper::jsonutils;
 namespace wxhelper {
 
@@ -20,6 +21,7 @@ std::string ChatController::SendTextMsg(std::string params) {
 }
 
 std::string ChatController::SendImageMsg(std::string params) {
+  SPDLOG_INFO("SendImageMsg params={}", params);
   nlohmann::json jp = nlohmann::json::parse(params);
   std::wstring wxid = jsonutils::GetWStringParam(jp, "wxid");
   std::wstring image_path = jsonutils::GetWStringParam(jp, "imagePath");
@@ -30,6 +32,7 @@ std::string ChatController::SendImageMsg(std::string params) {
 }
 
 std::string ChatController::SendFileMsg(std::string params) {
+  SPDLOG_INFO("SendFileMsg params={}", params);
   nlohmann::json jp = nlohmann::json::parse(params);
   std::wstring wxid = jsonutils::GetWStringParam(jp, "wxid");
   std::wstring file_path = jsonutils::GetWStringParam(jp, "filePath");
@@ -40,6 +43,7 @@ std::string ChatController::SendFileMsg(std::string params) {
 }
 
 std::string ChatController::SendAtText(std::string params) {
+  SPDLOG_INFO("SendAtText params={}", params);
   nlohmann::json jp = nlohmann::json::parse(params);
   std::wstring chat_room_id = jsonutils::GetWStringParam(jp, "chatRoomId");
   std::vector<std::wstring> wxids = jsonutils::GetArrayParam(jp, "wxids");
@@ -51,6 +55,7 @@ std::string ChatController::SendAtText(std::string params) {
 }
 
 std::string ChatController::SendMultiAtText(std::string params) {
+  SPDLOG_INFO("SendMultiAtText params={}", params);
   nlohmann::json jp = nlohmann::json::parse(params);
   nlohmann::json array = jp["at"];
   std::vector<std::pair<std::wstring, std::wstring>> at;
@@ -67,19 +72,39 @@ std::string ChatController::SendMultiAtText(std::string params) {
   return ret.dump();
 }
 
+
 std::string ChatController::SendCustomEmotion(std::string params) {
-  nlohmann::json ret = {
-      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+  SPDLOG_INFO("SendCustomEmotion params={}", params);
+  nlohmann::json jp = nlohmann::json::parse(params);
+  std::wstring wxid = jsonutils::GetWStringParam(jp, "wxid");
+  std::wstring file_path = jsonutils::GetWStringParam(jp, "filePath");
+  int64_t success =
+      wechat::WeChatService::GetInstance().SendCustomEmotion(file_path, wxid);
+  nlohmann::json ret = {{"code", success}, {"data", {}}, {"msg", "success"}};
   return ret.dump();
 }
 
+TODO("")
 std::string ChatController::SendApplet(std::string params) {
-  nlohmann::json ret = {
-      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+  SPDLOG_INFO("SendApplet params={}", params);
+  nlohmann::json jp = nlohmann::json::parse(params);
+  std::wstring wxid = jsonutils::GetWStringParam(jp, "wxid");
+  std::wstring waid_concat = jsonutils::GetWStringParam(jp, "waidConcat");
+  std::wstring waid = jsonutils::GetWStringParam(jp, "waid");
+  std::wstring app_wxid = jsonutils::GetWStringParam(jp, "appletWxid");
+  std::wstring json_param = jsonutils::GetWStringParam(jp, "jsonParam");
+  std::wstring head_url = jsonutils::GetWStringParam(jp, "headImgUrl");
+  std::wstring main_img = jsonutils::GetWStringParam(jp, "mainImg");
+  std::wstring index_page = jsonutils::GetWStringParam(jp, "indexPage");
+  int64_t success = wechat::WeChatService::GetInstance().SendApplet(
+      wxid, waid_concat, waid, waid, app_wxid, json_param, head_url, main_img,
+      index_page);
+  nlohmann::json ret = {{"code", success}, {"data", {}}, {"msg", "success"}};
   return ret.dump();
 }
 
 std::string ChatController::SendPatMsg(std::string params) {
+  SPDLOG_INFO("SendPatMsg params={}", params);
   nlohmann::json jp = nlohmann::json::parse(params);
   std::wstring room_id = jsonutils::GetWStringParam(jp, "receiver");
   std::wstring wxid = jsonutils::GetWStringParam(jp, "wxid");
@@ -91,37 +116,55 @@ std::string ChatController::SendPatMsg(std::string params) {
 }
 
 std::string ChatController::ForwardMsg(std::string params) {
+  SPDLOG_INFO("ForwardMsg params={}", params);
   nlohmann::json jp = nlohmann::json::parse(params);
   std::wstring wxid = jsonutils::GetWStringParam(jp, "wxid");
   int64_t msg_id = jsonutils::GetInt64Param(jp, "msgId");
   int64_t success =
       wechat::WeChatService::GetInstance().ForwardMsg(msg_id, wxid);
-  nlohmann::json ret = {
-      {"code", success}, {"data", {}}, {"msg", "Not Implemented"}};
+  nlohmann::json ret = {{"code", success}, {"data", {}}, {"msg", "success"}};
   return ret.dump();
 }
 
 std::string ChatController::ForwardPublicMsgByMsgId(std::string params) {
-  nlohmann::json ret = {
-      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+  SPDLOG_INFO("ForwardPublicMsgByMsgId params={}", params);
+
+  nlohmann::json jp = nlohmann::json::parse(params);
+  std::wstring wxid = jsonutils::GetWStringParam(jp, "wxid");
+  int64_t msg_id = jsonutils::GetInt64Param(jp, "msgId");
+  int64_t success =
+      wechat::WeChatService::GetInstance().ForwardPublicMsgByMsgId(wxid,
+                                                                   msg_id);
+
+  nlohmann::json ret = {{"code", success}, {"data", {}}, {"msg", "success"}};
   return ret.dump();
 }
 
 std::string ChatController::ForwardPublicMsg(std::string params) {
-  nlohmann::json ret = {
-      {"code", 200}, {"data", {}}, {"msg", "Not Implemented"}};
+  SPDLOG_INFO("ForwardPublicMsg params={}", params);
+  nlohmann::json jp = nlohmann::json::parse(params);
+  std::wstring wxid = jsonutils::GetWStringParam(jp, "wxid");
+  std::wstring appname = jsonutils::GetWStringParam(jp, "appName");
+  std::wstring username = jsonutils::GetWStringParam(jp, "userName");
+  std::wstring title = jsonutils::GetWStringParam(jp, "title");
+  std::wstring url = jsonutils::GetWStringParam(jp, "url");
+  std::wstring thumburl = jsonutils::GetWStringParam(jp, "thumbUrl");
+  std::wstring digest = jsonutils::GetWStringParam(jp, "digest");
+  INT64 success = wechat::WeChatService::GetInstance().ForwardPublicMsg(
+      wxid, title, url, thumburl, username, appname, digest);
+  nlohmann::json ret = {{"code", success}, {"data", {}}, {"msg", "success"}};
   return ret.dump();
 }
 
 std::string ChatController::GetContactOrChatRoomNickname(std::string params) {
+  SPDLOG_INFO("GetContactOrChatRoomNickname params={}", params);
   int64_t success = -1;
   nlohmann::json jp = nlohmann::json::parse(params);
   std::wstring wxid = jsonutils::GetWStringParam(jp, "wxid");
   std::wstring nickname =
       wechat::WeChatService::GetInstance().GetContactOrChatRoomNickname(wxid);
-  nlohmann::json ret = {{"code", success},
-                        {"data", {"nickname", nickname}},
-                        {"msg", "Not Implemented"}};
+  nlohmann::json ret = {
+      {"code", success}, {"data", {"nickname", nickname}}, {"msg", "success"}};
 
   return ret.dump();
 }

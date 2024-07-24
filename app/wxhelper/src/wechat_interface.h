@@ -128,6 +128,31 @@ struct ContactProfileInner {
       : wxid(""), account(""), v3(""), nickname(""), head_image("") {}
 };
 
+struct SearchContactInner {
+  std::string big_image;
+  std::string small_image;
+  std::string city;
+  std::string nation;
+  std::string province;
+  std::string signature;
+  std::string v2;
+  std::string v3;
+  std::string nickname;
+  int32_t sex;
+  SearchContactInner()
+      : big_image(""),
+        small_image(""),
+        city(""),
+        nation(""),
+        province(""),
+        signature(""),
+        sex(-1),
+        v2(""),
+        v3(""),
+        nickname("") {}
+};
+
+
 namespace function {
 //hook
  typedef  uint64_t(*__DoAddMsg)(uint64_t, uint64_t, uint64_t);

@@ -5,6 +5,11 @@
 #include <string>
 namespace wxhelper {
 namespace wxutils {
+
+
+
+
+
 #ifdef _WIN64
 int64_t GetWeChatWinBase();
 #else
@@ -18,6 +23,7 @@ std::string ImageXor(std::string buf);
 std::wstring ReadWstring(INT64 addr);
 std::string ReadWstringThenConvert(INT64 addr);
 int DecodeImage(const wchar_t* file_path, const wchar_t* save_dir);
+ bool FindOrCreateDirectory(const std::wstring &path);
 }  // namespace wxutils
 
 }  // namespace wxhelper
