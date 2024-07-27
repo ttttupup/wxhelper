@@ -424,8 +424,8 @@ const uint64_t kForwordPublicMsg = 0xddc6c0;
 const uint64_t kParseAppMsgXml = 0x11b0a70;
 const uint64_t kNewAppMsgInfo = 0x91a550;
 const uint64_t kFreeAppMsgInfo = 0x8fd1a0;
-const uint64_t kGetPreDownLoadMgr = 0x9996f0;
-const uint64_t kPushAttachTask = 0x9c0080;
+const uint64_t kGetPreDownLoadMgr = 0x1c0a3a0;
+const uint64_t kPushAttachTask = 0x1cda920;
 const uint64_t kGetCustomSmileyMgr = 0x1ca0320;
 const uint64_t kSendCustomEmotion = 0x21b04c0;
 const uint64_t kNewJsApiShareAppMessage = 0x26cda20;
@@ -451,12 +451,24 @@ const uint64_t kGetQRCodeLoginMgr = 0x201e350;
 const uint64_t kUpdateMsg = 0x21421a0;
 const uint64_t kGetVoiceMgr = 0x1e13320;
 const uint64_t kChatMsg2NetSceneSendMsg = 0x1b70fd0;
-const uint64_t kTranslateVoice = 0x11217e0;
-const uint64_t kNewWebViewPageConfig = 0x9512f0;
-const uint64_t kFreeWebViewPageConfig = 0x951520;
+const uint64_t kTranslateVoice = 0x2353d50;
+const uint64_t kNewWebViewPageConfig = 0x1b53ae0;
+const uint64_t kFreeWebViewPageConfig = 0x1b53d10;
 const uint64_t kGetWebViewMgr = 0x1b43950;
 const uint64_t kShowWebView = 0x302ed30;
 const uint64_t kSetUrl = 0x13dd410;
+
+const uint64_t kNewPayInfo = 0x1bcd930;
+const uint64_t kFreePayInfo = 0x1b92450;
+const uint64_t kTransferConfirm = 0x2f8c750;
+const uint64_t kTransferRefuse = 0x2f8d340;
+
+const uint64_t kAddFriend = 0x1f3a350;
+const uint64_t kVerifyApply = 0x1f3a940;
+const uint64_t kDoDelContact = 0x2310120;
+
+const uint64_t kGetSearchContactMgr = 0x1f9a730;
+const uint64_t kStartSearch = 0x22a4200;
 #else
 #ifdef WECHAT_VERSION
 #error "Unsupported WeChat version."

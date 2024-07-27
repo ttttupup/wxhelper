@@ -20,7 +20,6 @@ class ChatController : public http::HttpController<ChatController> {
   ADD_PATH("/api/forwardMsg", ForwardMsg);
   ADD_PATH("/api/forwardPublicMsgByMsgId", ForwardPublicMsgByMsgId);
   ADD_PATH("/api/forwardPublicMsg", ForwardPublicMsg);
-
   PATHS_END
 
  public:

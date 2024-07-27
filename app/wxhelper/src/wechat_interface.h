@@ -249,6 +249,15 @@ typedef uint64_t (*__NewWebViewPageConfig)(uint64_t);
 typedef uint64_t (*__FreeWebViewPageConfig)(uint64_t);
 typedef uint64_t (*__GetWebViewMgr)();
 typedef uint64_t (*__SetUrl)(uint64_t,uint64_t,uint64_t);
+typedef uint64_t (*__NewWCPayInfo)(uint64_t);
+typedef uint64_t (*__FreeWCPayInfo)(uint64_t);
+typedef uint64_t (*__PayTransferConfirm)(uint64_t,uint64_t);
+typedef uint64_t (*__PayTransferRefuse)(uint64_t,uint64_t);
+typedef uint64_t (*__AddFriend)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t);
+typedef uint64_t (*__Verify)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t);
+typedef uint64_t (*__DelContact)(uint64_t);
+typedef uint64_t (*__GetSearchContactMgr)();
+typedef uint64_t (*__StartSearch)(uint64_t,uint64_t);
 
 }  // namespace function
 

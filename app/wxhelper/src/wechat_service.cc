@@ -683,7 +683,7 @@ int64_t wechat::WeChatService::GetSNSNextPage(uint64_t sns_id) {
   return success;
 }
 
-TODO("AddFavFromMsg")
+
 int64_t wechat::WeChatService::AddFavFromMsg(uint64_t msg_id) {
   int64_t success = -1;
   uint64_t get_chat_mgr_addr = base_addr_ + offset::kGetChatMgr;
@@ -723,7 +723,7 @@ int64_t wechat::WeChatService::AddFavFromMsg(uint64_t msg_id) {
   return success;
 }
 
-TODO("AddFavFromImage")
+
 int64_t wechat::WeChatService::AddFavFromImage(const std::wstring& wxid,
                                                const std::wstring& image_path) {
   int64_t success = -1;
@@ -740,7 +740,6 @@ int64_t wechat::WeChatService::AddFavFromImage(const std::wstring& wxid,
                                reinterpret_cast<uint64_t>(send_id));
   return success;
 }
-TODO("SendAtText")
 int64_t wechat::WeChatService::SendAtText(
     const std::wstring& room_id, const std::vector<std::wstring>& wxids,
     const std::wstring& msg) {
@@ -755,7 +754,7 @@ int64_t wechat::WeChatService::SendAtText(
     if (at_all.compare(wxids[i]) == 0) {
       nickname = L"\u6240\u6709\u4eba";
     } else {
-      // nickname = GetContactOrChatRoomNickname(wxids[i]);
+      nickname = GetContactOrChatRoomNickname(wxids[i]);
     }
     if (nickname.length() == 0) {
       continue;
@@ -818,7 +817,7 @@ std::wstring wechat::WeChatService::GetContactOrChatRoomNickname(
   }
 }
 
-TODO("GetContactByWxid")
+
 int64_t wechat::WeChatService::GetContactByWxid(const std::wstring& wxid,
                                                 ContactProfileInner& profile) {
   int64_t success = -1;
@@ -1427,7 +1426,6 @@ std::string wechat::WeChatService::GetTranslateVoiceText(uint64_t msg_id) {
   if (content.empty()) {
     return {};
   }
-
   tinyxml2::XMLDocument doc;
   if (doc.Parse(content.c_str(), content.size()) != 0) {
     SPDLOG_INFO("tinyxml2 parse error");
@@ -1483,23 +1481,41 @@ int64_t wechat::WeChatService::OpenUrlByWeChatBrowser(const std::wstring& url,
 TODO("GetChatRoomMemberNickname")
 std::wstring wechat::WeChatService::GetChatRoomMemberNickname(
     const std::wstring& room_id, const std::wstring& member_id) {
+
   return std::wstring();
 }
 
 TODO("DelContact")
 int64_t wechat::WeChatService::DelContact(const std::wstring& wxid) {
-  return 0;
+  int64_t success = -1;
+  uint64_t del_contcat_addr = base_addr_ + offset::kDoDelContact;
+  func::__DelContact del_contcat = (func::__DelContact)del_contcat_addr;
+
+  return success;
 }
 
 TODO("SearchContact")
 int64_t wechat::WeChatService::SearchContact(
     const std::wstring& keyword, wechat::SearchContactInner& contact) {
-  return 0;
+  int64_t success = -1;
+   prototype::WeChatString key(keyword);
+  uint64_t search_mgr_addr = base_addr_ + offset::kGetSearchContactMgr;
+  uint64_t search_addr = base_addr_ + offset::kStartSearch;
+
+  func::__GetSearchContactMgr get_mgr =
+      (func::__GetSearchContactMgr)search_mgr_addr;
+  func::__StartSearch search = (func::__StartSearch)search_addr;
+  uint64_t mgr = get_mgr();
+  success = search(mgr,&key);
+
+  return success;
 }
 
 TODO("AddFriendByWxid")
 int64_t wechat::WeChatService::AddFriendByWxid(const std::wstring& wxid,
                                                const std::wstring& msg) {
+  uint64_t add_friend_addr = base_addr_ + offset::kAddFriend;
+  func::__AddFriend add_friend = (func::__AddFriend)add_friend_addr;
   return 0;
 }
 
@@ -1507,6 +1523,8 @@ TODO("VerifyApply")
 int64_t wechat::WeChatService::VerifyApply(const std::wstring& v3,
                                            const std::wstring& v4,
                                            int32_t permission) {
+  uint64_t verify_addr = base_addr_ + offset::kVerifyApply;
+  func::__Verify add_friend = (func::__Verify)verify_addr;
   return 0;
 }
 
@@ -1519,6 +1537,25 @@ int64_t wechat::WeChatService::DoConfirmReceipt(
   prototype::WeChatString transcation_id(transcationid);
   prototype::WeChatString transfer_id(transferid);
 
+  char pay_info[0x224] = {0};
+  uint64_t new_pay_info_addr = base_addr_ + offset::kNewPayInfo;
+  uint64_t free_pay_info_addr = base_addr_ + offset::kFreePayInfo;
+  uint64_t do_confirm_addr = base_addr_ + offset::kTransferConfirm;
+
+  func::__NewWCPayInfo new_pay_info = (func::__NewWCPayInfo)new_pay_info_addr;
+  func::__FreeWCPayInfo free_pay_info =
+      (func::__FreeWCPayInfo)free_pay_info_addr;
+  func::__PayTransferConfirm do_confirm =
+      (func::__PayTransferConfirm)do_confirm_addr;
+
+  new_pay_info(reinterpret_cast<uint64_t>(&pay_info));
+  memcpy(&pay_info[0x30], &transcation_id, sizeof(transcation_id));
+  memcpy(&pay_info[0x58], &transfer_id, sizeof(transfer_id));
+  // memcpy(&pay_info[0xA0], &recv_id, sizeof(recv_id));
+  success = do_confirm(&pay_info, &recv_id);
+
+  free_pay_info(reinterpret_cast<uint64_t>(&pay_info));
+
   return success;
 }
 
@@ -1526,5 +1563,28 @@ TODO("DoRefuseReceipt")
 int64_t wechat::WeChatService::DoRefuseReceipt(
     const std::wstring& wxid, const std::wstring& transcationid,
     const std::wstring& transferid) {
-  return 0;
+  int success = -1;
+  prototype::WeChatString recv_id(wxid);
+  prototype::WeChatString transcation_id(transcationid);
+  prototype::WeChatString transfer_id(transferid);
+
+  char pay_info[0x224] = {0};
+  uint64_t new_pay_info_addr = base_addr_ + offset::kNewPayInfo;
+  uint64_t free_pay_info_addr = base_addr_ + offset::kFreePayInfo;
+  uint64_t do_refuse_addr = base_addr_ + offset::kTransferRefuse;
+
+  func::__NewWCPayInfo new_pay_info = (func::__NewWCPayInfo)new_pay_info_addr;
+  func::__FreeWCPayInfo free_pay_info =
+      (func::__FreeWCPayInfo)free_pay_info_addr;
+  func::__PayTransferRefuse do_refuse =
+      (func::__PayTransferRefuse)do_refuse_addr;
+
+  new_pay_info(reinterpret_cast<uint64_t>(&pay_info));
+  memcpy(&pay_info[0x30], &transcation_id, sizeof(transcation_id));
+  memcpy(&pay_info[0x58], &transfer_id, sizeof(transfer_id));
+  // memcpy(&pay_info[0xA0], &recv_id, sizeof(recv_id));
+  success = do_refuse(&pay_info, &recv_id);
+
+  free_pay_info(reinterpret_cast<uint64_t>(&pay_info));
+  return success;
 }
