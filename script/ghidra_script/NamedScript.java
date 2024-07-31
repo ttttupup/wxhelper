@@ -31,6 +31,7 @@ public class NamedScript extends GhidraScript {
 		FunctionManager functionManager = currentProgram.getFunctionManager();
 		ReferenceManager referenceManager = currentProgram.getReferenceManager();
 		AddressFactory addressFactory = currentProgram.getAddressFactory();
+		
 
 		AddressSpace space = addressFactory.getDefaultAddressSpace();
 		AddressSpace[] addressSpaces = addressFactory.getAddressSpaces();
@@ -43,24 +44,18 @@ public class NamedScript extends GhidraScript {
 	
 		Address funcAddress = selectAddress;
 		Function logFunction = functionManager.getFunctionAt(funcAddress);
-//		for (AddressSpace sp : addressSpaces) {
-//			funcAddress = sp.getAddress(selectAddress.getOffset());
-//			logFunction = functionManager.getFunctionAt(funcAddress);
-//			space = sp;
-//			if (null != logFunction) {
-//				break;
-//			}
-//		}
+
 
 		ReferenceIterator referenceIterator = referenceManager.getReferencesTo(logFunction.getEntryPoint());
-		for (Reference ref : referenceIterator) {
-			Address fromAddress = ref.getFromAddress();
-//			if (fromAddress.getOffset() != 0x18284bb19L) {
-//				continue;
-//			}
+		while(referenceIterator.hasNext()) {
+			monitor.checkCancelled();
+			Reference next = referenceIterator.next();
+			Address fromAddress = next.getFromAddress();
+			println("lookup address: " + fromAddress.toString());
 			handle(fromAddress, functionManager, decompiler, space, listing,selectAddress);
-			println("caller address: " + fromAddress);
+			println("caller address: " + fromAddress.toString());
 		}
+
 
 	}
 
@@ -68,7 +63,7 @@ public class NamedScript extends GhidraScript {
 			AddressSpace space, Listing listing,Address selectAddress) {
 		Function functionContaining = functionManager.getFunctionContaining(address);
 		if (null == functionContaining) {
-			println("no found function: " + address);
+			println("no found function: " + address.toString());
 			return;
 		}
 		DecompileResults res = decompiler.decompileFunction(functionContaining, 20, null);

@@ -30,7 +30,7 @@ add_subdirectory(../base base)
    
 add_library(wxhelper  SHARED ${CPP_FILES} ${ASM_FILES})
 
-target_compile_definitions(wxhelper PRIVATE WECHAT_VERSION=391119)
+target_compile_definitions(wxhelper PRIVATE WECHAT_VERSION=391125)
 
 # target_include_directories(wxhelper 
 #     PRIVATE     ../base/src/include
