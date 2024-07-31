@@ -1,0 +1,640 @@
+{
+    "info": {
+        "name": "Wechat Hook 395",
+        "_postman_id": "d2b6a4f2-6d7d-4a21-9bbf-65b5a5a3a5a",
+        "description": "A collection of Wechat Hook 395 API requests.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "checkLogin",
+            "request": {
+                "url": {
+                    "raw": "http://127.0.0.1:19088/api/checkLogin",
+                    "protocol": "http",
+                    "host": [
+                        "127.0.0.1"
+                    ],
+                    "port": "19088",
+                    "path": [
+                        "api",
+                        "checkLogin"
+                    ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                    "mode": "raw",
+                    "raw": ""
+                },
+                "description": "API to check login status."
+            }
+        },
+        {
+            "name": "userInfo",
+            "request": {
+                "url": {
+                    "raw": "http://127.0.0.1:19088/api/userInfo",
+                    "protocol": "http",
+                    "host": [
+                        "127.0.0.1"
+                    ],
+                    "port": "19088",
+                    "path": [
+                        "api",
+                        "userInfo"
+                    ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                    "mode": "raw",
+                    "raw": ""
+                },
+                "description": "API to get user information."
+            }
+        },
+        {
+            "name": "sendTextMsg",
+            "request": {
+                "url": {
+                    "raw": "http://127.0.0.1:19088/api/sendTextMsg",
+                    "protocol": "http",
+                    "host": [
+                        "127.0.0.1"
+                    ],
+                    "port": "19088",
+                    "path": [
+                        "api",
+                        "sendTextMsg"
+                    ]
+                },
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"wxid\": \"filehelper\",\"msg\": \"12www\"}"
+                },
+                "description": "API to send text messages."
+            }
+        },
+       {
+            "name": "sendImagesMsg",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/sendImagesMsg",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "description": "Specify that the request body is in JSON format."
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"wxid\": \"filehelper\",\"imagePath\": \"C:\\pic.png\"}"
+                },
+                "description": "API to send image messages."
+            }
+        },
+        {
+            "name": "sendFileMsg",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/sendFileMsg",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "description": "Specify that the request body is in JSON format."
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"wxid\": \"filehelper\",\"filePath\": \"C:\\test.zip\"}"
+                },
+                "description": "API to send file messages."
+            }
+        },
+        {
+            "name": "hookSyncMsg",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/hookSyncMsg",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "description": "Specify that the request body is in JSON format."
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"port\": \"19099\",\"ip\": \"127.0.0.1\",\"url\": \"http://localhost:8080\",\"timeout\": \"3000\",\"enableHttp\": \"0\"}"
+                },
+                "description": "API to hook sync messages."
+            }
+        },
+        {
+            "name": "unhookSyncMsg",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/unhookSyncMsg",
+                "method": "POST",
+                "header": [],
+                "body": {
+                    "mode": "raw",
+                    "raw": ""
+                },
+                "description": "API to unhook sync messages."
+            }
+        },
+        {
+            "name": "getContactList",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/getContactList",
+                "method": "POST",
+                "header": [],
+                "body": {
+                    "mode": "raw",
+                    "raw": ""
+                },
+                "description": "API to get the contact list."
+            }
+        },
+        {
+            "name": "getDBInfo",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/getDBInfo",
+                "method": "POST",
+                "header": [],
+                "body": {
+                    "mode": "raw",
+                    "raw": ""
+                },
+                "description": "API to get database information."
+            }
+        },
+        {
+            "name": "execSql",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/execSql",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "description": "Specify that the request body is in JSON format."
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"dbHandle\": 1713425147584,\"sql\": \"select * from MSG where localId =100;\"}"
+                },
+                "description": "API to execute SQL queries."
+            }
+        },
+        {
+            "name": "getChatRoomDetailInfo",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/getChatRoomDetailInfo",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "description": "Specify that the request body is in JSON format."
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"chatRoomId\": \"123333@chatroom\"}"
+                },
+                "description": "API to get chat room detail information."
+            }
+        },
+        {
+            "name": "addMemberToChatRoom",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/addMemberToChatRoom",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "description": "Specify that the request body is in JSON format."
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"chatRoomId\": \"123@chatroom\",\"memberIds\": \"wxid_123\"}"
+                },
+                "description": "API to add member to chat room."
+            }
+        },
+        {
+            "name": "delMemberFromChatRoom",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/delMemberFromChatRoom",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "description": "Specify that the request body is in JSON format."
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"chatRoomId\": \"21363231004@chatroom\",\"memberIds\": \"wxid_123\"}"
+                },
+                "description": "API to delete member from chat room."
+            }
+        },
+        {
+            "name": "modifyNickname",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/modifyNickname",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "description": "Specify that the request body is in JSON format."
+                    }
+                ],
+                "body": {
+                  "mode": "raw",
+                    "raw": "{\"chatRoomId\": \"123@chatroom\",\"wxid\": \"wxid_123\",\"nickName\": \"test\"}"
+                },
+                "description": "API to modify a nickname in a chat room."
+            }
+        },
+        {
+            "name": "getMemberFromChatRoom",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/getMemberFromChatRoom",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "description": "Specify that the request body is in JSON format."
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"chatRoomId\": \"123@chatroom\"}"
+                },
+                "description": "API to get members from a chat room."
+            }
+        },
+        {
+            "name": "topMsg",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/topMsg",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "description": "Specify that the request body is in JSON format."
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"msgId\": 1222222}"
+                },
+                "description": "API to top a message."
+            }
+        },
+        {
+            "name": "removeTopMsg",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/removeTopMsg",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "description": "Specify that the request body is in JSON format."
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"chatRoomId\": \"123@chatroom\",\"msgId\": 123}"
+                },
+                "description": "API to remove a topped message."
+            }
+        },
+        {
+            "name": "InviteMemberToChatRoom",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/InviteMemberToChatRoom",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "description": "Specify that the request body is in JSON format."
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"chatRoomId\": \"123@chatroom\",\"memberIds\": \"wxid_123\"}"
+                },
+                "description": "API to invite members to a chat room."
+            }
+        },
+        {
+            "name": "hookLog",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/hookLog",
+                "method": "POST",
+                "header": [],
+                "body": {
+                    "mode": "raw",
+                    "raw": ""
+                },
+                "description": "API to hook logs."
+            }
+        },
+        {
+            "name": "unhookLog",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/unhookLog",
+                "method": "POST",
+                "header": [],
+                "body": {
+                    "mode": "raw",
+                    "raw": ""
+                },
+                "description": "API to unhook logs."
+            }
+        },
+        {
+            "name": "createChatRoom",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/createChatRoom",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "description": "Specify that the request body is in JSON format."
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"memberIds\": \"wxid_8yn4k908tdqp22,wxid_oyb662qhop4422\"}"
+                },
+                "description": "API to create a chat room."
+            }
+        },
+        {
+            "name": "quitChatRoom",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/quitChatRoom",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "description": "Specify that the request body is in JSON format."
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"chatRoomId\": \"123@chatroom\"}"
+                },
+                "description": "API to quit a chat room."
+            }
+        },
+        {
+            "name": "forwardMsg",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/forwardMsg",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "description": "Specify that the request body is in JSON format."
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"wxid\": \"filehelper\",\"msgId\": \"12331\"}"
+                },
+                "description": "API to forward a message."
+            }
+        },
+        {
+            "name": "getSNSFirstPage",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/getSNSFirstPage",
+                "method": "POST",
+                "header": [],
+                "body": {
+                    "mode": "raw",
+                    "raw": ""
+                },
+                "description": "API to get the first page of SNS data."
+            }
+        },
+        {
+            "name": "getSNSNextPage",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/getSNSNextPage",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "description": "Specify that the request body is in JSON format."
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"snsId\": \"\"}"
+                },
+                "description": "API to get the next page of SNS data."
+            }
+        },
+        {
+            "name": "addFavFromMsg",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/addFavFromMsg",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "description": "Specify that the request body is in JSON format."
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"msgId\": \"1222222\"}"
+                },
+                "description": "API to add a favorite from a message."
+            }
+        },
+        {
+            "name": "addFavFromImage",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/addFavFromImage",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "description": "Specify that the request body is in JSON format."
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"wxid\": \"\",\"imagePath\": \"\"}"
+                },
+                "description": "API to add a favorite from an image."
+            }
+        },
+        {
+            "name": "getContactProfile",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/getContactProfile",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "description": "Specify that the request body is in JSON format."
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"wxid\": \"\"}"
+                },
+                "description": "API to get contact profile."
+            }
+        },
+        {
+            "name": "sendAtText",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/sendAtText",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "description": "Specify that the request body is in JSON format."
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"wxids\": \"notify@all\",\"chatRoomId\": \"123@chatroom\",\"msg\": \"你好啊\"}"
+                },
+                "description": "API to send an at-text message."
+            }
+        },
+        {
+            "name": "forwardPublicMsg",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/forwardPublicMsg",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "description": "Specify that the request body is in JSON format."
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"appName\": \"\",\"userName\": \"\",\"title\": \"\",\"url\": \"\",\"thumbUrl\": \"\",\"digest\": \"\",\"wxid\": \"filehelper\"}"
+                },
+                "description": "API to forward a public message."
+            }
+        },
+        {
+            "name": "forwardPublicMsgByMsgId",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/forwardPublicMsgByMsgId",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "description": "Specify that the request body is in JSON format."
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"msgId\": 123,\"wxid\": \"filehelper\"}"
+                },
+                "description": "API to forward a public message by message ID."
+            }
+        },
+        {
+            "name": "downloadAttach",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/downloadAttach",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "description": "Specify that the request body is in JSON format."
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"msgId\": 123}"
+                },
+                "description": "API to download an attachment."
+            }
+        },
+        {
+            "name": "decodeImage",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/decodeImage",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "description": "Specify that the request body is in JSON format."
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"filePath\": \"C:\\66664816980131.dat\",\"storeDir\": \"C:\\test\"}"
+                },
+                "description": "API to decode an image."
+            }
+        },
+        {
+            "name": "getVoiceByMsgId",
+            "request": {
+                "url": "http://127.0.0.1:19088/api/getVoiceByMsgId",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "description": "Specify that the request body is in JSON format."
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"msgId\": 7880439644200,\"storeDir\": \"c:\\test\"}"
+                },
+                "description": "API to get voice by message ID."
+            }
+        }
+    ]
+}
