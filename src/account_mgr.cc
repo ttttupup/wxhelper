@@ -215,6 +215,23 @@ int AccountMgr::Logout() {
   return success;
 }
 
+int AccountMgr::EnterWeChat() {
+    int success = -1;
+    //base::FunctionResolver resolver(base_addr_);
+    //auto cb = base::CastFunction<__OnLoginBtnClick>(resolver, kOnLoginBtnClick);
+    //auto vec =
+    //    base::memory::ScanAndMatchValue(base_addr + 0x4ecedf8, 0x1000, 0x8);
+    //for (int i = 0; i < vec.size(); i++) {
+    //    int64_t ptr = vec.at(i);
+    //    if (*(int64_t*)ptr == base_addr + 0x4ecedf8) {
+    //        int64_t login_wnd = ptr;
+    //        success = cb(ptr);
+    //        break;
+    //    }
+    //}
+    return success;
+}
+
 /// @brief 根据 502647092 提供的偏移 获取二维码url
 /// @return 
 std::string AccountMgr::GetQRCodeUrl() {
