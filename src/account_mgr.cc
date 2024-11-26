@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "account_mgr.h"
 #include "wechat_function.h"
+#include "spdlog/spdlog.h"
 
 using namespace std;
 namespace wxhelper {
@@ -217,18 +218,30 @@ int AccountMgr::Logout() {
 
 int AccountMgr::EnterWeChat() {
     int success = -1;
-    //base::FunctionResolver resolver(base_addr_);
-    //auto cb = base::CastFunction<__OnLoginBtnClick>(resolver, kOnLoginBtnClick);
-    //auto vec =
-    //    base::memory::ScanAndMatchValue(base_addr + 0x4ecedf8, 0x1000, 0x8);
-    //for (int i = 0; i < vec.size(); i++) {
-    //    int64_t ptr = vec.at(i);
-    //    if (*(int64_t*)ptr == base_addr + 0x4ecedf8) {
-    //        int64_t login_wnd = ptr;
-    //        success = cb(ptr);
-    //        break;
-    //    }
-    //}
+    DWORD enter_wechat_callback_addr = base_addr_ + WX_ENTER_WECHAT_CALLBACK_OFFSET;
+    std::vector<DWORD> vec;
+    bool found = Utils::ScanAndMatchValue(base_addr_ + 0x2A66A18, vec);
+    if (found) {
+        HANDLE handle = GetCurrentProcess();
+        for (int i = 0; i < vec.size(); i++) {
+            DWORD ptr = vec.at(i);
+            DWORD value;
+            if (ReadProcessMemory(handle, (LPVOID)ptr, &value, sizeof(value), NULL)) {
+                if (value == base_addr_ + 0x2A66A18) {
+                    DWORD login_wnd = ptr;
+                    __asm {
+                        PUSHAD
+                        MOV     ECX, login_wnd
+                        CALL    enter_wechat_callback_addr
+                        POPAD
+                    }
+                    success = 1;
+                    break;
+                }
+            }
+        }
+    }
+
     return success;
 }
 
