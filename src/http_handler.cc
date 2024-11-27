@@ -685,6 +685,12 @@ string Dispatch(struct mg_connection *c, struct mg_http_message *hm) {
       ret = ret_data.dump();
       break;
     }
+    case WECHAT_ENTER_WECHAT: {
+      int success = g_context.account_mgr->EnterWeChat();
+      json ret_data = { {"code", success}, {"result", "OK"} };
+      ret = ret_data.dump();
+      break;
+    }
     default:
       json ret_data = {{"result", "ERROR"}, {"msg", "not support api"}};
       ret = ret_data.dump();

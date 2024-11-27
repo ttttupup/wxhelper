@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "account_mgr.h"
 #include "wechat_function.h"
+#include "spdlog/spdlog.h"
 
 using namespace std;
 namespace wxhelper {
@@ -213,6 +214,35 @@ int AccountMgr::Logout() {
     POPAD
   }
   return success;
+}
+
+int AccountMgr::EnterWeChat() {
+    int success = -1;
+    DWORD enter_wechat_callback_addr = base_addr_ + WX_ENTER_WECHAT_CALLBACK_OFFSET;
+    std::vector<DWORD> vec;
+    bool found = Utils::ScanAndMatchValue(base_addr_ + 0x2A66A18, vec);
+    if (found) {
+        HANDLE handle = GetCurrentProcess();
+        for (int i = 0; i < vec.size(); i++) {
+            DWORD ptr = vec.at(i);
+            DWORD value;
+            if (ReadProcessMemory(handle, (LPVOID)ptr, &value, sizeof(value), NULL)) {
+                if (value == base_addr_ + 0x2A66A18) {
+                    DWORD login_wnd = ptr;
+                    __asm {
+                        PUSHAD
+                        MOV     ECX, login_wnd
+                        CALL    enter_wechat_callback_addr
+                        POPAD
+                    }
+                    success = 1;
+                    break;
+                }
+            }
+        }
+    }
+
+    return success;
 }
 
 /// @brief 根据 502647092 提供的偏移 获取二维码url

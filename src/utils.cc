@@ -211,4 +211,36 @@ bool Utils::IsTextUtf8(const char *str,int length) {
   }
   return (bytes_num == 0);
 }
+
+bool Utils::ScanAndMatchValue(DWORD value, std::vector<DWORD>& result) {
+    SYSTEM_INFO sys_info;
+    GetSystemInfo(&sys_info);
+    
+    LPVOID current_addr = sys_info.lpMinimumApplicationAddress;
+    DWORD pageSize = sys_info.dwPageSize;
+
+    MEMORY_BASIC_INFORMATION mem_info = {};
+    HANDLE handle = GetCurrentProcess();
+    while (current_addr < sys_info.lpMaximumApplicationAddress) {
+        if (VirtualQueryEx(handle, current_addr, &mem_info, sizeof(MEMORY_BASIC_INFORMATION))) {
+            if (mem_info.State == MEM_COMMIT && (mem_info.Protect & (PAGE_READONLY | PAGE_READWRITE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE))) {
+                // 读取内存并搜索值
+                LPVOID pBuffer = new BYTE[mem_info.RegionSize];
+                if (ReadProcessMemory(handle, mem_info.BaseAddress, pBuffer, mem_info.RegionSize, NULL)) {
+                    for (DWORD i = 0; i < mem_info.RegionSize; i += sizeof(DWORD)) {
+                        if (*(PDWORD)((LPBYTE)pBuffer + i) == value) {
+                            result.push_back((DWORD)mem_info.BaseAddress + i);
+                        }
+                    }
+                }
+                delete[] pBuffer;
+            }
+            current_addr = (LPBYTE)mem_info.BaseAddress + mem_info.RegionSize;
+        }
+        else {
+            current_addr = (LPBYTE)current_addr + pageSize;
+        }
+    };
+    return !result.empty();
+}
 }  // namespace wxhelper

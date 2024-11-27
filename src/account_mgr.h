@@ -18,6 +18,8 @@ namespace wxhelper{
      int Logout();
 
      std::string GetQRCodeUrl();
+
+     int EnterWeChat();
     };
     
 }
