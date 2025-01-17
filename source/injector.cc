@@ -526,7 +526,7 @@ DWORD  GetPIDForProcess(wchar_t* process)
 	if (!hSnapshot) {
 		return 0;
 	}
-	pe32.dwSize = sizeof(PROCESSENTRY32);
+	pe32.dwSize = sizeof(PROCESSENTRY32W);
 	for (working = Process32FirstW(hSnapshot, &pe32); working; working = Process32NextW(hSnapshot, &pe32))
 	{
 		if (!wcscmp(pe32.szExeFile, process))
@@ -933,7 +933,7 @@ int  InjectDll(wchar_t* szPName, wchar_t* szDllPath)
 			result = 1;
 		}
 		else
-		{	
+		{
 			DWORD dErrorCode = GetLastError();
 			printf("dll inject fail");
 			printf("error code : %d ", dErrorCode);
